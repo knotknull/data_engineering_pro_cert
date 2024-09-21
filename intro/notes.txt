@@ -81,41 +81,103 @@ in short: get raw data, turn in into something useful and then deliver
 
 
 
+  Downstream                                      Data                        Upstream
+Stakeholders                 --+                 Engineer                     Stakeholders
+  - Analysts                   |               +----------+                     - Software 
+  - Data Scientists            | How often <-> |          | <-> Volume             Engineers
+  - Machine Learning Engineers | What Info <-> |   Data   | <-> Frequency
+  - Salespeople                | How much  <-> |  Engineer| <-> Format
+  - Marketing Professionals    |  latency      |          | <-> Data Security
+  - Executives               --+               +----------+ <-> Reg Compliance
+
+
+Look for business value!!
+    - don't get hung up on the technology
+    - focus on the value that the tech can provide !!!!
+
+
+# System Requirements
+    - Business Requirements
+            - revenue growth
+            - increase user base
+    - Stakeholder Requirements
+            - needs of individual in orgranization
+    - System Requirements
+            - Functional Requirements
+                - "The What"
+                    - Updates to a DB
+                    - Alert a user about data anomaly
+            - Non-Functional Requirements
+                - "The How"
+                    - Tech specs of ingestion or orchestration 
+                    - How you'l meed end user's needs
+
+# Reguirements Gathering:                    --+                           +--
+    - Business & Stakeholder Requirements    |                           | High Level       Downstream
+    - Features and Attributes                |  <<-- Data Engineer  -->> | Goals &     <<-- Stakeholders 
+    - Memory & Storage Capacity              |                           | needs
+    - Costs & Security Constraints           |                           |
+                                           --+                           +--
+
+Jordan Morrow: Founder of Data Literacy 
+    - ability to read, work with and analyze data
+
+    - Understand audience
+    - Understand business goals of company
+    - Understand goals of stakeholders
+
+Work on People Skills
+Know how business operates
+
+# Reguirements Gathering Conversation 
+
+- what do they need
+- how do they will use it
+- when do they need it
+    - is there value in real time ?
+- format and time scope
+
+# Stakeholder Needs into Specific Requirements
+
+# Key Elements:
+    - Learn what existing data systems or solutions are in place
+    - Learn what pain points or problems there are with the existing solutions
+    - Learn what actions stakeholders plan to take with the data
+        NOTE: Repeat what you learned back to your stakeholders
+    - Identify any other stakeholders you'll need to talk to if you're still missing information
+
+Think like a Data Engineer:
+
+1. Identify business goals &  stakeholder needs
+    A. Identify business goals and stakeholders you will serve 
+    B. Explore existing systems and stakeholder needs
+    C. Ask stakeholders what actions they will take with the data product
+
+2. Define System Requirements
+    A. Translate stakeholder needs to Functional Requirements
+    B. Define non-functional requirements
+    C. Document and confirm requirements with stakeholders
+
+3. Choose tools & technologies
+    A. Itentify tools & tech to meet non-functional requirements
+    B. Perform cost / benefity analysis and choose between comparable tools & tech
+    C. Prototype and test your system, alaign with stakeholder needs
+
+4. Build, evaluate, iterate & evolve
+    A. Build & deploy production data system
+    B. Monitor, evaluate and iterate on you system to improve it
+    C. Evolve your system basedon stakeholder needs
+
+     +-->  [1] -> [2] -> [3] -> [4] ---+
+     |                                 |
+     +---------------------------------+
 
 
 
+community.deeplearning.ai 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Data Engineering on the Cloud
+## 
 
 
 
