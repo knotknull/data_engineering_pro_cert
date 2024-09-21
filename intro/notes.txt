@@ -180,6 +180,124 @@ community.deeplearning.ai
 ## 
 
 
+# Intro to AWS Cloud
+
+- compute
+    - EC2
+    - Container hosting services (EKS)
+    - Serverless functions
+- storage
+    - Simple Storage Service (S3)
+    - Elastic Block Store
+    - Database Services
+- networking
+    - Virtual Private Clouse
+
+# AWS Regions and Availability Zones
+
+AWS Regions: collections of data centers within geographical areas where you can use AWS Services 
+    - high reliability, availability, resilience
+    - named for geographical name and region code: us-east-1 
+            Region: us-east-1     AZ: us-east-1a, 1b, 1c 
+            Region: eu-central-1  AZ: eu-central-1a, eu-central-1b
+    - Each region contains at least 3 isolated and physically separated AZs  **
+
+
+Availability Zones: Each Region comprised of multiple AZs 
+    - multiple data centers make up Availability Zone
+    - multiple AZs make up an AWS Region
+    - physically separated by a meaningul distance from any other AZ 
+        - all within 100km of eachother **
+
+34 AWS Regions  **
+108 Availability Zones  **
+
+NOTE: Costs may differ between regions
+      Certain regulations may rquire hosting your data in specific geographical regions
+      Service availability no available in all regions
+
+
+https://aws.amazon.com/about-aws/global-infrastructure/regions_az/
+
+https://aws.amazon.com/about-aws/global-infrastructure/
+
+
+# Intro to AWS Core Services
+
+Compute: 
+    - Elastic Compute Cloud (EC2) 
+        - VM  / EC2 instance
+    - Lambda
+    - Elastic Container Service (ECS)
+    - Elastic Kubernetes Service (EKS)
+
+
+Network: 
+    - Virtual Private Network (VPC): Private network you can crate and place resources into 
+        - isolated from other networks
+        - choose size of private IP space
+        - subnets: partition into smaller networks
+    NOTE: VPC spans AZs within a region
+            - cannot span across regions
+            - create a VPC in every region to operate in
+        
+        - data and resources don't leave region unless you build solution to do so
+
+      Region                                                                       
+    ┌────────────────────────────────────────────────────────────────────┐         
+    │     VPC                                                            │         
+    │   ┌────────────────────────────────────────────────────────────┐   │         
+    │   │                                                            │   │         
+    │   │   ┌──────────────────┐            ┌─────────────────┐      │   │         
+    │   │   │      AZ 1        │            │     AZ 2        │      │   │         
+    │   │   │                  │            │                 │      │   │         
+    │   │   │                  │            │                 │      │   │         
+    │   │   │  ┌────────────┐  │            │  ┌───────────┐  │      │   │         
+    │   │   │  │            │  │            │  │           │  │      │   │         
+    │   │   │  │   Public   │  │            │  │   Public  │  │      │   │         
+    │   │   │  │   Subnet   │  │            │  │   Subnet  │  │      │   │         
+    │   │   │  │            │  │            │  │           │  │      │   │         
+    │   │   │  └────────────┘  │            │  └───────────┘  │      │   │         
+    │   │   │                  │            │                 │      │   │         
+    │   │   │                  │            │                 │      │   │         
+    │   │   │  ┌────────────┐  │            │  ┌───────────┐  │      │   │         
+    │   │   │  │            │  │            │  │           │  │      │   │         
+    │   │   │  │   Private  │  │            │  │   Private │  │      │   │         
+    │   │   │  │   Subnet   │  │            │  │   Subnet  │  │      │   │         
+    │   │   │  │            │  │            │  │           │  │      │   │         
+    │   │   │  └────────────┘  │            │  └───────────┘  │      │   │         
+    │   │   │                  │            │                 │      │   │         
+    │   │   └──────────────────┘            └─────────────────┘      │   │         
+    │   └────────────────────────────────────────────────────────────┘   │         
+    └────────────────────────────────────────────────────────────────────┘         
+                                                                                   
+                                                                                   
+Storage: 
+    Object Storage:  S3 / unstructured data
+
+    Block Storage :  EBS / db storage, vm file system                     
+                        - attatch EBS as volumes to EC2 instance                                                                 
+
+    File Storage  :  Data organized into files and directories  / Elastic File System (EFS)                                                                                    
+                                                                                   
+                                                                                   
+    Relational Data Service :  RDS / cloud-based relational database service
+    Redshift :  data warehouse services to store transform and serve data 
+
+
+Security: 
+    Shared responsiblity model
+        AWS  is responsible for secrurity OF the cloud
+            - hardware to hypervisor
+        User is responsible for secrurity IN the cloud
+            - VM, OS, Firewall Config, Software, Access and Data
+
+
+
+
+
+
+
 
 
 
