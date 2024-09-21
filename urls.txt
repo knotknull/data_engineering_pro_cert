@@ -1,0 +1,32 @@
+
+https://www.coursera.org/account-settings / marc.pulido@gmail.com
+
+
+https://www.coursera.org/professional-certificates/data-engineering
+
+https://www.coursera.org/learn/intro-to-data-engineering/home/week/1
+
+## Intro to Data Engineering  [ 17 hrs ]
+https://www.coursera.org/learn/intro-to-data-engineering?specialization=data-engineering
+
+## Source Systems, Data Ingestion and Pipelines (34 hours)
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines?specialization=data-engineering
+
+## Data Storage and Queries (22 hours)
+https://www.coursera.org/learn/data-storage-and-queries?specialization=data-engineering
+
+## Data Modeling, Transformation and Serving (26 hours)
+https://www.coursera.org/learn/data-modeling-transformation-serving?specialization=data-engineering
+
+
+
+
+
+
+
+
+
+
+
+
+
