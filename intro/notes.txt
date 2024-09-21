@@ -296,13 +296,25 @@ Security:
 
 
 
+Resources:
 
 
+https://go.redpanda.com/fundamentals-of-data-engineering
+
+https://www.linkedin.com/pulse/what-recovering-data-scientist-joe-reis/
+
+https://datastackshow.com/podcast/29-the-present-and-future-of-data-engineering-with-joe-reis-and-matthew-housley-from-ternary-data/
+
+https://www.listennotes.com/podcasts/monday-morning/154-sol-rashidi-getting-b2Bjy6Fr-4P/#google_vignette
 
 
+## AWS
+https://aws.amazon.com/getting-started/
 
+https://www.coursera.org/learn/aws-cloud-practitioner-essentials
 
+https://www.coursera.org/learn/aws-cloud-technical-essentials
 
-
+https://aws.amazon.com/certification/certified-data-engineer-associate/
 
 .
