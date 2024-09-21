@@ -317,4 +317,9 @@ https://www.coursera.org/learn/aws-cloud-technical-essentials
 
 https://aws.amazon.com/certification/certified-data-engineer-associate/
 
+
+## MAP LAST HERE
+https://www.coursera.org/learn/intro-to-data-engineering/home/week/2
+
+
 .
