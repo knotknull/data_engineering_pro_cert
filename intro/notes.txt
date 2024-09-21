@@ -1,0 +1,128 @@
+Andrew Ng
+
+Joe Reis
+Oreilly: Fundamentals of Data Engineering
+
+
+
+
+## Intro to Data Engineering
+## 
+
+Data Centric AI: discipline of systematically engineering the data used to build an AI system
+
+
+
+# Syllabus
+
+Intermediate Python skills:
+    - w3 School Pandas tutorial: https://www.w3schools.com/python/pandas/default.asp
+    - Kaggle Pandas tutorials  : https://www.kaggle.com/learn/pandas
+
+Basic SQL skills:
+    - SQLBolt Tutorials course: https://sqlbolt.com/
+
+
+AWS skills :
+    - AWS Cloud Practioner Essentials: https://www.coursera.org/learn/aws-cloud-practitioner-essentials
+    - AWS Cloud Technical Essentials : https://www.coursera.org/learn/aws-cloud-technical-essentials
+
+
+## Digial copy of Fundamentals of Data Engineering
+https://go.redpanda.com/fundamentals-of-data-engineering
+
+
+# DeepLearning AI Community link
+https://community.deeplearning.ai/invites/RsdEnVWirt
+
+
+
+
+# Data Engineering Defined
+
+    - originally seen as byproduct or "exhaust"
+    - data has business value
+    - data engineering work:
+
+        [ ingestion ] [ transformation ] [ serving ]
+        --------------------------------------------
+                      [ data storage ] 
+
+Data engineering is the development, implementation, and maintenance of systems and processes
+that take in raw data and produce high quality consistent information that supports downstream 
+use cases such as analysis and machine learning.
+
+Data engineering is the intersection of:
+         security, data management, DataOps,
+        data architecture, orchestration, and software engineering
+
+
+# Data Engineering Lifecycle                                                   
+                   + ----------------------------------------------------|       +-------------------+
+                   |                                                     |       |                   |
+                   | [ ingestion ] ->  [ transformation ] ->  [ serving ]|       |  Analytics        |
+[Generation] ---->>| ----------------------------------------------------| --->> |  Machine Learning |
+      ^            |    [            data storage              ]         |       |  Reverse ETL      |
+      |            |                                                     |       |                   |
+      |            +-----------------------------------------------------+       +-------------------+
+      |                                                                                   |
+      +-------------------------------Reverse ETL-----------------------------------------+
+
+-----------------------------------------------------------------------------------------------------------
+  [Security]  [Data Mangement]  [DataOps]  [Data Architecture]  [Orchestration]  [Software Engineering]
+
+
+
+
+Data Pipeline: combination of architecture, systems, and processes that move data through the 
+               stages of the data engineering lifecycle
+
+in short: get raw data, turn in into something useful and then deliver
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
