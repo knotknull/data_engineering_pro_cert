@@ -697,16 +697,24 @@ RDBMS: product, productlines, employees, offices, customers, orders, orderdetail
   +--> Transformed data: fact_orders, dim_customers, dim_products, dim_locations
 
 
+Architectural Diagram for Lab
+                                                      +------------->  User
+ +--VPC------------------------+                      |
+ |                             |         +------> [ Athena ]
+ |    [ RDS ]    [ EC2  ]      |         |
+ |      |        [Cloud9]      |         |
+ |      |                      |         |
+ |     +---> [ Glue ETL ] -----|------> [S3] <--- [Glue Crawler] 
+ |                             |
+ |                             |
+ +-----------------------------+
 
+Lab Walkthru:
+- Setup Lap
+- Launch Cloud9 
+- Setup Jupyter Notebook 
 
-
-
-
-
-
-
-
-
+NOTE : Once finished with lab, go back to vocareum and "Submit" lab
 
 
 .
