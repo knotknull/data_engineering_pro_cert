@@ -375,7 +375,7 @@ Storage Abstraction
 
     choose config patterns: Latency, Scalability, Cost
 
-Storage Hierarch
+Storage Hierarchy
  [ Storage Abstractions]
  [   Storage Systems   ]
  [     Raw Hardware    ]
@@ -421,6 +421,83 @@ reverse ETL learning:  take transformed data, analytics, machine learnig model o
 ## Intro to Data Engineering
 ## Data Undercurrents
 ## Week 2
+
+Data Undercurrents:
+    Security
+    Data Management
+    DataOps
+    Data Architecture
+    Orchestration
+    Software Engineering
+
+# Security 
+
+Least Privilege:  Give users or apps access to only the essentail data / resources they need 
+                  for only the duration required
+
+Data Sensitivity: Give user access to data only when necessary
+
+
+Security in the Cloud:
+    - Identity and Access Management
+    - Encryption Methods
+    - Networking Protocols
+
+defensive mindset
+    - be cautious with sensitive data
+    - design for potential attacks
+
+# Data Management  
+
+    Data Management Association International (DAMA)
+        - provides Data Management Book of Knowledge (DMBOK)
+
+DMBOK defines data management as the development, execution, and supervision of plans,
+programs, and practices that deliver, control, protect, and enhance the value of
+data and information assets throughout their life cycles
+
+
+Data governance: data management fucntion to ensure the quality, integrity, security and
+                 usability of the data collecte by an orgranization
+                 
+Data quality
+    High Quality Data                       Low Quality Data
+    -----------------------                 --------------------
+        Accurate                                Inaccurate
+        Complete                                Incomplete
+        Discoverable                            Hard to find
+        Available in a timely manner            Late
+    ( exactly what stakeholders expect )        (unusable)
+
+
+# Data Architecture  
+
+ The design of systems to support the evolving data needs 
+ of an enterprise, achived by flexible and reversible decisions 
+ reached through a careful evaluation of trade-offs
+
+    - ongoing effort
+    - evolving
+
+Principle of Good Data Architecture 
+    1. Choose common components wisely
+    2. Plan for failure
+    3. Architect for scalability
+    4. Architecture is leadership 
+    5. Always be architecting
+    6. Build loosely coupled systems
+    7. Make reversible decisions
+    8. Prioritize security (but it is toward the bottom)
+    9. Embrace FinOps: Finance + DataOps
+
+
+# Data Ops  
+
+
+
+
+
+
 
 
 
