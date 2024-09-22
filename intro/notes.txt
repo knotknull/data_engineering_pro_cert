@@ -527,10 +527,23 @@ Incident Response
 
 # Orchestration
 
+Orchestration Frameworks:
+    - Airflow
+    - dagster
+    - Prefect
+    - Mage
 
+  - Automate pipeline with complex dependencies
+  - Monitor pipeline
 
+Directed Acyclic Graph (DAG)
+    - how data flows thru pipeline
+    - flow of data in one direction (directed)
+    - acyclic (no loops)
+    - graph: composed of nodes and edges
+        i.e. flowchart
 
-
+# Software Engineering
 
 
 
