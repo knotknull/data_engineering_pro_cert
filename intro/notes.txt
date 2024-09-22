@@ -545,6 +545,24 @@ Directed Acyclic Graph (DAG)
 
 # Software Engineering
 
+design, development, deployment and maintenance of software apps
+
+    - open source fameworks
+    - Infrastructure as code
+    - Pipeline as code
+    - Problem solving
+
+
+Practical Examples on AWS
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/intro-to-data-engineering/lecture/GQhIs/the-data-engineering-lifecycle-on-aws
+
+
+
+
+
 
 
 
