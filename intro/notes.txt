@@ -493,6 +493,46 @@ Principle of Good Data Architecture
 
 # Data Ops  
 
+DataOps: Improves the dev process and quality of data products
+         set of cultural habits
+            - Communication and Collaboration
+            - Continuous Improvement
+            - Rapit Iteration
+
+DataOps from Agile Methodology
+
+Pillars of DataOps:
+    - Automation
+    - Observability & Monitoring
+    - Incident Response
+
+Goal: Provide high-quality data products 
+
+Automation:
+    Automated Change management:
+        Code /  Config / Environment 
+        Pipelines
+        Data 
+    Scheduling
+    Orchestration framework (Airflow)
+
+Observability & Monitoring:
+
+Incident Response
+    - root cause
+    - quick resolution
+    - identify tech and tools
+    - coordinate efforts of data team
+
+
+# Orchestration
+
+
+
+
+
+
+
 
 
 
