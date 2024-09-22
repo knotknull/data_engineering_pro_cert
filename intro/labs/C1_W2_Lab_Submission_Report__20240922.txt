@@ -1,0 +1,15 @@
+[Executed at: Sun Sep 22 11:17:23 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Test 2 Part 1 passed: Created AWS Glue Database.
+Test 2 Part 2 passed: Created AWS Glue Connection.
+Test 2 Part 3 passed: Created AWS Glue Crawler.
+Test 2 Part 4 passed: Created AWS Glue Job.
+Test 2 Part 5 passed: Created S3 datalake bucket.
+Test 2 Part 6 passed: Created S3 scripts bucket.
+========================================================================================================================
+Test 3 passed: Successful run of AWS Glue Job.
+========================================================================================================================
+Test 4 passed: Created S3 bucket for Amazon Athena Query Results.
+========================================================================================================================

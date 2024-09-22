@@ -1,0 +1,10 @@
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	10/10
+	
+Creation of Data Pipeline Components 	30/30
+	
+Successful Run of AWS Glue Job 	30/30
+	
+Creation of S3 Bucket for Amazon Athena Query Results 	30/30
+	

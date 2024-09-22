@@ -716,5 +716,6 @@ Lab Walkthru:
 
 NOTE : Once finished with lab, go back to vocareum and "Submit" lab
 
+LAB: Passed 100 / 100
 
 .
