@@ -718,4 +718,16 @@ NOTE : Once finished with lab, go back to vocareum and "Submit" lab
 
 LAB: Passed 100 / 100
 
+
+## Intro to Data Engineering
+## Data Architecture
+## Week 3
+
+
+
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/intro-to-data-engineering/lecture/nWjYC/week-3-overview
+
 .
