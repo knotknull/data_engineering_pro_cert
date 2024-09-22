@@ -7,7 +7,7 @@ Oreilly: Fundamentals of Data Engineering
 
 
 ## Intro to Data Engineering
-## 
+## Week 1
 
 Data Centric AI: discipline of systematically engineering the data used to build an AI system
 
@@ -318,8 +318,112 @@ https://www.coursera.org/learn/aws-cloud-technical-essentials
 https://aws.amazon.com/certification/certified-data-engineer-associate/
 
 
-## MAP LAST HERE
-https://www.coursera.org/learn/intro-to-data-engineering/home/week/2
+## Intro to Data Engineering
+## Data Engineering Lifecycle
+## Week 2
+
+
+# Data Generation in Source Systems
+
+Common Source Systems  
+ - Databases: Relational / NoSQL
+ - Files    : text , audio , video
+ - API      : request / response
+ - Data Sharing Platform
+ - IoT Devices
+
+Source systems are unreliable:
+    - can go down
+    - format / schema changes
+
+Data Engineer needs to work with Source Systems 
+    - How they generate data
+    - How data changes over time
+    - How changes will impact downstream systems
+
+# Ingestion
+
+ingestion: moving raw data from source systems into data pipeline for processing
+
+    - frequency:  batch / streaming
+
+    streaming: near real-time (data available shortly after it is produced)
+        - event streaming platform / message queue
+
+    - What would be done with the data in real-time
+
+# Storage
+
+Raw Hardware 
+    Solid-State Storage
+    Magnetic Storage
+    RAM
+
+Process components
+    Networking          Serialization
+    CPU                 Compression
+    Caching
+
+Storage Systems
+    DBMS                    Object Store
+    Apache Iceberg          Cache / Memory based storage
+    Streaming Storage
+
+Storage Abstraction
+    Data Warehouse      Data Lake
+    Data Lakehouse
+
+    choose config patterns: Latency, Scalability, Cost
+
+Storage Hierarch
+ [ Storage Abstractions]
+ [   Storage Systems   ]
+ [     Raw Hardware    ]
+
+
+# Data Transformation / Data Engineering Lifecycle
+
+transformation:  turn raw data into useful data / valuable
+
+queries, modeling, transformation
+
+query: issue a request to read records from data source
+
+data modeling: choosing a coherent structure for data to make it useful for business
+
+data transformation: data manipulated, enhanced and saved for downstream use
+
+
+# Serving Data
+
+Giving stakeholders the opportunity to extract business value from data
+
+analytics:  process of identifying key insights and patterns within data
+        - business intelligence: 
+                explore historical and business data to discover insights
+
+        - operational analytics: 
+                monitoring real-time data for immediate action
+        
+        - embedded analytics
+                external or customer-facing analytics
+                    - dashboards, etc
+
+machine learning: 
+        - model training
+        - real-time inference
+        - track data history and lineagoe
+
+reverse ETL learning:  take transformed data, analytics, machine learnig model output 
+                       and feed back to source systems
+
+
+## Intro to Data Engineering
+## Data Undercurrents
+## Week 2
+
+
+
 
 
 .
