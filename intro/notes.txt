@@ -58,17 +58,19 @@ Data engineering is the intersection of:
 
 
 # Data Engineering Lifecycle                                                   
-                   + ----------------------------------------------------|       +-------------------+
-                   |                                                     |       |                   |
-                   | [ ingestion ] ->  [ transformation ] ->  [ serving ]|       |  Analytics        |
-[Generation] ---->>| ----------------------------------------------------| --->> |  Machine Learning |
-      ^            |    [            data storage              ]         |       |  Reverse ETL      |
-      |            |                                                     |       |                   |
-      |            +-----------------------------------------------------+       +-------------------+
-      |                                                                                   |
-      +-------------------------------Reverse ETL-----------------------------------------+
+                    + -----------------------------------------------------+       +-------------------+
++------------+      |                                                      |       |                   |
+|            |      | [ ingestion ] ->  [ transformation ] ->  [ serving ] |       |  Analytics        |
+| Generation | -->> | -----------------------------------------------------| --->> |  Machine Learning |
+|            |      | [[  ............    data storage   ............   ]] |       |  Reverse ETL      |
++------------+      |                                                      |       |                   |
+      ^             +------------------------------------------------------+       +-------------------+
+      |                                                                                    |
+      |                                                                                    |
+      +-----------------------------------Reverse ETL--------------------------------------+
 
------------------------------------------------------------------------------------------------------------
+==========================================================================================================
+
   [Security]  [Data Mangement]  [DataOps]  [Data Architecture]  [Orchestration]  [Software Engineering]
 
 
@@ -244,32 +246,22 @@ Network:
         - data and resources don't leave region unless you build solution to do so
 
       Region                                                                       
-    ┌────────────────────────────────────────────────────────────────────┐         
-    │     VPC                                                            │         
-    │   ┌────────────────────────────────────────────────────────────┐   │         
-    │   │                                                            │   │         
-    │   │   ┌──────────────────┐            ┌─────────────────┐      │   │         
-    │   │   │      AZ 1        │            │     AZ 2        │      │   │         
-    │   │   │                  │            │                 │      │   │         
-    │   │   │                  │            │                 │      │   │         
-    │   │   │  ┌────────────┐  │            │  ┌───────────┐  │      │   │         
-    │   │   │  │            │  │            │  │           │  │      │   │         
-    │   │   │  │   Public   │  │            │  │   Public  │  │      │   │         
-    │   │   │  │   Subnet   │  │            │  │   Subnet  │  │      │   │         
-    │   │   │  │            │  │            │  │           │  │      │   │         
-    │   │   │  └────────────┘  │            │  └───────────┘  │      │   │         
-    │   │   │                  │            │                 │      │   │         
-    │   │   │                  │            │                 │      │   │         
-    │   │   │  ┌────────────┐  │            │  ┌───────────┐  │      │   │         
-    │   │   │  │            │  │            │  │           │  │      │   │         
-    │   │   │  │   Private  │  │            │  │   Private │  │      │   │         
-    │   │   │  │   Subnet   │  │            │  │   Subnet  │  │      │   │         
-    │   │   │  │            │  │            │  │           │  │      │   │         
-    │   │   │  └────────────┘  │            │  └───────────┘  │      │   │         
-    │   │   │                  │            │                 │      │   │         
-    │   │   └──────────────────┘            └─────────────────┘      │   │         
-    │   └────────────────────────────────────────────────────────────┘   │         
-    └────────────────────────────────────────────────────────────────────┘         
+    ┌────────────────────────────────────────────────────────────┐         
+    │     VPC                                                    │         
+    │   ┌────────────────────────────────────────────────────┐   │         
+    │   │    AZ 1                   AZ 2                     │   │         
+    │   │   ┌──────────────────┐    ┌─────────────────┐      │   │         
+    │   │   │  ┌────────────┐  │    │  ┌───────────┐  │      │   │         
+    │   │   │  │   Public   │  │    │  │   Public  │  │      │   │         
+    │   │   │  │   Subnet   │  │    │  │   Subnet  │  │      │   │         
+    │   │   │  └────────────┘  │    │  └───────────┘  │      │   │         
+    │   │   │  ┌────────────┐  │    │  ┌───────────┐  │      │   │         
+    │   │   │  │   Private  │  │    │  │   Private │  │      │   │         
+    │   │   │  │   Subnet   │  │    │  │   Subnet  │  │      │   │         
+    │   │   │  └────────────┘  │    │  └───────────┘  │      │   │         
+    │   │   └──────────────────┘    └─────────────────┘      │   │         
+    │   └────────────────────────────────────────────────────┘   │         
+    └────────────────────────────────────────────────────────────┘         
                                                                                    
                                                                                    
 Storage: 
@@ -418,7 +410,7 @@ reverse ETL learning:  take transformed data, analytics, machine learnig model o
                        and feed back to source systems
 
 
-## Intro to Data Engineering
+## Data Engineering Lifecycle
 ## Data Undercurrents
 ## Week 2
 
@@ -553,13 +545,156 @@ design, development, deployment and maintenance of software apps
     - Problem solving
 
 
-Practical Examples on AWS
+## Practical Examples on AWS
+
+# Data Engineering Lifecycle on AWS
+
+# Data Engineering Lifecycle                                                   
+                    + -----------------------------------------------------+       +-------------------+
++------------+      |                                                      |       |                   |
+|            |      | [ ingestion ] ->  [ transformation ] ->  [ serving ] |       |  Analytics        |
+| Generation | -->> | -----------------------------------------------------| --->> |  Machine Learning |
+|            |      | [[  ............    data storage   ............   ]] |       |  Reverse ETL      |
++------------+      |                                                      |       |                   |
+      ^             +------------------------------------------------------+       +-------------------+
+      |                                                                                    |
+      +-----------------------------------Reverse ETL--------------------------------------+
+
+Source Systems
+ Databases
+    - Amazon Relational Database Service (RDS)
+        - managed db
+        - mysql / postgresql
+
+    - Amazon DynamoDB
+        - Serverless NoSQL
+        - stand-alone tables (virtually unlimited in size)
+        - flexible schema
+        - low latency / large volumes (gaming, IoT)
+ 
+ Streaming
+    - Amazon Kinesis Data Streams
+    - Amazon Simple Queue Service (SQS)
+    - Amazon Managed Streaming for Apache Kafka (MSK)
+        - AWS manages infrastructure
+
+ Ingestion
+   From a DB    
+    - Amazon Database Migration Services (DMS)
+        - migration / replicate data from source to target automated
+
+    - AWS Glue
+        - supports data integration processes
+
+   From Streaming    
+    - Amazon Kinesis Data Streams
+    - Amazon Data Firehose
+    - Amazon SQS
+    - Amazon MSK
+
+ Storage
+   Traditional Data Warehouse
+    - Amazon Redshift
+    - Amazon S3
+          +-->> Lakehouse: access structured data in data warehouse 
+                           and unstructured data in an object store data lake 
+
+ Transformation
+   Data Processing Tools
+    - AWS Glue
+    - Apache Spark
+    - dbt
 
 
-MAP LAST HERE
-https://www.coursera.org/learn/intro-to-data-engineering/lecture/GQhIs/the-data-engineering-lifecycle-on-aws
+ Serving
+   Business Intelligence / Analytics 
+    - Amazon Athena   : query structured / unstructured data
+    - Amazon Redshift
+
+   Dashboarding Tools
+    - Amazon QuickSight 
+    - Apache Superset 
+    - Apache Metabase 
+
+   AI / Machine Learning 
+    - batch data for model training
+    - vector databases
+
+# Undercurrents on AWS
+
+Undercurrents (get it, they are under the dashed line ....)
+
+==========================================================================================================
+  [Security]  [Data Mangement]  [DataOps]  [Data Architecture]  [Orchestration]  [Software Engineering]
 
 
+
+ Security
+   Shared Responsibility Model
+    - AWS      responsible for data center and services they provide
+    - Customer responsible for security of systems built with AWS resources 
+
+    - Identity and Access Management (IAM)
+        - roles and permissions to access AWS resources
+
+       IAM Roles:
+        - give users / apps access to temporary credentials
+        - provide appropriate AWS API permissions to various tools / data storage areas
+
+    - Amazon Virtual Private Cloud 
+        - private network
+
+    - Security Groups
+        - Instance level firewalls
+
+
+ Data Management
+    - AWS Glue               +   | Discover, create, manage metadata for data stored in 
+    - AWS Glue Crawler       | --| S3 or other storage and database systems
+    - AWS Glue Data Catalog  +   |
+
+    - AWS Lake Formation:  Centrally manage and scale fine-grained data access permissions
+
+ DataOps
+    - AWS CloudWatch: Collects metrics and provides monitroing features for cloud resources, applications, 
+                      and on-premises resources
+
+    - AWS CloudWatch Logs: Sore and analyze operational logs
+
+    - AWS Simple Notification Service (SNS):  setup notifications between apps or 
+                  via text / email that are triggered by events within your system
+ 
+    OpenSource monitoring: Monte Carlo, Bigeye
+
+ Orchestration 
+    - Apache Airflow
+        - alternatives: Dagster, Prefect, Mage
+
+ Architecture 
+    - AWS Well-Architected
+        Operactional Excellence    Performance Efficiency
+        Security                   Cost Optimization
+        Reliability                Sustainability
+
+ Software Engineering 
+    - AWS Cloud9: IDE for development within a browser
+        [Cloud9]  ---hosted on ---> [EC2]
+
+    - AWS CodeDeploy: Automated Code Deployment
+
+    - repos: git / github
+
+
+
+NOTE: Community Forum of lab issues: 
+https://community.deeplearning.ai/c/course-q-a/data-engineering-specialization/de-course-1/467
+
+
+Lab Scenario:
+
+RDBMS: product, productlines, employees, offices, customers, orders, orderdetails, payments
+  |
+  +--> Transformed data: fact_orders, dim_customers, dim_products, dim_locations
 
 
 
