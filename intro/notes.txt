@@ -724,10 +724,96 @@ LAB: Passed 100 / 100
 ## Week 3
 
 
+## Data Architecture
 
+
+Enterprise Arechitecture:  the design of systems to support change in an enterprise, 
+    achieved by flexible and reversible decisions reached through a careful evaluation of trade-offs
+    
+
+Data Arechitecture      :  the design of systems to support the evolving data needs of 
+    an enterprise.  Achieved by flexible and reversible decisions reached through a careful 
+    evaluation of trade-offs. 
+
+// VERY SIMILAR !!
+
++--- Enterprice Architecture ---+
+|                               |
+|   [Business Architecture]     | <<-- Product / service strategy and business model
+|   [Application Architecture]  | <<-- Structure and interaction of key applications
+|   [Technical Architecture]    | <<-- Interaction of software and hardware components
+|   [Data Architecture]         | <<-- Supporting the evolving needs of data
+|                               |
++-------------------------------+
+
+NOTE: Change management and reversible decisions are key to Enterprise Architecture
+
+## Conway's Law
+
+"Any organization that designs a system will produca a design whose structure is a copy
+of the organization's communication structure." 
+  -- Melvin Conway
+
+WARNING:  DO NOT BUILD A SYSTEM THAT CLASHES WITH COMPANY'S COMMUNICATION STRUCTURE
+
+
+
+## Principle's of Good Data Architecture
+
+1. Choose common components wisely
+2. Plan for failure
+3. Architect for scalability
+4. Architect is leadership
+5. Always be architecting
+6. Build loosely coupled systems
+7. Make reversible decisions
+8. Prioritize security (second to last)
+9. Embrace FinOps
+
+
+# Grouped by
+                                   +
+1. Choose common components wisely | <<-- How data arch impacts other teams 
+4. Architect is leadership         +      and individuals 
+
+5. Always be architecting          +
+6. Build loosely coupled systems   | <<-- Data arch is an ongoing process 
+7. Make reversible decisions       +
+
+2. Plan for failure                +
+3. Architect for scalability       | <<-- Unspoken but understood priorities 
+8. Prioritize security             |
+9. Embrace FinOps                  +
+
+
+# Common Components
+    - Object Storage
+    - version control system
+    - Observability & Monitoring
+    - Processing Engines
+
+    can facilitate team collaboration / break down silos
+    Wise choice:
+        - identify tools that benefit all teams
+        - Avoid a one-size-fits-all approach
+
+## Always Architecting
+
+
+
+                    [ Always be architecting ]
+                        ^              ^
+                       /                \
+                      /                  \
+                     /                    \
+     [ Make reversible decisions]      [ Build loosely coupled systems]
 
 
 MAP LAST HERE
-https://www.coursera.org/learn/intro-to-data-engineering/lecture/nWjYC/week-3-overview
+https://www.coursera.org/learn/intro-to-data-engineering/lecture/O2Bu1/always-architecting
+
+
+
+
 
 .
