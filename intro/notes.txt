@@ -919,7 +919,92 @@ Batch is a "special case" of streaming
 
 ## Architecting for Compliance
 
+    General Data Protection Regulation  (GDPR)
+        - personal data
+            - personal identifiable info
+            - other data
+
+
+    Health Insurance Portability and  Accountability Act (HIPAA)
+
+    Sarbanes Oxley Act (SOX)
 
 
 
+## Choosing the Right Technologies 
+
+
+Data Arch   --->>>   Tools
+---------           ---------
+ What                How
+ Why
+ When
+
+Considerations: 
+    Location: onprem, cloud, hybrid
+    Cost Optimization
+    build vs. buy
+    team size / capabilities
+
+
+# Location
+
+on prem: company owns / maintains data stack
+cloud  : cloud provider builds maintains hardware
+hybrid : on prem + cloud
+
+
+# Monolithic vs Modular
+
+monolithic: tightly-coupled components
+    - single codebase
+    - one language / one technology
+    - hard to maintain
+
+
+monolithic: losely-coupled components
+    - interoperability (can be integrated with other tools i.e. using parquet)
+    - flexible & reversible decisions
+    - continuous improvement
+
+
+# Cost optimization and Business Value
+
+
+
+Total Cost of Ownership (TCO): total estimated cost of a solution, project or initiative over its lifecycle
+    direct costs                        indirect costs
+        - salaries                      - netowrk downtime
+        - cloud bills                   - IT support
+        - software subscriptions        - loss of productivity
+
+
+Capital Expenses   (CapEx): payment to purchase long-term fixed assets    [ On Prem]
+
+Operational Expenses (OpEx): Expense assocaites with running day to day operations  [ Cloud ]
+
+
+
+Total Opportunity Cost of Ownership (TOCO):  cost of lost opportunities incurred in choosing a particular tool / technology
+
+Minimize TOCO 
+  - build flexible systems
+  - loosely-coupled components
+
+Recognize components that are likely to change: 
+    - Immutable tech
+        - Object storage, Networking, SQL
+
+    - Transitory tech
+        - Stream processing, Orchestration, AI
+
+
+FinOps:  Minimize TCO / TOCO
+         Maximize revenue generation opportunities
+
+    Cloud:  OpEx first
+            Pay as you go tech
+            modular options
+
+         
 .
