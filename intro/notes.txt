@@ -932,6 +932,7 @@ Batch is a "special case" of streaming
 
 
 ## Choosing the Right Technologies 
+## 
 
 
 Data Arch   --->>>   Tools
@@ -1091,27 +1092,46 @@ Software Engineering
 
 
 
+## Investigating Your Architecture on AWS
+## 
+
+# AWS Well-Architected Framework
+
+6 Pillars: 
+
+Operattional Excellence         Performance Efficiency   
+Security                        Cost Optimization
+Reliability                     Sustainability
+
+
+Operational Excellence
+    - how to develop and run workloads on AWS more effectively
+    - monitor your systems to gain insght into your operations
+    - continuously improve your porcesses and procedures to deliver business value
+
+Security
+    - how to take advantage of cloud technologies to protect your data, systems and assets
+
+Reliability
+    - everything: designing for reliability to planning for failure and adapting to change 
+
+Performance Efficiency   
+    - data driven approach to buile high-perfromance architecture
+    - evaluate ability of resource to efficiently meet system requirements 
+    - maintain efficiency as demand changes and tech evolves
+
+Cost Optimization
+    - build systems to deliver max biz value at lowest possible price point
+    - AWS Cost Explorer / Cost Optimzation Hub
+
+Sustainability
+    - consider environmenta impact of the workloads your running on the cloud
+    - reduce energy consumption and increase efficiency across all system components
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Lens: extension of Well-Architected Framework that focuses on area, industry or tech stack.
+      and provides guideance to those contexts
 
 
 
