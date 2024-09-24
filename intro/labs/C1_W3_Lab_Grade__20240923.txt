@@ -1,0 +1,10 @@
+Total score 	                            100/100
+	
+Monitor Networking Activity 	            20/20
+	
+Change of ALB Security Group Inbound Rules 	20/20
+	
+Execution of Launch Template 	            30/30
+	
+Creation of Dynamic Scaling Policy 	        30/30
+	

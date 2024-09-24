@@ -1,0 +1,15 @@
+[Executed at: Mon Sep 23 20:12:28 PDT 2024]
+
+Test 1 passed: Generated stress test to increase Networking Activity.
+========================================================================================================================
+Test 2 passed: Changed the inbound rules for the ALB Security Group.
+========================================================================================================================
+Test 3 passed: Launch Template was created and executed.
+========================================================================================================================
+Test 4 Part 1 passed: Created Dynamic scaling policy with the name de-c1w3-scaling-policy.
+Test 4 Part 2 passed: PolicyType is correctly set as TargetTrackingScaling.
+Test 4 Part 3 passed: PredefinedMetricType is correctly set as ALBRequestCountPerTarget.
+Test 4 Part 4 passed: Target group is correctly set as de-c1w3-ec2-tg-port80.
+Test 4 Part 5 passed: Target value of the dinamic scaling policy equals to 60.
+Test 4 Part 6 passed: Instance warmup of the dinamic scaling policy equals to 60 seconds.
+========================================================================================================================

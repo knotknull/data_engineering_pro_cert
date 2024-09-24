@@ -1133,7 +1133,16 @@ Sustainability
 Lens: extension of Well-Architected Framework that focuses on area, industry or tech stack.
       and provides guideance to those contexts
 
+Data Analytics Lens: AWS > Documentation > AWS Well-Architected > AWS Well-Architected Framework
 
+
+Apache Benchmark for web stress testing
+
+
+LAB: 
+
+ALB / ELB 
+de-c1w3-alb-1436900260.us-east-1.elb.amazonaws.com
 
 
 .
