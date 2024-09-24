@@ -1145,4 +1145,24 @@ ALB / ELB
 de-c1w3-alb-1436900260.us-east-1.elb.amazonaws.com
 
 
+Resources:
+
+Well-Architected
+
+https://aws.amazon.com/architecture/well-architected/
+https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html
+
+Lambda / Kappa Arch
+
+https://www.oreilly.com/radar/questioning-the-lambda-architecture/
+https://towardsdatascience.com/a-brief-introduction-to-two-data-processing-architectures-lambda-and-kappa-for-big-data-4f35c28005bb
+
+AWS API
+https://medium.com/api-university/the-api-mandate-install-api-thinking-at-your-company-4335433b7d0b
+
+
+
+MAP LAST HERE 
+https://www.coursera.org/learn/intro-to-data-engineering/lecture/rhcbq/week-4-overview
+
 .
