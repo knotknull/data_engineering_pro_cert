@@ -1165,4 +1165,91 @@ https://medium.com/api-university/the-api-mandate-install-api-thinking-at-your-c
 MAP LAST HERE 
 https://www.coursera.org/learn/intro-to-data-engineering/lecture/rhcbq/week-4-overview
 
+
+## Intro to Data Engineering
+## Data Architecture
+## Week 4
+
+
+## Stakeholder Management & Gathering Requirements
+
+# Requirements
+
+Hierarchy of Needs 
+    Business Goals      -->> what does success look like: gro revenue, market share, user base              
+    Stakeholder Needs   -->> Indiv Employees:  proper resources, tools and management, robust data system
+    System Requirements -->> Requirements for the data system you will build & maintain
+        Functional
+            specific functionality: what will system be able to do 
+        NonFunctional
+            characteristics or attributes:  Latency, scalability, reliability, cost, security
+
+NOTE: Can't build a system without knowing specifically business goals and stakeholder needs
+
+
+
+
+Key Elements of Requirements Gathering
+    - Learn what existing data systems or solutions are in place
+    - Learn what pain points / problems there are with existing solutions
+    - Learn what actions stakeholders plan to take based on the data you provide
+    - Identify any other stakeholders you'll need to talk to if you're still mising information
+
+
+
+
+
+
+
+Business Goals: 
+    - continue on the growth trajectory      
+    - focus on customer retention and loyalty, epand to new markets and new product offering
+Stakeholder Needs:
+  Analytics Dashboard:  Marketing needs to know about demand spices, with hourly dashobard updates
+
+  Recommender System :  Marketing needs a system that recommends products based on browsing or 
+                        purchase history and current cart contents
+System Requirements 
+  Analytics                                     Recommender System 
+      Functional                                Functional
+        The data system needs to serve              The system needs to:  
+        transformed data that is no more              - provide training data for recommender
+        than one hour old                             - ingest, transform, serve user data to recommender 
+                                                      - Return model outputs back to sales platform
+
+      NonFunctional                             NonFunctional
+            
+
+
+
+
+When talking to Source System Owners 
+    - Learn what existing data systems or solutions are in place
+    - Learn what pain points / problems there are with existing solutions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Translating Requirements to Architecture
+
+
+
+
 .
