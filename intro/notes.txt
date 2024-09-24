@@ -521,7 +521,7 @@ Incident Response
 
 Orchestration Frameworks:
     - Airflow
-    - dagster
+    - Dagster
     - Prefect
     - Mage
 
@@ -970,8 +970,6 @@ monolithic: losely-coupled components
 
 # Cost optimization and Business Value
 
-
-
 Total Cost of Ownership (TCO): total estimated cost of a solution, project or initiative over its lifecycle
     direct costs                        indirect costs
         - salaries                      - netowrk downtime
@@ -1006,5 +1004,116 @@ FinOps:  Minimize TCO / TOCO
             Pay as you go tech
             modular options
 
-         
+# Build vs buy
+
+Build Benefits: 
+    - get exactly what is needed
+    - avoid licensing fees
+    - avoid being at mercy of a vendor
+
+Existing Solutions: 
+    - open source (community)
+    - commercial open source (vendor)
+    - proprietary non-open source
+Considerations: 
+    Team
+        - does team have bandwidth to implement open source 
+        - can proprietary service free up time
+    Cost
+        - cost of licensing fees
+        - what is total cost to build and maintain
+    Business Value
+        - advantage by building own vs buy
+        - avoiding work with no payback
+
+# Server, Conatiner and Serverless Compute Options
+
+        Server                          Container                                Serverless
+- setup & manage                        - packaged code                         - no server to setup / maintain 
+- update OS                                and dependencies                     - automatic scaling
+- install / update                      - lightweight & portable                - availability & fault-tolerance
+  packages                              - setup app code & deps                 - pay as you go
+- patch software                                                                - AWS Lambda
+- netowrk, scaling, security                                                    - run as needed / 
+                                                                                  pay a little bit each time
+
+When to User Serverless Services 
+    - what is cloud cost 
+        - high event rate can be costly
+    - model and monitor
+        - event rates / duration / cost
+    - limitations
+        - limits on execution frequency
+            concurncy and duration
+
+Best for     : simple / discrete tasks
+Not Good when: alot of compute or memory
+
+ELSE 
+    containers / Kubernetes
+
+
+
+# How Undercurrents Impact Your Desicisions
+
+Security 
+    - what are security features of the tool
+        - only from reputable sources
+
+Data Management 
+    - how are data governance practices handled by provider
+        - Data Breach
+        - Compliance
+        - Data Quality
+
+DataOps 
+    - What features are offered to 
+        - Automation 
+        - Monitoring
+        - Service Leval Agreement (SLA)
+
+Data Architecture
+    - How does tool provide modularity and interoperabilty 
+        - Loosely-coupled components
+
+Orchestration 
+    - Airflow
+    - Dagster
+    - Prefect
+    - Mage
+
+Software Engineering  
+    - How much do you want to do?
+        - team's capabilities
+        - business value
+        - build vs. buy
+        - avoiding work with no payback  ( Avoid undifferentiated heafy lifting )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .
