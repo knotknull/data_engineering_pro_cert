@@ -809,9 +809,115 @@ WARNING:  DO NOT BUILD A SYSTEM THAT CLASHES WITH COMPANY'S COMMUNICATION STRUCT
      [ Make reversible decisions]      [ Build loosely coupled systems]
 
 
-MAP LAST HERE
-https://www.coursera.org/learn/intro-to-data-engineering/lecture/O2Bu1/always-architecting
 
+## When Systems Fail 
+
+# Plan for Failure
+
+    - Availability: percent of time an IT service is expected to be in an operable state
+    - Realiability: probability of a service performing its' intended function during a 
+                    particular time interval
+    - Durability  : ability of a storage system to withstand data loss due to hardware failure, 
+                    software errors, or natural disasters
+
+Recovery Time Objective (RTO) : Maximum acceptable time for a service or system outage
+                    ex. impact to customers
+
+Recovery Point Objective (RTO): Acceptable state after recovery
+                    ex. maximum acceptable data loss
+
+# Prioritize Security
+
+ - Zero-trust security 
+    Every action requires authentication
+
+
+# Architect for scalability &  Embrace FinOps
+    - Large unforseen costs (cloud)
+    - Missed opportunities for revenues
+    - Manage cloud costs
+
+## Batch Architectures
+
+- processed in chunks
+- real-time analysis is not critical
+
+                                                        +------------------------+
+                                                        |                        |
+                                 +------------+         |   +----------------+   |
+[ Data ] [ Data ] [ Data ] -->>  | Ingestion  | -->>    |   | Transformation |   |
+                                 +------------+         |   +----------------+   |
+   - Extract Transform Load                             |                        |
+                                                        |   +----------------+   |
+   - Extract Load Transform                             |   |    Storage     |   |
+                                                        |   +----------------+   |
+                                                        |                        |
+                                                        +------------------------+
+
+Data Mart: subset of a Data Warehouse (concentrating on Dept, Function, Business Area)
+
+            - analytics and reporting 
+                    - Sales
+                    - Marketing
+                    - Ops
+
+FinOps: Cost Benefit Analsysis
+        - Performance vs Cost
+
+
+## Streaming Architectures
+
+Data: stream of events
+
+    [ Event Producer ]   [D] [D] [D]     [Event Consumer]  data available shortly after produced
+                       continuous,                              (< 1s ) 
+                       near real-time 
+                       ingestion
+
+    [ Event  ]    [Streaming]    [  Event  ]                  Downstream 
+    [Producer]    [  Broker ]    [ Consumer] -------------->> Use Case 
+       |                              |                         |
+       |                              |                         |
+     Data Source                Data processor            Analytics / ML
+
+
+
+
+# Streaming Frameworks
+    - Kafka:  Event Streaming 
+    - Storm:  Streaming / Real-time Analytics
+    - Samza:  Streaming / Real-time Analytics  
+
+
+# Lambda Architecture
+
+                   [ Batch Processing ]     -->> [Data Warehouse] 
+                /                                                 \  [Serving] 
+[Source System]                                                      [Layer  ]
+                \                                                 /
+                   [ Streaming Processing ] -->> [NoSQL DB ]     
+
+
+# Kappa Architecture
+    - 
+
+[Source System]   -->>  [ Stream Processing ]  -->> [Serving Layer ]                                                       [Layer  ]
+
+Unified Batch & Streaming
+
+    Google Dataflow 
+    Apache Beam 
+    Apache Flink 
+
+All data are events:
+    - unbounded data: real-time event streams
+    -   bounded data: data in batches
+
+
+Batch is a "special case" of streaming
+
+
+## Architecting for Compliance
 
 
 
