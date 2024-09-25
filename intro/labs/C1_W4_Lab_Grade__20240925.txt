@@ -1,0 +1,13 @@
+
+Total score 	                        100/100
+	
+Creation of Cloud9 Environment 	        10/10
+	
+Run of AWS Glue ETL Job 	            30/30
+	
+Creation of Vector Database 	        30/30
+	
+Configuration of Lambda Function 	    15/15
+	
+Implementation of Streaming Pipeline 	15/15
+	

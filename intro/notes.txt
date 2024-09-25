@@ -1576,9 +1576,31 @@ https://medium.com/slalom-build/a-guide-to-choosing-the-right-streaming-solution
 https://programmaticponderings.com/2023/04/23/streaming-data-on-aws-amazon-kinesis-data-streams-or-amazon-msk/
 
 
+LAB Scratch: 
 
+voclabs:~/environment $ aws rds describe-db-instances --db-instance-identifier de-c1w4-rds --output text --query "DBInstances[].Endpoint.Address"                                                                                                 
+de-c1w4-rds.c3iso22mgg8k.us-east-1.rds.amazonaws.com
 
+## for getting vector db user / pass
+## 
+terraform output vector_db_master_username
+terraform output vector_db_master_password
+Outputs:
 
+data_lake_bucket_id = "de-c1w4-501228451000-us-east-1-datalake"
+scripts_bucket_id = "de-c1w4-501228451000-us-east-1-scripts"
+vector_db_host = "de-c1w4-vector-db.c3iso22mgg8k.us-east-1.rds.amazonaws.com"
+vector_db_master_password = <sensitive>
+vector_db_master_username = <sensitive>
+vector_db_port = 5432
+
+voclabs:~/environment/terraform $ terraform output vector_db_master_username
+zzzzzzz
+voclabs:~/environment/terraform $ terraform output vector_db_master_password
+xxxxxxx 
+
+## vectordb 
+de-c1w4-vector-db.c3iso22mgg8k.us-east-1.rds.amazonaws.com
 
 
 

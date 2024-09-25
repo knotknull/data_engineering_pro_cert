@@ -1,0 +1,48 @@
+# .bashrc
+
+export PATH=$PATH:$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/local/nodejs/current/bin
+
+# modifications needed only in interactive mode
+if [ "$PS1" != "" ]; then
+    # Set default editor for git
+    git config --global core.editor nano
+
+    # Turn on checkwinsize
+    shopt -s checkwinsize
+
+    # keep more history
+    shopt -s histappend
+    export HISTSIZE=100000
+    export HISTFILESIZE=100000
+    export PROMPT_COMMAND="history -a;"
+
+    # Source for Git PS1 function
+    if [ -z "$(type -t __git_ps1)" ] && [ -e "/usr/share/git-core/contrib/completion/git-prompt.sh" ]; then
+        . /usr/share/git-core/contrib/completion/git-prompt.sh
+    fi
+
+    # Cloud9 default prompt
+    _cloud9_prompt_user() {
+        if [ "$C9_USER" = root ]; then
+            echo "$USER"
+        else
+            echo "$C9_USER"
+        fi
+    }
+
+    PS1='\[\033[01;32m\]$(_cloud9_prompt_user)\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)" 2>/dev/null) $ '
+fi
+export TF_VAR_project=de-c1w4
+export TF_VAR_region=us-east-1
+export TF_VAR_vpc_id=vpc-0acba70fca291f827
+export TF_VAR_private_subnet_a_id=subnet-03be0f02d4df08b82
+export TF_VAR_db_sg_id=sg-071426073d878ae56
+export TF_VAR_source_host=de-c1w4-rds.c3iso22mgg8k.us-east-1.rds.amazonaws.com
+export TF_VAR_source_port=3306
+export TF_VAR_source_database=classicmodels
+export TF_VAR_source_username=
+export TF_VAR_source_password=
+export TF_VAR_public_subnet_a_id=subnet-0348fffedce169ad5
+export TF_VAR_public_subnet_b_id=subnet-0218d9d7cc04f4baf
+export TF_VAR_kinesis_stream_arn=arn:aws:kinesis:us-east-1:501228451000:stream/de-c1w4-kinesis-data-stream
+export TF_VAR_inference_api_url=https://dsvthiidf5nzixzohjck6ojlqi0cmjkm.lambda-url.us-east-1.on.aws/

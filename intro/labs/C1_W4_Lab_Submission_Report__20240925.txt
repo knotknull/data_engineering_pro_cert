@@ -1,0 +1,20 @@
+
+[Executed at: Wed Sep 25 9:57:42 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Test 2 Part 1 passed: Created AWS Glue Database.
+Test 2 Part 2 passed: Created AWS Glue Connection.
+Test 2 Part 3 passed: Created AWS Glue Crawler.
+Test 2 Part 4 passed: Created AWS Glue Job.
+Test 2 Part 5 passed: Created S3 datalake bucket.
+Test 2 Part 6 passed: Created S3 scripts bucket.
+========================================================================================================================
+Test 3 passed: Created Vector Database.
+========================================================================================================================
+Test 4 Part 1 passed: Configured c1w4-model-inference lambda function variable VECTOR_DB_HOST.
+Test 4 Part 2 passed: Configured c1w4-model-inference lambda function variable VECTOR_DB_PASSWORD.
+Test 4 Part 3 passed: Configured c1w4-model-inference lambda function variable VECTOR_DB_USER.
+========================================================================================================================
+Test 5 passed: Created S3 recommendations bucket.
+========================================================================================================================
