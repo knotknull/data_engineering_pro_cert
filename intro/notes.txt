@@ -1221,17 +1221,58 @@ System Requirements
             
 
 
-
-
 When talking to Source System Owners 
     - Learn what existing data systems or solutions are in place
     - Learn what pain points / problems there are with existing solutions
 
 
+NonFunctional Requirements
+    - characteristics system must have 
 
 
+System Requirements 
+[[  Analytics  ]]
+      Functional                                
+        The data system needs to serve transformed data that is no more      
+        than one hour old                    
+                                            
+      NonFunctional
+
+        Scalability and Latency
+          System will be able to scale up to ingest, transform and serve the 
+          data volume expected with the maximum level of user activity, while 
+          staying with the latency requirements
+
+        Reliability
+          System will perform data quality checks to ensure data is conformant
+
+        Maintainability
+          The ingestion and transformation stages must be easily adaptable to 
+          accommodate any changes in the data schema
 
 
+System Requirements 
+[[ Recommender System  ]] 
+      Functional
+        The system needs to:  
+            - provide training data for recommender
+            - ingest, transform, serve user data to recommender 
+            - Return model outputs back to sales platform
+
+      NonFunctional                             
+
+        Latency
+          System must have a latency of less than 1 second from ingestion of user data 
+          to serving of recommendation data
+            
+        Scalability
+          System must be able to scale up to the maximum number of concurrent 
+          users on the platform
+
+        Reliability
+          System must return a set of recommendations within one second 
+          If the recommender pipeline fails it should default to serving 
+          a selection of the most popular products.
 
 
 
