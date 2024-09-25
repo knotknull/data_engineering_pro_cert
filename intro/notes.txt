@@ -1316,28 +1316,157 @@ How to break Iron Triangle:
 ETL Pipeline
 
 
-[ Data Source ]  -->>   [Transform]       -->>   [Load]        -->>        [Serve]   ----------------+
-                                                                                                     |
-                                                                                                     |
- AWS RDS              EC2 Instance          tabular data -> star schema -> Amazon RDS                |
-                        + scripts           large comples data -> Amazon Redshift                    v
+[ Data Source ]  -->>   [Ingest]  -- >>  [Transform]  -->>   [Load]   -->>  [Serve]  ------------------+
+                                                                                                       |
+                                                                                                       |
+ AWS RDS              EC2 Instance                  tabular data -> star schema -> Amazon RDS          |
+                        + scripts                   large complex data -> Amazon Redshift              v
                     (lots of overhead)                                                              ML --> S3
 
                         AWS Lambda
                         limitations round memory and CPU
                         custom code
 (Elastic Map Reduce)
-Amazon EMR                      AWS Glue ETL 
-more control                    more convenience
-supports Hive + Spark           Glue uses crawlers: automatically discover and classify data           
-hadoop                                              create meta data, populates Cata Catalog
-                                Glue Data Catalog: central repo with info about your data assets
-                                Glue Visual ETL tool to design pipeline
+Amazon EMR                          AWS Glue ETL 
+more control                        more convenience
+supports Hive + Spark               Glue uses crawlers: automatically discover and classify data           
+hadoop                                                  create meta data, populates Cata Catalog
+                                    Glue Data Catalog: central repo with info about your data assets
+                                    Glue Visual ETL tool to design pipeline
+
+Data Source: 
+    - Amazon RDS
+    - Amazon EMR (Elastic Map Reduce): Hive, Spark, Hadoop
+
+Transform: 
+    - EC2 + scripts / apps
+    - AWS Lambda
+    - AWS GLUE ETL
+        - AWS GLUE crawlers
+        - AWS GLUE Data Catalog
+        - AWS GLUE Vistual ETL
+Load: 
+    - Amazon RDS
+    - Amazon Redshift
+
+Serve: 
+    - Amazon S3
+
+
 
 # AWS Services for Streaming Pipelines
 
-MAP LAST HERE
+[ Data Source ]  -->>   [Ingest]  -- >>  [Transform]  -->>   [Load]   -->>  [Serve]  ------------------+
 
-https://www.coursera.org/learn/intro-to-data-engineering/lecture/MDsI3/aws-services-for-streaming-pipelines
+Amazon Kinesis Data Streams                  Data Consumer    --> Storage
+    - Data agnostic: JSON, XML, etc                          +--> Real-time Analsys
+    - Min. retention time: 24 hrs
+        - default, can be extended
+                                                    +---------------------------------------+
+Amazon Managed Streaming for      [Data Producer] ->|             Kafka Cluster             | -> [Data Consumer]
+Apache Kafka (Amazon MSK)         [Data Producer] ->|       (contains servers / brokers)    | <-----------------------+ MSK Manages Nodes
+Note: Managed services for servers                  |     [Topic 1]  [Topic 2]  [Topic 3]   |
+                                  [Data Producer] ->|           Amazon MSK                  | -> [Data Consumer]
+                                                    +---------------------------------------+
+
+
+Kinesis and MSK can handle:
+    -  petabyte level data volumes
+    -  millisecond latency
+
+MSK: more control 
+    - kafka clusters
+    - higher degree of flexibility and control
+
+Kinesis: more convenience 
+    - user friendly
+    - reduced operational overhead
+
+Amazon Data Firehose
+    - Kinesis first
+    - Integrates with kinesis 
+    - Easily read from stream and move to storage 
+       without custom code: 
+        - S3 
+        - Redshift
+        - Datadog
+        - Splunk
+        - 20 other AWS sources
+
+Last Quiz Requirements:
+================================================================================================================================
+                                              Training Data Set
+    [Source: RDS] -->> [Batch Data Pipeline] ------------------->> [Training of Recommender ]  -->> [Trained Recommender] 
+
+Dataset (tabular data):
+    user_id, user_feature, user_feature, product_id, product_feature, product_feature, rating
+
+
+Other Functional Info for ML Models: 
+    - duration data pipeline should retain / store training data
+    - how to combine old and new data. 
+        - old dataset discarded ?
+        - if customer updates a rating for a product:
+            - keep most recent rating ?
+            - average the two ?
+    - what is file format of training data: csv, Parquet, etc
+
+[Batch Data Pipeline]
+
+NonFunctional requirements:
+    - retrain model when needed 
+        - data pipeline should perform transformation task ONLY WHEN NEEDED
+        - not too much overhead to deliver new training set
+
+    - operational costs of pipeline
+        - want cost effective pipeline
+
+
+Functional Requirements                                 NonFunctional Requirements
+--------------------------                              -----------------------------
+- Provide training data for recommender                 - data system must be easy to mainatin / update
+  in the following format:                                 - less operational overhead 
+    - Tabular dat                                          - irregular / on demand run schedule
+    - Each row must contain columns:
+        - credit limit                                  - data system must be cost effective
+        - postal code
+        - country
+        - product code
+        - quantity in stock
+        - buy price
+        - msrp
+        - product line
+        - product scale
+        - product rating
+
+[Streaming Data Pipeline]
+
+Functional requirements:
+    - use recommender system to find set of products to recommend for a given user 
+      based on the user's information and the products they interacted with online
+        - input:  user info, products interacted with
+        - output: recommended products
+
+    - stream the products to the sales platform and store them for later analysis
+
+NonFunctional requirements:
+    - Latency: system should provide recommended products to user instantaneously as they 
+               are browsing through different products or during the checkout process.
+
+               for given user: 
+                 - system must ingest and extract user and product data  
+                 - provide user and product data extracted to  recommender
+                 - serve product recommendations to sales platform
+                 - all in a few seconds
+
+    - Scalability / concurrency: system must be able to scale up to ingest, 
+              transform and serve the data volume expected with the maximum level
+              of user activity on the platform, while staying within latency requirements
+
+================================================================================================================================
+
+
+
+
 
 .
