@@ -1467,6 +1467,119 @@ NonFunctional requirements:
 
 
 
+# AWS Services to Meet Requirements
+
+AWS Service Options for Batch Pipelines:
+    AWS Glue ETL: 
+            https://aws.amazon.com/glue/features/
+
+
+            - AWS Glue is a serverless, scalable data integration service that makes it easier to discover, prepare, move, and integrate data from 
+                multiple sources for analytics, machine learning, and application development. 
+            - AWS Glue provides all the capabilities needed for data integration. 
+            - No infrastructure to set up or manage. 
+            - You pay only for the resources consumed while your jobs are running.
+
+NOTE:
+    Data Catalog
+        - Discover and search across all your AWS datasets
+        - AWS Glue Data Catalog is your persistent metadata store for all your data assets
+        - Data Catalog contains:  
+                - table definitions 
+                - job definitions 
+                - schemas
+                - other control information to help you manage your AWS Glue environment. 
+        - Automatically computes statistics and registers partitions to make queries against your data efficient and cost-effective. 
+        - Maintains a comprehensive schema version history so you can understand how your data has changed over time.
+
+ Automatically Scale: 
+        - Auto Scaling, a serverless feature in AWS Glue, dynamically scales resources up and down based on workload. 
+        - Job is assigned workers only when needed. 
+        - As the job progresses, AWS Glue adds and removes resources depending on how much it can split up the workload. 
+          -  Don't have to over-provision resources, spend time optimizing the number of workers, or pay for idle resources. 
+
+
+    AWS EMR: 
+        overview: https://aws.amazon.com/emr/?nc=sn&loc=1
+        features: https://aws.amazon.com/emr/features/?nc=sn&loc=2&dn=1
+
+        - Amazon EMR is the industry-leading cloud big data solution for petabyte-scale data processing, interactive analytics, and machine learning 
+        using open-source frameworks such as Apache Spark, Apache Hive, and Presto.
+        - Easy to use, quick cluster provisioning , easy to scale, high availability
+
+
+    AWS S3: 
+        https://aws.amazon.com/s3/
+
+        - Amazon Simple Storage Servic3e is an object storage service
+            - scalability, availability, security, performance
+
+    AWS Redshift: 
+        https://www.cloudzero.com/blog/aws-redshift/
+
+
+        - Amazon Redshift is data warehousing solution. 
+          - Huge volumes (exabytes), structured and unstructured
+          - Column store
+          - Massively Parallel Processing (MPP)
+
+
+AWS Service Options for Streaming Pipelines:
+LAB: 
+
+                                    [ Trained Recommender ]
+                                           |
+                                           v
+                               +----------------------------+     
+     [ Online User data ]      |  Streaming Data Pipeline   |  ----->> [ Store Recommended products ]
+                               +----------------------------+    | 
+                                                                 |
+                                                                 +-->> [ Send recommended data to sale platform ]
+
+
+
+
+    AWS Kinesis: 
+        overview: https://aws.amazon.com/kinesis/data-streams/?nc=sn&loc=1
+        features: https://aws.amazon.com/kinesis/data-streams/features/?nc=sn&loc=2
+
+        - serverless streaming dta service: capture, process, store data streams
+        - adjust capacity, automatic provisioning and scaling
+        - pay for only what you use
+        - built-in integration with AWS services
+        - High availability / durable 
+            - replicate across three AZs in a Region and store data for 365 days
+        - Low latency: data available within 70ms of being collected
+
+
+    AWS Data Firehouse: 
+        overview:  https://aws.amazon.com/kinesis/data-firehose/?nc=sn&loc=2&dn=3
+        features:  https://aws.amazon.com/kinesis/data-firehose/features/?nc=sn&loc=2
+
+        - Easiest way to acquire, transform, and deliver data streams within seconds to data lakes, data warehouses, and analytics services. 
+        - Set up a stream with a source, destination, and required transformations. 
+        - Amazon Data Firehose continuously processes the stream, automatically scales based on the amount of data available, and delivers it within seconds. 
+        - Transform, convert into formats, or use lambda function to transform
+        - Destination, S3, Redshift, Splunk, HTTP Endpoint
+        - Pay as you go
+
+
+    Amazon MSK: 
+        overview:  https://aws.amazon.com/msk/
+        features:  https://aws.amazon.com/msk/features/
+
+        - Fully managed Kafka service
+        - MSK Serverless : Run Apache Kafka clusters without having to manage compute and storage capacity. 
+
+
+https://medium.com/slalom-build/a-guide-to-choosing-the-right-streaming-solution-for-you-on-aws-57089f03e034
+https://programmaticponderings.com/2023/04/23/streaming-data-on-aws-amazon-kinesis-data-streams-or-amazon-msk/
+
+
+
+
+
+
 
 
 .
