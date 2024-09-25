@@ -1274,13 +1274,33 @@ System Requirements
           If the recommender pipeline fails it should default to serving 
           a selection of the most popular products.
 
+Summary 
+Main Takeaways
+  1. Identify the stakeholders, understand their needs and the broader goals of the business
+  2. Ask open-ended questions
+  3. Document all of your findings
 
 
+Evaluation of Trade Offs 
 
+Timeline
+    Stakeholders want you to build them a data system as quickly as possible
 
+Cost
+    You might be working within a limited budget
 
+Scope
+    Features of the system
 
+Iron Triangle
+                    [Timeline]
+                     /      \
+                    /        \
+                   /          \
+                  /            \
+             [Scope]---------[Cost]
 
+    Good, fast or cheap:  YOU ONLY GET TO PICK TWO!
 
 
 
