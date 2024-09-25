@@ -1162,7 +1162,6 @@ https://medium.com/api-university/the-api-mandate-install-api-thinking-at-your-c
 
 
 
-MAP LAST HERE 
 https://www.coursera.org/learn/intro-to-data-engineering/lecture/rhcbq/week-4-overview
 
 
@@ -1303,14 +1302,42 @@ Iron Triangle
     Good, fast or cheap:  YOU ONLY GET TO PICK TWO!
 
 
-
-
-
+How to break Iron Triangle:
+    - build Loosely Coupled Systems
+    - two-way doors / reversible decisions
+    - lock down requirements
 
 
 ## Translating Requirements to Architecture
 
+# AWS Services for Batch Pipelines
 
 
+ETL Pipeline
+
+
+[ Data Source ]  -->>   [Transform]       -->>   [Load]        -->>        [Serve]   ----------------+
+                                                                                                     |
+                                                                                                     |
+ AWS RDS              EC2 Instance          tabular data -> star schema -> Amazon RDS                |
+                        + scripts           large comples data -> Amazon Redshift                    v
+                    (lots of overhead)                                                              ML --> S3
+
+                        AWS Lambda
+                        limitations round memory and CPU
+                        custom code
+(Elastic Map Reduce)
+Amazon EMR                      AWS Glue ETL 
+more control                    more convenience
+supports Hive + Spark           Glue uses crawlers: automatically discover and classify data           
+hadoop                                              create meta data, populates Cata Catalog
+                                Glue Data Catalog: central repo with info about your data assets
+                                Glue Visual ETL tool to design pipeline
+
+# AWS Services for Streaming Pipelines
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/intro-to-data-engineering/lecture/MDsI3/aws-services-for-streaming-pipelines
 
 .
