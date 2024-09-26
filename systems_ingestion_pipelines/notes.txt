@@ -3,6 +3,180 @@
 ## Course 2
 ## Week 1
 
+## Introduction to Source Systems
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/home/week/1
+
+# Types of Source Systems
+
+
+Structured Data     :  organized as table of rows and columns 
+Semi-Structured Data:  Data that is not in tabular form but still has some structure
+            i.e. JSON, XML
+
+Unstructured Data:  Data that does not have any predefined structure 
+        text, video, audio, images
+
+
+General types of source systems
+
+    Databases                   Files               Streaming Systems
+
+stored in organized way      sequence of bytes       continuous flow of data
+
+structured                     text                   semi-structured
+semi-structured                images
+                               audio                 [producer] -> [Message Q, streaming platform]
+                               csv                                      |
+   CRUD                                                                 +-->> [consumer] 
+   DBMS                     structured                  IoT
+    Relational              semi-structured             
+    NoSQL                   unstructured
+
+
+
+# Relational Databases
+ 
+  - Online Transaction Processing: OLTP
+  - Primary Key + Foreign Key
+
+
+Data Normalization: 
+    - minimize redundancy
+    - ensure data integrity
+
+                                    SQL Commands
+                                         |
+      +----------------------+-----------------------+---------------------+                                   
+      |                      |                       |                     |
+      |                      |                       |                     |
+     Data                   Data                    Data                  Data  
+    Cleaning               Joining               Aggregating            Filtering
+
+    DROP                   INNER JOIN               SUM                  WHERE    
+  TRUNCATE                 LEFT JOIN                AVG                   AND    
+    TRIM                  RIGHT JOIN               COUNT                  OR    
+   REPLACE                 FULL JOIN                MAX                   IS NULL
+   SELECT DISTINCT           UNION                  MIN                   IS NOT NULL
+                                                   GROUP BY               IN 
+                                                                          LIKE 
+
+
+# SQL Queries 
+ 
+
+# NoSQL Databases 
+
+NoSQL == Not Only SQL
+
+- non-tabular values 
+    - key value
+    - document 
+    - graph
+    - wide column
+
+- no predefined schemas
+- more flexibility w/ data
+
+
+Horizontal Scaling 
+                                +---------> Secondary   (Eventual consistency: data read may not be up to date)
+                                |                           
+            client  ---->> [NoSQL DB]  ---> Primary
+
+
+        NoSQL DB                        Relational DB
+     -------------                    ----------------   
+    Eventual Consistency              Strong Consistency
+
+     speed is prioritized            read data only when all nodes
+     system availability and           have been updated
+      scalability are important
+
+Not All NoSQL databases guarantee ACID:
+    Atomicity
+    Consistency         NOTE: mongoDB is ACID compliant
+    Isolation
+    Durability
+
+
+Key-Value Database:
+    - fast lookup: i.e. user session data
+
+Document Store:
+    - data stored in JSON-like documents
+    - each document as unique key
+    - documents organized into collections
+        document    ==  row
+        collection  ==  table
+
+    - all information stored in one document
+    - document stores don't support joins
+    - flexible scheam
+
+    use cases: content management, catalogs, sensor readings
+
+NOTE: document databases can become a nightmare to manage and query
+
+
+# Database ACID Compliance
+
+    Relational Databases                NoSQL Databases
+     Atomicity                           Not ACID compliant by default
+     Consistency                         
+     Isolation                           NOTE: mongoDB is ACID compliant
+     Durability
+
+ensures transactions are
+processed reliably and 
+accurately in an OLTP system
+
+Atomicity:   transactions are atomic, treated as single indivisible unit
+                all or no part of a transaction is done
+
+Consistency: changes to data within a transaction follow the set of rules 
+             or constraints defined by database schema
+
+Isolation:   each transaction is executed independently in sequential order
+
+Durability:  Once transaction completed, its effects are permanent and will survive 
+             any subsequent system failures. (i.e. power loss)
+
+ACID Principle guarantees that a database will maintain a consistent picture of the world
+        - Strong Consistency:  Data consisten across the entire network 
+
+
+# Interacting with DynamoDB
+
+DynamoDB: Key-value Database
+        - row has attributes of one item 
+        - identified by a key
+        - simple primary key == partition key
+        - composite primary key == partition key + sort key
+        - schemaless
+
+Python Boto3:  python package that allows you to interact with AWS services
+
+    CREATE:       create_table
+    READ  :       scan / get_item / query
+    UPDATE:       put_item /  write_batch_items /  update_item
+    DELETE:       delete_item
+                   
+import boto3 
+client = boto3.client('dynamodb')
+
+KeySchema=[
+   {
+        'AttributeName': 'ForumName',
+        'KeyType': 'HASH'
+   },
+   {
+        'AttributeName': 'Subject',
+        'KeyType': 'RANGE'
+   },
+]
+HASH  == partition key
+RANGE == sort key
+
+
+
+.
