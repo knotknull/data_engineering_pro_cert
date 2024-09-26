@@ -407,13 +407,58 @@ Straming System Components
     - JDBC
     - ODBC
 
+# Connecting to an Amazon RDS MySQL Database
+
+https://aws.amazon.com/getting-started/hands-on/create-mysql-db/
+
+# Access RDS via CloudShell
+
+## MySql Connect
+https://dev.mysql.com/doc/refman/8.0/en/connecting.html
+
+## Pgsql Connect
+https://www.postgresql.org/docs/9.1/app-psql.html
 
 
 
+mysql --host=[hostname]            --port=[port number] 
+      --user=[database user name]  --password=[database user password]
+
+mysql> show databases;
+mysql> use  <db_name>;
+mysql> show tables;
+mysql> select * from <tbl_name>;
+mysql> exit
 
 
+get the endpoint and port via cli
+
+aws rds describe-db-instances --filters "Name=engine,Values=mysql" --query "*[].[DBInstanceIdentifier,Endpoint.Address,Endpoint.Port,MasterUsername]"
 
 
+# connect via python
+import boto3
 
+access_key_id="AXXXXXXXXXXXXH"
+secret_access_key="bXXXXXXXXXXXXZ"
+region_name = "us-east-1"
+
+session = boto3.Session(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key, region_name=region_name) 
+rds=session.client("rds)
+dbInstance = rds.describe_db_instances()['DBInstances'[0]]
+
+import pymysql
+
+try: 
+    conn = pymysql.connect(host=ENDPOINT, user=USER, passwd=toekn, port=PORT, database=DBNAME)
+    cur = conn.cursor()
+    cur.execute("""SELECT * from pet""")
+    query_results = curr.fetchall()
+    print(query_results)
+ except Exception as e:
+    print("Database connection failed due to {}".format(e))   
+
+
+# Basics of IAM and Permissions
 
 .
