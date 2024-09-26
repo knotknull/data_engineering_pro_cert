@@ -177,6 +177,71 @@ KeySchema=[
 HASH  == partition key
 RANGE == sort key
 
+def put_item_db( table_name: str, item: Dict[str, Any], **kwargs):
+    ### START CODE HERE ### (~ 2 lines of code)
+    client = boto3.client("dynamodb")
+    response = client.put_item(TableName=table_name, Item=item, **kwargs)
+    ### END CODE HERE ###
+
+    return response
+
+for dynamodb_tab in [product_catalog_table, thread_table]:
+    file_name = dynamodb_tab['table_name'].split('-')[-1]    
+    items = read_data(file_path=f'./data/aws_sample_data/{file_name}.json')
+    
+    for item in items[dynamodb_tab["table_name"]]:
+        put_item_db(table_name=dynamodb_tab["table_name"], item=item['PutRequest']['Item'])
+
+def batch_write_item_db(items: Dict[str, Any], **kwargs):
+    ### START CODE HERE ### (~ 2 lines of code)
+    client = boto3.client("dynamodb")
+    response = client.batch_write_item(RequestItems=items, **kwargs)
+    ### END CODE HERE ###
+    
+    return response
+
+for dynamodb_tab in [reply_table, forum_table]:
+    file_name = dynamodb_tab['table_name'].split('-')[-1]    
+    items = read_data(file_path=f'./data/aws_sample_data/{file_name}.json')
+    response = batch_write_item_db(items=items)
+    print(response)
+
+
+Queried data for table de-c2w1-dynamodb-ProductCatalog:
+
+Read Capacity Unit  / consistent vs. strongly consistent reads: 
+
+The previous request consumed 1.0 RCU because this item is less than 4KB. 
+(RCU stands for Read Capacity Unit: "One read capacity unit represents one strongly consistent read per second, 
+ or two eventually consistent reads per second, for an item up to 4 KB in size", reference).
+
+
+
+The DynamoDB DeleteItem() method is used to delete an item. Deletes in DynamoDB are singleton operations. 
+There is no single command you can run that would delete all the rows in the table. 
+
+
+MAP LAST HERRE 
+
+# Object Store
+
+
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/oAdbn/object-storage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .
