@@ -221,20 +221,35 @@ The DynamoDB DeleteItem() method is used to delete an item. Deletes in DynamoDB 
 There is no single command you can run that would delete all the rows in the table. 
 
 
-MAP LAST HERRE 
 
 # Object Store
 
+ - file treated as an individual object
+ - object storage has no hierarchy
+ - any type of data
+    - semi-structured and unstructured
+    - serving data for training ML models
 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/oAdbn/object-storage
+ - each object has:
+    -  Universal Unique Identifier (UUID key)
+    -  Metadata: creation_date, file type, owner
 
+NOTE: after initial write object is immutable
+        - no random write or append
 
+    - A write requires a new write with UUID pointing to new object
+    - Can enable versioning: 
+        - write metadata which specified version
 
+Why Use Object Storage
+    - store files of various formats without a file system structure
+    - easily scale out to provide virtually limitless storage space
+    - replicate data across several availability zones
 
+        S3: 99.999999999% data durability (11 9's)
 
-
-
-
+    - cheaper than other storage options
+    - ideal for data lakes and data lakehouses
 
 
 
