@@ -252,10 +252,101 @@ Why Use Object Storage
     - ideal for data lakes and data lakehouses
 
 
+Object Store Lab
+
+s3_client.create_bucket(Bucket=bucket_name)
+s3_client.upload_file(local_file_path, bucket_name, object_key)
+s3_client.select_object_content(bucket_name, object_key)
+s3_client.download_file(bucket_name, object_key, local_file_path)
+
+NOTE: can apply a SQL expression to apply on the return from select_object_content()
+
+# aws cli 
+aws s3 ls
+aws s3 ls de-c2w1lab3-265729830485/csv/
+
+# set query parameters
+# 
+file_s3_key = 'csv/ratings_ml_training_dataset.csv'
+kwargs = {'ExpressionType': 'SQL',
+          'Expression': """SELECT * FROM s3object AS s WHERE s.\"productline\" = 'Trains' LIMIT 20""",
+          'InputSerialization': {'CSV': {"FileHeaderInfo": "Use"}, 'CompressionType': 'NONE'},
+          'OutputSerialization': {'CSV': {}},
+}
+
+response = s3_select_object_content(bucket_name=BUCKET_NAME, object_key=file_s3_key, **kwargs)
+
+
+NOTE: by default S3 buckets and objects in it are private
+
+# below updates bucket's public access settings
+# 
+    s3_client.put_public_access_block(
+        Bucket=bucket_name,
+        PublicAccessBlockConfiguration=public_access_block_configuration
+    )
+
+# Define the public access settings  
+public_access_configuration = {
+    'BlockPublicAcls': False,
+    'IgnorePublicAcls': False,
+    'BlockPublicPolicy': False,
+    'RestrictPublicBuckets': False
+}
+
+s3_public_access_setup(bucket_name=BUCKET_NAME,  
+                       public_access_block_configuration=public_access_configuration)
+                       
+# apply a policy to a bucket
+response = s3_client.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
+
+# policy to the bucket to allow anyone on the internet to have reading access to the 
+#  objects whose key starts with images/
+
+policy = { 
+    "Version": "2012-10-17", 
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": f"arn:aws:s3:::{BUCKET_NAME}/images/*"
+        }
+    ]
+}
+
+# update bucket versioning
+# 
+response = s3_client.put_bucket_versioning(
+        Bucket=bucket_name,
+        VersioningConfiguration=versioning_config
+    )
+
+# versioning config
+# 
+versioning_config = {'Status': 'Enabled'}
+
+response = configure_bucket_versioning(bucket_name=BUCKET_NAME, 
+                                       versioning_config=versioning_config)
+
+
+## S3 select_object_content
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/select_object_content.html
+
+## S3 query data
+https://aws.amazon.com/blogs/storage/querying-data-without-servers-or-databases-using-amazon-s3-select/
+
+
+## S3 pub_public_access_block
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/put_public_access_block.html
 
 
 
 
+# Logs
+
+MAP LAST HERE
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/p2cpV/logs
 
 
 
