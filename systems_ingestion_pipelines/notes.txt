@@ -345,8 +345,74 @@ https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/cl
 
 # Logs
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/p2cpV/logs
+Log: apend only sequence of records ordered by time, capturing info about events
+
+       Rich data source                  downstream use case
+    ------------------------          ------------------------
+    Web Server Logs        --------->>     Analysis of user behavior patterns
+    Database Sysetem Logs  --------->>     Track changes in source database
+    Security Sysetem Logs  --------->>     Machine Learning anomaly detection
+
+
+Log Level:  tag to categorize the event
+    - debug         - info
+    - warn          - error
+    - fatal          
+
+# Streaming Systems
+
+
+
+Event:
+Something happened in the world or change to a system
+
+Message:
+A record of info about an event
+
+Stream: 
+A sequence of messages
+
+
+
+Straming System Components
+
+
+[  Event   ]  ----->>   [   Event Router /  ]  --------->>  [  Event   ]
+[ Producer ]            [  Streaking Broker ]     |         [ Consumer ]
+                                                  |
+ - IoT                    - acts as buffer        |         [  Event   ]
+ - Mobile App               to filter and         +=---->>  [ Consumer ]
+ - API                      distribute messages
+ - Website                - decouples producer 
+                            and consumer
+
+                            - Message Queues  (FIFO / SQS)
+                            - Event Streaming (Append only log: Kinesis, Kafka)
+
+
+
+
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 1
+
+## Connecting to Source Systems
+
+
+- boto3
+- cloud9
+- jupyter
+
+- API Connector 
+    - JDBC
+    - ODBC
+
+
+
+
+
+
+
 
 
 
