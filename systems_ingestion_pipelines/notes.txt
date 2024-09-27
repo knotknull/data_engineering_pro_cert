@@ -827,23 +827,167 @@ AWS Console -> VPC -> Route tables
 
 AWS Console -> VPC -> Route tables 
     - Choose Route Table
-        NOTE: choose public route table
+        NOTE: choose PUBLIC route table
     - [Routes]  << Tab
     - [Edit Routes] 
     - [Add Route] 
         - Destination: 0.0.0.0/0    << ANY IP ADDRESS
         - Target: [Internet Gateway]   from dropdown
             [select Internet Gateway for this VPC]
+            [save changes]
+
+Now private subnet route table setup
+    - Choose Route Table
+        NOTE: choose PRIVATE route table
+    - [Routes]  << Tab
+    - [Edit Routes] 
+    - [Add Route] 
+        - Destination: 0.0.0.0/0    << ANY IP ADDRESS
+        - Target: [NAT Gateway]   from dropdown
+            [select NAT Gateway associated for the subnet the route table is in]
+            [save changes]
+
+
+# Network ACLSs and Security Groups
+
+Security Groups: Instance level virtual firewalls 
+                    control inbound and outbound traffic
+
+            Default:  deny all inbound traffic / allow all outbound traffic
+
+
+Security Groups Are Stateful:
+    - allow inbound traffic to an instance automatically allows the return traffic
+        DON'T NEED EXPLICIT OUTBOUND RULE
+    - security groups can reference other security groups
+
+Resources placed in VPCs use Security Groups
+    - i.e. EC2, RDS, LBs
+
+
+
+Security Group Chaining
+
+    [ALB]                       [EC2]                           [RDS]
+
+sec grp id: sg-123  <<------+   sec grp id: sg-456  <<----+  sec grp id: sg-789
+Source    |Protocol| Port   |   Source |Protocol| Port    |  Source  |Protocol| Port
+----------|--------| ----   |   -------|--------| ----    |  --------|--------| ----       
+0.0.0.0/0 | HTTP   | 80     +-- sg-123 | HTTP   | 80      +-- sg-456 | TCP    | 3306           
+0.0.0.0/0 | HTTPS  | 443        sg-123 | HTTPS  | 443           
+
+
+# Create Security Group (for ALB)
+
+AWS Console -> VPC -> Security -> Security Groups -> [Create Security Group]
+    - Name: alb-sg
+    - VPC: select from drop down 
+    Inbound Rule:  [Add Rule]
+        Type: HTTP
+        Source: 0.0.0.0/0
+    Inbound Rule:  [Add Rule]
+        Type: HTTPS
+        Source: 0.0.0.0/0
+    [Create Security Group]
+
+
+Network Access Control Lists (NACL)
+    - Provide additional layer of security at subnet level
+    - NACLs are STATELESS
+    - inbound / outbound rules defined explicitly
+    - useful for implementing security policies at subnet level
+
+DEFAULT: NACLs allow all inbound / outbound traffic
+
+
+VPC / subnets:  provide a way to define a private network on AWS
+
+Route Table:    direct traffic within VPC to Internet 
+
+Public Subnet:  point to Intenet Gateway
+
+Intenet Gateway: allow resources withing public subnets to access Intenet
+
+Private Subnet:  point to NAT Gateway
+
+NAT Gateway:     enable instances to initiate outbound connections securely
+NOTE: Route tables determine public / private access 
+
+Security Group:  virtual firewall at instance level (EC2, RDS, LB)
+                 control inbound / outbound traffic
+                 they are stateful 
+
+Network ACLs :   additional level of security at subnet level
+                 stateless / explicit inbound and outbound rules
+NACLs vs Security Groups:
+    NACLs          @ subnet level 
+    Security Group @ instance level 
+
+
+Connectivity Issue Checklist:
+
+1. Verify that VPC has Internet Gateway properly attached 
+
+2. Verify that route tables have appropriate rules to direct traffic correctly
+
+3. Verify that route tables associations with subnets are configured correctly
+     i.e. don't want private routes associated with public subnets
+
+4. Check security groups to make sure they have needed rules in place
+
+5. Review network ACLs to confirm they allow necessary traffic
+
+6. Double check instance configurations to ensure they are associated with correct 
+   security groups and sbnets 
 
 
 
 
+Route Table Exmple
+
+ Customr Route Table 1
+| Destination  | Target         |<--------- [Public Subnet 10.0.0/24]
+| 10.0.0.0/16  | local          |
+|  0.0.0.0/0   | internet-gw-id |
+
+ Customr Route Table 2
+| Destination  | Target         |<--------- [Public Subnet 10.1.0/24]
+| 10.0.0.0/16  | local          |
+|  0.0.0.0/0   | nat-gw-id      |
 
 
+NACL: firewall that filters traffic to / from subnet
+NOTE:  Rules are evaluated in ascending order (Rule 100, 110, 120, 800)
 
 
+Endpoints:
+    two types: private zone and public zone
 
+    private zone services:  resources that need to be launced in a VPC 
+        i.e. EC2, RDS, ELB, EFS, etc
 
+    public zone services:  resources that DO NOT need to be launced in a VPC
+        i.e. S3, DynamoDB, Lambda, Kinesis, Athena
+
+Interface endpoints can be placed in a public or private subnet to allow resources to 
+connect to AWS public resources
+
+Gateway endpoints can be attached to a VPC to allow resources in the VPC to connect to 
+S3 and DynamoDB
+
+NOTE: S3 can also be reached using an interface endpoint but DynamoDB can only be 
+      reached using gateway endpoint
+
+Resources:
+https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html
+https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat.html
+https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison
+https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+https://docs.aws.amazon.com/en_us/console/ec2/security-groups/create
+https://docs.aws.amazon.com/en_us/console/ec2/security-groups/reference
+https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html
+https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
 
 
 
