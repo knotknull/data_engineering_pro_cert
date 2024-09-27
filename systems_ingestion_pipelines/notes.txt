@@ -618,6 +618,63 @@ https://docs.aws.amazon.com/IAM/latest/UserGuide/access.html
 https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html
 
 
+# Basics of Networking in the Cloud
+
+- Region considerations:
+    - legacl compliance
+    - latency
+    - availability
+    - cost
+
+VPC:  smaller network that spans multiple availability zones within a region
+
+
+
+                                                                              
+                                                                              
+   VPC                                                                
+ ┌────────────────────────────────────────────────────────────┐       
+ │   ┌──────────────────┐                                     │       
+ │   │Availability Zone │           [172.16.0.0]              │       
+ │   │                  │           [172.16.0.0]              │       
+ │   │                  │           [172.16.0.0]              │       
+ │   │  ┌────────────┐  │              ^                      │       
+ │   │  │            │  │              |                      │       
+ │   │  │   Public   │ <---->   [ACL]--+                      │       
+ │   │  │            │  │              |                      │       
+ │   │  │   Subnet   │  │              |                      │       
+ │   │  │            │  │              |                      │ [ Internet ]      
+ │   │  └────────────┘  │              +------------------>   │ [ Gateway  ] <--> Internet      
+ │   │                  │              |                      │       
+ │   │  ┌────────────┐  │              |                      │       
+ │   │  │            │  │              |                      │       
+ │   │  │   Private  │ <---->   [ACL]--+                      │       
+ │   │  │            │  │              |                      │       
+ │   │  │   Subnet   │  │              v                      │       
+ │   │  │            │  │           [172.16.0.0]              │       
+ │   │  └────────────┘  │           [172.16.1.0]              │       
+ │   │                  │           [172.16.2.0]              │       
+ │   └──────────────────┘                                     │       
+ └────────────────────────────────────────────────────────────┘       
+                                                                              
+Each Subnet has it's own Network Access Control List (NACL)                                                                              
+                                                                              
+Routing configs in Internet Gateway                                                                              
+                                                                              
+                                                                              
+                                                                              
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
