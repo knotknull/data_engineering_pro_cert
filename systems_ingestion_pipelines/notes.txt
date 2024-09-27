@@ -506,11 +506,116 @@ IAM  Role :  A user, application or services that's been granted
 
 # Basics of AWS IAM 
 
-MAP LAST HERE
-
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/supplement/HlS45/basics-of-aws-iam
+IAM: web servcies that helps you manage and securely control access to AWS resources and services.
 
 
+Root User:  full access to all AWS resources and services in an account
+
+IAM User:   person or service that interacts with AWS resources.
+                - define what resources IAM user can access
+                - what actions they can perform
+                - credentials generated:
+                    - username / password
+                    - access keys for apps
+                - grant access to AWS resources via policies
+
+Policy:     specifies what actions are allowed or denied for a resource
+                - read only, write only, full access
+            policy can be attached to several users
+            a user can have several policies
+
+When a request is made, AWS evaluates policies to determine if request is allowed
+
+IAM Group:  collection of users, can attach policy to group i.e. Data Scientists or DBAs
+                - each user in group inherit's group's permissions 
+                - groups can have multiple users
+                - user can have no group, one, group or multiple groups (up to 10)
+                NOTE: groups CANNOT be nested
+
+IAM Role:   specific permissions with short-term credentials
+            Roles can be assumed by entities: people, applications, AWS resources 
+            No long-term credentials:  temporary security credentials provided 
+               for duration of the role sessions.
+            1. Create IAM role   
+            2. Attach a policy to it 
+            3. Specify which resource can assume this role
+
+            Example: EC2 instance needs to read from S3. 
+                     Default EC2 instance does not have read permisssion from S3
+                     DON'T transfer credentials to EC2 to read S3
+                     Create a role, attach policy to read from S3
+                     Assign role to EC2 instance
+
+            Example: Glue job needs to write to S3. 
+                     Create role with S3 write perms and assign to Glue job
+
+
+IAM Policy:  an object in AWS that defines the permissions of the attached user or role.
+             can manage access in AWS by creating policies and attaching them to 
+                users, groups, roles
+
+             Stored in AWS as JSON doc
+             Create custom policy with AWS-managed policies
+
+IAM Documentation
+https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html
+
+ex. 
+{
+    "Version": "2012-10-17", 
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:*",
+                "s3-object-lambda:*"
+            ],
+            "Resource": "*"
+        }
+    ] 
+}
+
+Version  : specialty the version of policy language
+Statement: container of the details of given perms or denials.
+           can include more than one statement in a policy
+           multiple statements: AWS applies locial OR across statements
+
+    Sid:      optional statement id to differntiate between statements
+    Effect:   Use Allow or Deny wheter policy allows or denies access
+    Action:   list of actions policy allows / denies. 
+                eg. s3:*  menas all read and write actions on S3 allowed
+    Resource: object or list of objects which the actions apply. 
+              i.e. can specify a specific S3 bucket or all resources "*"    
+
+ex. 2
+
+{
+    "Version": "2012-10-17", 
+    "Statement": [
+        {
+            Sid: "allow_statement"
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            Sid: "deny_statement"
+            "Effect": "Deny",
+            "Action": [
+                "s3:DeleteBucket",
+            ],
+            "Resource": "arn:aws:s3:::confidential"
+        }
+    ] 
+}
+
+IAM / Policy Resources
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies.html
+https://docs.aws.amazon.com/IAM/latest/UserGuide/access.html
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html
 
 
 
