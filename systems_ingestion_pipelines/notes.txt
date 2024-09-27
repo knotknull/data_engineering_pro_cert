@@ -629,7 +629,7 @@ https://docs.aws.amazon.com/IAM/latest/UserGuide/id.html
 VPC:  smaller network that spans multiple availability zones within a region
 
 
-
+# AWS Networking Overview: VPC & Subnets
                                                                               
                                                                               
    VPC                                                                
@@ -762,7 +762,7 @@ Application Load Balancer (ALB):
     - Keeps EC2 instances private
 
 
-# Create Intenet Gateway
+# Create Internet Gateway
 AWS Console -> VPC -> Internet Gateways -> [Create Internet Gateway]
     - Name:
     - [Create Internet Gateway]
@@ -786,6 +786,66 @@ AWS Console -> VPC -> NAT Gateways -> [Create NAT Gateway]
 
 NOTE: repeat for each public subnet 
       best practice, create NAT Gateway each AZ  
+
+
+# Route Tables
+
+Rotue Tables: direct network traffice within VPC
+    - Each Subnet can have a route table 
+    - route table is a set of rules / routes of where network traffic is directed
+
+NOTE: when VPC created, default route table created
+
+Default route table allows internal communication within VPC
+        - resources in different subnets can communicate
+
+Public  subnets will direct all internet bound traffic to Internet Gateway
+Private subnets will direct all internet bound traffic to NAT Gateway in Public Subnet
+    - private subnet resources can make outbound Internet calls
+        and prvent inbound connections from Internet
+
+
+
+# Create Route Tables
+AWS Console -> VPC -> Route tables -> [Create Route Table]
+    - Name:
+    - VPC: [select VPC from dropdown]
+    - [Create Route Table] 
+
+
+# Associate Subnet to Route Table
+AWS Console -> VPC -> Route tables 
+    - Choose Route Table
+    - Actions: [Edit Subnet Associations]  <<-- dropdown
+    - select subnet
+    - [Save associations]
+
+# Create Routes
+    - public  subnets to Intenet Gateway
+    - private subnets to NAT     Gateway
+
+
+AWS Console -> VPC -> Route tables 
+    - Choose Route Table
+        NOTE: choose public route table
+    - [Routes]  << Tab
+    - [Edit Routes] 
+    - [Add Route] 
+        - Destination: 0.0.0.0/0    << ANY IP ADDRESS
+        - Target: [Internet Gateway]   from dropdown
+            [select Internet Gateway for this VPC]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
