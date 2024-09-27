@@ -684,8 +684,8 @@ Scenario:
      │   │   │  │   Public   │  │     |      │  │   Public  │  │      │   │   
      │   │   │  │   Subnet   │  │     |      │  │   Subnet  │  │      │   │   
      │   │   │  │            │  │     |      │  │           │  │      │   │   
-     │   │   │  │    NAT     │  │     |      │  │    NAT    │  │      │   │   
-     │   │   │  │   Gateway  │  │     |      │  │   Gateway │  │      │   │   
+     │   │   │  │ [  NAT   ] │  │     |      │  │ [  NAT  ] │  │      │   │   
+     │   │   │  │ [Gateway ] │  │     |      │  │ [Gateway] │  │      │   │   
      │   │   │  └────────────┘  │     |      │  └───────────┘  │      │   │   
      │   │   │                  │     |      │                 │      │   │   
      │   │   │  ┌────────────┐  │     |      │  ┌───────────┐  │      │   │   
@@ -725,25 +725,67 @@ Network creation steps:
         - Enter subnet CIDR block (must be a subnet of VPC)
                 eg. 10.0.1.0/24
 
+        - Add new subnet
 
    NOTE:  subnet created in specific AZ
             - usually 1 private and 1 public subnet in each AZ
 
+subnet                 CIDR                 AZ
+public_subnet_1       10.0.1.0/24      us-east-1a
+private_subnet_1      10.0.2.0/24      us-east-1a
+
+public_subnet_2       10.0.3.0/24      us-east-1b
+private_subnet_3      10.0.4.0/24      us-east-1b
 
 
+# Internet Gateway & NAT Gateway
+
+Per scenario:
+    - EC2 instances would need internet access to download updates and patches
+    - need away to submit requests web app on EC2 instance (via ALB)
+
+Attach Internet Gateway to VPC
+    - allow public subnets to connect to internet
 
 
+NAT Gateway: Network Address Translation Gateway
+    - allow resources in private subnet to connect to 
+      Internet or other AWS services
+
+    - prevents Internet from initiating connections to those resources
 
 
+Application Load Balancer (ALB): 
+    - Distributes incoming application traffic across multiple backend targets
+    - Entry point for external users
+    - Handles load and ensures app is responsive and available
+    - Keeps EC2 instances private
 
 
+# Create Intenet Gateway
+AWS Console -> VPC -> Internet Gateways -> [Create Internet Gateway]
+    - Name:
+    - [Create Internet Gateway]
 
 
+NOTE: A VPC can have one Internet Gateway  
+        - Internet Gateway can only be attached to one VPC at aa time
 
+# Attach Intenet Gateway to VCP
+AWS Console -> VPC -> Internet Gateways -> new Internet gateway -> Actions -> [Attach to VPC]
+    - select VPC from dropdown
+    - [Attach Internet gateway]
 
+# Create NAT Gateway
+AWS Console -> VPC -> NAT Gateways -> [Create NAT Gateway]
+    - Name:
+    - select subnet from dropdown
+    - connectivity type: Public
+    - [ Allocate Elastic IP ]  <static IP address> 
+    - [Create NAT Gateway]
 
-
-
+NOTE: repeat for each public subnet 
+      best practice, create NAT Gateway each AZ  
 
 
 
