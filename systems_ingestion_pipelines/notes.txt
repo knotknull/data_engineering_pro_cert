@@ -663,6 +663,79 @@ Routing configs in Internet Gateway
                                                                               
                                                                               
                                                                               
+# AWS Networking: VPC and Subnets
+
+Scenario: 
+    - EC2 instace running web app that queries RDS
+
+
+
+                                    User
+                                      ^                                       
+                                      |                                       
+       Region                         |                                       
+     ┌────────────────────────────────|───────────────────────────────────┐   
+     │     VPC                        |                                   │   
+     │   ┌────────────────────────────|───────────────────────────────┐   │   
+     │   │                            |                               │   │   
+     │   │   ┌──────────────────┐     |      ┌─────────────────┐      │   │   
+     │   │   │      AZ 1        │     |      │     AZ 2        │      │   │   
+     │   │   │  ┌────────────┐  │     |      │  ┌───────────┐  │      │   │   
+     │   │   │  │   Public   │  │     |      │  │   Public  │  │      │   │   
+     │   │   │  │   Subnet   │  │     |      │  │   Subnet  │  │      │   │   
+     │   │   │  │            │  │     |      │  │           │  │      │   │   
+     │   │   │  │    NAT     │  │     |      │  │    NAT    │  │      │   │   
+     │   │   │  │   Gateway  │  │     |      │  │   Gateway │  │      │   │   
+     │   │   │  └────────────┘  │     |      │  └───────────┘  │      │   │   
+     │   │   │                  │     |      │                 │      │   │   
+     │   │   │  ┌────────────┐  │     |      │  ┌───────────┐  │      │   │   
+     │   │   │  │  Private   │  │     |      │  │  Private  │  │      │   │   
+     │   │   │  │  Subnet    │  │     |      │  │  Subnet   │  │      │   │   
+     │   │   │  │            │  │     |      │  │           │  │      │   │   
+     │   │   │  │   [RDS]    │  │     v      │  │    [RDS]  │  │      │   │   
+     │   │   │  │   [EC2] <--│--│---[ALB]----│--│--> [EC2]  │  │      │   │   
+     │   │   │  │            │  │            │  │           │  │      │   │   
+     │   │   │  └────────────┘  │            │  └───────────┘  │      │   │   
+     │   │   └──────────────────┘            └─────────────────┘      │   │   
+     │   └────────────────────────────────────────────────────────────┘   │   
+     └────────────────────────────────────────────────────────────────────┘   
+NOTE: VPC can span all AZs in a Region
+        - can have multiple VPCs in a Region 
+        - resources in same VPC can communicate
+        - cannot by default communicate accross VPCs (needs to be configured)
+
+NOTE: Default VPC in each Region in an AWS account 
+        - includes public subnet in each AZ in region  + Internet Gateway
+            -  can launch public facing EC2 instances quickly
+
+
+
+Network creation steps:
+1.   AWS Console -> VPC -> [Create VPC]
+        - Name                                                                              
+        - Private IP address range: 10.0.0.0/16 (CIDR: Classless Inter-Domain Rouding)
+                / notation is the size of the network 
+                /16 means network is 16 bits in length (first two digits in dot notation)
+
+        - Region: i.e. US-East-1
+    [Create Subnet]
+        - Select VPC subnet will reside in
+        - Subnet Name
+        - Choose Availability Zone
+        - Enter subnet CIDR block (must be a subnet of VPC)
+                eg. 10.0.1.0/24
+
+
+   NOTE:  subnet created in specific AZ
+            - usually 1 private and 1 public subnet in each AZ
+
+
+
+
+
+
+
+
 
 
 
