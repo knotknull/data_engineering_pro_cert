@@ -461,4 +461,60 @@ try:
 
 # Basics of IAM and Permissions
 
+
+IAM: framework for managing permissions
+    - permissions define which actions an identity (person, app)
+      can perform on a specific set of resources
+
+
+
+AWS Identity and Access Management
+
+
+  - Policies used to grant identities access to resources
+
+                                              Resources
+[------------]                              [------------]                          
+[            ]                              [    [S3]    ]       
+[ Identities ]  --->>  [Policies ] --->>    [    [RDS]   ]
+[            ]                              [    [EC2]   ]       
+[------------]                              [------------]                          
+
+Types of Identities:
+Root User:   Has unrestricted access to all resources
+
+IAM  User:   Has specific permissions to certain resources
+                - Username and password
+                - Access Key
+
+IAM  Group:  A collection of users that inherit the same permission  
+             from the group policy
+                    i.e.  DB Users or DB Admins
+
+IAM  Role :  A user, application or services that's been granted 
+             temporary permissions
+
+
+        [EC2]     -----XX---->   [S3]
+        EC2 be default cannot access S3
+
+
+    [ROLE] [EC2]     ----------->   [S3]
+        Role allows EC2 instance to access S3
+
+
+
+# Basics of AWS IAM 
+
+
+
+
+
+
+
+
+
+
+
+
 .
