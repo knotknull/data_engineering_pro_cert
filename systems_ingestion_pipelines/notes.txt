@@ -506,8 +506,9 @@ IAM  Role :  A user, application or services that's been granted
 
 # Basics of AWS IAM 
 
+MAP LAST HERE
 
-
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/supplement/HlS45/basics-of-aws-iam
 
 
 
