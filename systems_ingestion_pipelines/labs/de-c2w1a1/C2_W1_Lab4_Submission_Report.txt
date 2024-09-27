@@ -1,0 +1,10 @@
+
+[Executed at: Fri Sep 27 15:30:09 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Test 2 Part 1 passed: Added the inbound rule for the VPC Security Group.
+Test 2 Part 2 failed: Expected to limit access to the database only from the required EC2. Please try again.
+========================================================================================================================
+Test 3 passed: S3 Bucket policy was updated correctly.
+========================================================================================================================

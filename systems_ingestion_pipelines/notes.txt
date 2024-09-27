@@ -993,10 +993,35 @@ https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
 
 
 
+DB Connectivity Issues on AWS LAB
 
 
 
 
+
+# RDS endpoint  por5-5432
+de-c2w1a1-rds.cxo8cy4iqghl.us-east-1.rds.amazonaws.com
+
+RDS connection:
+    username: postgres
+    password: postgrespwrd
+
+## RDS endpoint from cli
+de-c2w1a1-rds.cxo8cy4iqghl.us-east-1.rds.amazonaws.com
+
+
+
+
+
+EC2 vpcid = 2e16
+RDS vpcid =  de-c2w1a1 (vpc-....21f)
+
+
+
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/e6drF/week-2-overview
 
 
 .

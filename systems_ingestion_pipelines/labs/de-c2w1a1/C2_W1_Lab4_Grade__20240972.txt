@@ -1,0 +1,11 @@
+
+Total score 	                25/30
+	
+Creation of Cloud9 Environment 	10/10
+	
+Addition of the Inbound Rule 	5/10
+	
+S3 Bucket Policy Update 	    10/10
+	
+
+[Executed at: Fri Sep 27 15:30:09 PDT 2024]
