@@ -1009,19 +1009,77 @@ RDS connection:
 ## RDS endpoint from cli
 de-c2w1a1-rds.cxo8cy4iqghl.us-east-1.rds.amazonaws.com
 
-
-
-
-
 EC2 vpcid = 2e16
 RDS vpcid =  de-c2w1a1 (vpc-....21f)
 
 
 
 
-MAP LAST HERE
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 2
 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/e6drF/week-2-overview
+
+Data Ingestion: get raw data from somewhere
+
+# Data Ingestion on a Continuum
+
+
+Unbounded Data: continuous stream of data (no beginning or end)
+
+Stream ingestion:  ingest events one at a time
+Batch  ingestion:  boundary on data and ingest the boundary of data as a unit
+            - size threshold batch (100 MB)
+            - # of records batch   (1000 )
+            - time based batch (hourly, daily, weekly)
+        - high frequency batch essentially becomes streaming
+
+
+Ingestion Frequencies
+
+          [Batch]                      [Streaming]
+    -------------------------------------------------------->>
+       Semi-frequent                  Very Frequent       
+
+
+File Ingestion 
+    - manual file download
+    - Secure File Transfer
+        - SFTP
+        - SCP
+
+IoT Ingestion 
+
+                                     Streaming Platform
+[IoT] ->  [ Event Producer ]  -->>  [[ .............. ]]   -->> [ Event Consumer ]
+                                       Message Queue
+
+Batch Ingestion Tools:
+    - AWS Glue ETL
+        - performs ETL job using Apache Spark
+            - distributes transformation workloads across compute nodes
+        - serverless solution   
+            - code-based ingestion and transformation
+
+    - AWS EMR: managed platform to run Hadoop / Spark
+        - can run serverless or provisioned
+
+        Glue needs less confguration  / EMR more control 
+
+    - AWS DMS: Data Migration Service
+        - sync data from an existing database
+
+    - AWS Snow family: transfer appliance to migrate large amounts of data
+        - Snowball, Snowcone
+
+    - AWS Transfer family: transfer files into and out of S3 using SFTP / FTP 
+
+Resources:
+https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html
+https://docs.aws.amazon.com/prescriptive-guidance/latest/serverless-etl-aws-glue/aws-glue-etl.html
+
+https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html
+
 
 
 .
