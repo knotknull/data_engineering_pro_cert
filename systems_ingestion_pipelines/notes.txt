@@ -1206,15 +1206,34 @@ main.py: get the ids of the featured playlists
          for each playlist id call second paginated call to get track info
 
 
-MAP LAST HERE
 # review these first before starting the lab:
 https://developer.spotify.com
 https://developer.spotify.com/documentation/web-api
 https://developer.spotify.com/documentation/web-api/concepts/authorization
 
 
+## Streaming Ingestion 
 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/gradedLti/xp17c/graded-programming-assignment-2-batch-data-processing-from-an-api
+# Streaming Ingestion Deails
+
+
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/9eNkI/conversation-with-a-software-engineer
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
