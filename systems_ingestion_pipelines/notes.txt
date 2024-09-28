@@ -1074,11 +1074,151 @@ Batch Ingestion Tools:
 
     - AWS Transfer family: transfer files into and out of S3 using SFTP / FTP 
 
+    - Other connectors: Airbyte, Matillion, Fivetran
+
 Resources:
 https://docs.aws.amazon.com/glue/latest/dg/components-key-concepts.html
 https://docs.aws.amazon.com/prescriptive-guidance/latest/serverless-etl-aws-glue/aws-glue-etl.html
-
 https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html
+
+Streaming Ingestion Tools:
+    - Kinesis
+    - Apache Kafka MSK
+
+Considrations Batch vs. Streaming ingestion
+
+Use cases:  
+    - what are you going to do with "real time" data over periodic batches
+    - machine learning 
+        - batch is good approach for training
+    - dashboards / reporting:
+        - benefit of "real time" dashboard. how will they act
+
+Latency:  millisecond real-time data vs. micro batch ?
+
+Cost   :  streaming can carry extra costs / complexities
+
+Existing / Available system: 
+        - can destination system handle real time data
+        - what is impact of ingesting from live production source system 
+
+Reliability / Availability:
+        - streaming needs high availability of compute, batch does not
+
+
+# ETL vs ELT
+
+API souce -->> Batch ingetstion due to the number of call
+
+Extract Transform Load
+            - original batch ingestion proces 
+            - potential data loss on transform
+
+                      Extract       Transform       Load
+       [Data Source] ----------> [Staging Area]  -------->  [Target]  
+
+Extract Load Transform 
+            - captures all data
+
+                      Extract       Load      Transform
+       [Data Source] ---------->   -------->  [Target]  
+
+NOTE: Transform done in the target i.e. Datawarehouse
+
+Advantages of ELT 
+    - faster to implement
+    - data available more quickly to end users
+    - transformations can be done efficiently
+        decide later to adopt different transformations 
+
+
+Disadvantages:
+    - can be come an Extract - Load pipeline
+    - target can become a Data Swamp
+
+EtLT: small t means transformation with limited scope
+        - mask sensitive data, deduplicate rows
+
+
+# REST API
+
+API:  set of rules and specifications the allows you to programatically 
+      communicate and exchange data with an application
+
+API Features:
+    - Metadata
+    - Documentation
+    - Authentication
+    - Error handling
+
+REST API:  Representational State Transfer API
+           Use HTTP as basis for communication
+
+
+## Spotify Lab
+
+https://developer.spotify.com
+https://developer.spotify.com/documentation/web-api
+https://developer.spotify.com/documentation/web-api/concepts/authorization
+
+each data item is a resource
+
+HTTP Request        Action
+GET                 retrieve a resource
+POST                create a resource
+PUT                 change / replace a resource
+Delete              delete a resource
+
+
+HTTP Request:  Endpoint + Access token
+
+Access token: string that contains the permissions to access a given resource (valid 1 hr)
+  - create spotify account
+  - get client ID and client secret
+        use them to generate access token
+
+
+Get Playlist
+Get Featured Playlist
+
+Pagination: Extract the items chunk by chunk
+    - using offset and limit
+
+https://api.spotify,com/v1/me/shows?offset=0&limit=20
+https://api.spotify,com/v1/me/shows?offset=20&limit=20
+https://api.spotify,com/v1/me/shows?offset=40&limit=20
+https://api.spotify,com/v1/me/shows?offset=60&limit=20
+https://api.spotify,com/v1/me/shows?offset=80&limit=20
+
+# use next field 
+response.get('playlists').get('next')
+
+
+
+
+authentication.py: contains scripts for get_token function returns access token
+
+endpoint.py       1  paginated call to endpoint "Get featured playlists":.
+                  2. paginated call to endpoint "Get playlist": 
+                  3. TODO: generate new token when expired
+
+main.py: get the ids of the featured playlists
+         for each playlist id call second paginated call to get track info
+
+
+MAP LAST HERE
+# review these first before starting the lab:
+https://developer.spotify.com
+https://developer.spotify.com/documentation/web-api
+https://developer.spotify.com/documentation/web-api/concepts/authorization
+
+
+
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/gradedLti/xp17c/graded-programming-assignment-2-batch-data-processing-from-an-api
+
+
+
+
 
 
 
