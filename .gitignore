@@ -1,2 +1,5 @@
 *.pdf
 *.key
+*.tar
+*.tar.gz
+*.tgz

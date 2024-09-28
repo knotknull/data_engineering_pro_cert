@@ -1,0 +1,16 @@
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	10/10
+	
+Get Featured Playlists Response Output 	15/15
+	
+Paginated Featured Playlists Response Output 	15/15
+	
+Paginated with Next Featured Playlists 	15/15
+	
+Python file endpoint.py 	15/15
+	
+Python file main.py 	15/15
+	
+Paginated Featured Playlists with SDK Response Output 	15/15
+	
