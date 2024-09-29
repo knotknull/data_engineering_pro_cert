@@ -1593,6 +1593,68 @@ https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lectu
 
 # Infrastructure as code 
 
+Roots in configuration management:
+
+1970s - Conf Management     
+        Chanllenge: config a serires of physical machines
+        Solution  : use bash scripts to automate
+
+2006 - AWS EC2
+
+2010s- Development of IaC Tools 
+            - AWS CloudFormation
+            - Terraform
+            - Ansible
+
+Hashicorp Configuration Language (HCL)
+
+# create / update vpc
+resource "aws_vpc" "main" {
+    cidr_block       = "10.0.0.0/16"
+    instance_tenancy = "default"
+
+    tags = {
+        Name = "main"
+    }
+}
+
+# create / update ec2 instance
+
+resource "aws_instance" "web" {
+    ami           = data.aws_ami.ubuntu.id
+    instance_type = "t3.micro"
+
+    tags = {
+        Name = "HelloWorld"
+    }
+}
+
+## GCP instance
+
+resource "google_compute_instance" "default" {
+    name         = "my-instance"
+    machine_type = "n2-standard-2"
+    zone         = "us-central1-a"
+
+    tags = ["foo", "bar"]
+    boot_disk {
+        initialize_params {
+            image = "debian-cloud/debian-11"
+            labels = {
+                my_label = "value"
+            }
+        }
+    }
+}
+
+HCL is declaritive language:
+    - just declare what infra looks like
+    - desired end-state of the infrastructure
+        - resources and configs
+
+    Highly idempotent
+
+
 
 
 
