@@ -1305,18 +1305,169 @@ Shard(logs): streams can be partitioned
 
 
 
+Event Producer sends data to a specific Stream
+    - Stream is made up of shards (i.e. partitions)
+        - Unit of Capaicity for the stream
+
+NOTE: to scale up a stream, need to add more shards
 
 
 
+How to size shards ?
+    Need to know the size of payload and rate of read / write of pipeline
+
+Read Operation
+ - Each shard can support 5 read operations per second per shard
+ - Max total read rate: 2 MB/s
+
+Write Operation
+ - Up to 1,000 records per shard
+ - Max total write rate: 1 MB/s
+
+
+Kineses "on-demand" Mode
+    - Automatically manage the scaling of the shards 
+       up or down as needed
+    - Only charged for what you used
+    - more conveenient
+
+
+Kineses "Provisioned demand" Mode
+    - Specify the number of shards necessary based on the 
+       expected write and read request rate
+
+    - Manually add more shards or re-shard when needed
+
+    - good for more control or steady rate of system
+
+
+Data Record made up of:
+    - Partition Key
+    - Sequence Number
+    - Binary Large Object (BLOB)
 
 
 
+Partition key used to determine which shard the data record is placed in 
+
+Kenesis assigns a sequence number when data written to shard 
+    - maintains order of record within the shard
+
+Producer writes data to   shards
+Consumer reads  data from shards
+    - can have muliple consumers reading data from a shard
+Shared   Fan-Out: Consumers share a shards read capacity == 2 MB/s  (default)
+Enhanced Fan-Out: Consumers are able to read at full capacity of the shard (2 MB/s)
+
+
+AWS Services that can process AWS Kinesis Data Streams:
+    - AWS Lambda
+    - AMS Apache Flink 
+    - AWS Glue
+
+Can write customer consumers using Amazaon Kinesis Client Library (KCL)
+
+Consumers can send data to other AWS Services:
+    - Firehose
+
+# What is Change Data Capture (CDC)
+
+Keeping data in sync across platforms:
+    - Full snapshot / full load
+    - incremental / differential:  only load what was updated from last run
+
+
+CDC: only load data that has been inserted / updated since last run
+
+Use cases: 
+    - synchronize data from OLTP to Data Warehouse
+    - capture on prem and apply to cloud databases
+    - capture every historical change for auditing
+    - enables microservices to track any change to source database 
+
+
+Two CDC approaches:
+    Push:
+        - process to capture change on source db
+        - source then pushes data updates to target
+        - target updated with the latest data
+        - can risk data loss if target unavailable
+
+    Pull:
+        - target continuously polls source db for changes
+            - pulls in updates when that happens
+        - usually results in a lag between updates
+
+# CDC Implementation Patterns
+
+    Batch-oriented or query-based CDC (pull-based): 
+        query dbatabase to identify change in data 
+        requires a field as : updated_at, last_update, last_modified
+        identify updated rows since cetain specified time
+        Computation intensive on target because each row scanned
+
+    Continuous or log-based CDC (pull-based): 
+        treat each updated to the db as an event using continuous CDC
+        Database logs checked. DB logs every change to DB sequentially.  
+        Can read events in DB log with Debezium and send them streaming to Kafka.
+        No computation overhead of DB. 
+
+
+    Trigger-based CDC (push-based): 
+        Configure a trigger on specific column changes.  Trigger informs
+        CDC of changes in source DB, relieves CDC from detecting change. 
+        Caveat: too many triggers can negatively impact the write performance 
+        of the source DB.
+
+
+CDC Tools:
+https://debezium.io/
+https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Task.CDC.html
+https://limadelrey.medium.com/kafka-connect-how-to-create-a-real-time-data-pipeline-using-change-data-capture-cdc-c60e06e5306a
+https://airbyte.com/solutions/database-replication
+
+
+# General Considerations for choosing ingestion tools
+
+    - Data type and structure: 
+        need to know type and structure so appropriate ingestion tool and 
+        transformations can be handled
+
+    - Data Volume:
+        byte size of of existing data to ingest
+        consider size of historical data
+        for streaming ingestion, need to consider the message size.  
+            Kinesis Data Streams supports max message size of 1MB
+            Kafka defaults to 1 MB payload size but can be configured to 20 MB or more.
+        what is size of future data will be.
+        what is daily, monthly, yearly growth of data
+
+
+    - Latency Requirements:
+        daily ingestion or near real time
+        how fast to process the ingested data once it reaches the pipeline 
+        how quickly source data is generated
+        CRITICAL:  Velocity of data will decide tools
+
+    - Data quality 
+        - can source data be used immediately at target
+        - what post processing has to be done
+        - data quality needs to be checked
+
+    - Changes in schema:
+        - need to detect and handle schama changes
+        NOTE: Coordinate with upstream stakeholders
+
+    - Reliability and Durability:
+        reliability: systems functioning as designed
+        durability : No data loss or corruption
+
+NOTE: Evaluate tradeoff between the cost of losing data vs. building appropriate 
+      level of redundancy.
 
 
 
-
-
-
-
+MAP LAST HERE: 
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/gradedLti/1aLBo/practice-lab-streaming-ingestion
 
 .
