@@ -1556,14 +1556,42 @@ DataOps:
 Deliver small chunks of work, small cycle times
 
 
-MAP LAST HERE 
+# DataOps Automation
 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/axv2F/dataops-automation
+DevOps automation:
+Continuous Ingetration and Delivery (CI/CD):  
+    [ build ]  --->  [ test ]  --->  [ integrate ]  --->  [ deploy ] 
+
+
+DataOps Automation:
+    - CI/CD can be applied to code and data within your data pipeline 
+        - code for database population
+        - code for transformations
+        - integrate new data
+
+    - Automation of data pipeline running
+        scheduling :  run stages of pipeline through a scheduler
+        orchestrate:  utilize a directed acyclic graph (DAG) i.e. Airflow
+
+    - Version control (git)
+        - track code and data
+
+    - Infrastructure as Code
+        - maintain design of infrastructure as a codebase (Terraform)
+        - version control your infrastructure
+
+DataOps practices are borrowed from DevOps
+
+    [Data Management] <-> [DataOps] <-> [Software Engineering]
 
 
 
+MAP LAST HERE
+
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/3mcXZ/infrastructure-as-code
 
 
+# Infrastructure as code 
 
 
 
