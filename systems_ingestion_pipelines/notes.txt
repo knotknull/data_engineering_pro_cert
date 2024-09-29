@@ -1217,13 +1217,91 @@ https://developer.spotify.com/documentation/web-api/concepts/authorization
 # Streaming Ingestion Deails
 
 
+Streaming requirements from "Conversation with a Software Engineer"
+-source 
+-payload: session_id, products, 
+   - size 100s bytes
+   - rate  1000 events / second
+   - ~ 1MB / sec
+- data retention 
+100 GB / day
 
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/9eNkI/conversation-with-a-software-engineer
+
+Message Queue: buffer used to deliver messages asynchronously
+
+[  Event   ]           [          Message Queue             ]           [  Event   ]
+[ Producer ]  ---->>   [  { 4 } .. { 3 } .. { 2 }  .. { 1 } ]   ---->>  [ Consumer ]
+                                        FIFO
+
+NOTE: Once message read, it is deleted from queue
 
 
 
+Event Streaming : Append-only persistent log
+
+[  Event   ]           [          Streaming Platform        ]           [  Event   ]
+[ Producer ]  ---->>   [  { 4 } .. { 3 } .. { 2 }  .. { 1 } ]   ---->>  [ Consumer ]
+                                                                |
+                                                                +--->>  [  Event   ]
+                                                                        [ Consumer ]
+NOTE: possible to replay or reprocess any events in the log
+
+
+Kafka
+
+┌────────────┐         ┌──────────────────────────────────────┐        ┌────────────┐
+│  Event     │         │             Kafka Cluster            │        │  Event     │
+│  Producer  │----+    │    (contains servers and brokers)    │   +--->│  Consumer  │
+└────────────┘    |    │                                      │   |    └────────────┘
+                  |    │  [-----]   [-----]  [-----]  [-----] │   |                  
+┌────────────┐    |    │  [Topic]   [Topic]  [Topic]  [Topic] │   |    ┌────────────┐
+│  Event     │    +--->│  [  1  ]   [  2  ]  [  3  ]  [  4  ] │ --+--->│  Event     │
+│  Producer  │    |    │  [ IoT ]   [Alert]  [ data]  [ etc ] │   |    │  Consumer  │
+└────────────┘    |    │  [-----]   [-----]  [-----]  [-----] │   |    └────────────┘
+┌────────────┐    |    │                                      │   |    ┌────────────┐
+│  Event     │----+    │                                      │   +--->│  Event     │
+│  Producer  │         │                                      │        │  Consumer  │
+└────────────┘         └──────────────────────────────────────┘        └────────────┘
+           push messages                                     pull messages
+
+
+Topics: Categories to hold related events
+
+Partitions(logs): topics can be partitioned
+                  Ordered immutable sequences of messages
+
+NOTE: Event Consumers can be part of a Consumer Group with each Consumer consuming from 
+a specific partition of the topic
+
+
+
+Kinesis
+
+┌────────────┐         ┌────────────────────────────────────────┐        ┌────────────┐
+│  Event     │         │          Kinesis Data Streams          │        │  Event     │
+│  Producer  │----+    │    (contains servers and brokers)      │   +--->│  Consumer  │
+└────────────┘    |    │                                        │   |    └────────────┘
+                  |    │ [------]  [------]  [------] [------]  │   |                  
+┌────────────┐    |    │ [Stream]  [Stream]  [Stream] [Stream]  │   |    ┌────────────┐
+│  Event     │    +--->│ [   1  ]  [  2   ]  [   3  ] [   4  ]  │ --+--->│  Event     │
+│  Producer  │    |    │ [ IoT  ]  [Alert ]  [ data ] [  etc ]  │   |    │  Consumer  │
+└────────────┘    |    │ [------]  [------]  [------] [------]  │   |    └────────────┘
+┌────────────┐    |    │                                        │   |    ┌────────────┐
+│  Event     │----+    │                                        │   +--->│  Event     │
+│  Producer  │         │                                        │        │  Consumer  │
+└────────────┘         └────────────────────────────────────────┘        └────────────┘
+           push messages                                     pull messages
+
+
+Stream: Categories to hold related events
+
+Shard(logs): streams can be partitioned
+             Ordered immutable sequences of messages
+
+
+
+# Kinesis Data Streams Details
 
 
 
