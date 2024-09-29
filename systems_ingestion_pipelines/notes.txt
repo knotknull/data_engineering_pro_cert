@@ -1466,8 +1466,40 @@ NOTE: Evaluate tradeoff between the cost of losing data vs. building appropriate
       level of redundancy.
 
 
+LAB
+de_c2w2lab1
 
-MAP LAST HERE: 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/gradedLti/1aLBo/practice-lab-streaming-ingestion
+# create buckets
+!aws s3 ls
+2024-09-29 14:46:20 de-c2w2lab1-471112674614-int
+2024-09-29 14:46:19 de-c2w2lab1-471112674614-usa
+
+
+
+
+
+# check if a stream is ready 
+def is_stream_ready(stream_name: str) -> None:
+    client = boto3.client("kinesis")
+    response = client.describe_stream(StreamName=stream_name)
+    return response["StreamDescription"]["StreamStatus"] == "ACTIVE"
+
+# Check if the streams are ready
+print(is_stream_ready(stream_name=USA_DATA_STREAM))
+print(is_stream_ready(stream_name=INTERNATIONAL_DATA_STREAM))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .
