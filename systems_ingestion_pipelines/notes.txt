@@ -1586,11 +1586,6 @@ DataOps practices are borrowed from DevOps
 
 
 
-MAP LAST HERE
-
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/3mcXZ/infrastructure-as-code
-
-
 # Infrastructure as code 
 
 Roots in configuration management:
@@ -1651,14 +1646,81 @@ HCL is declaritive language:
     - just declare what infra looks like
     - desired end-state of the infrastructure
         - resources and configs
+    - terraform will figure out intermediate steps to get to end state
 
     Highly idempotent
+    - will make updates only to get to end state
 
 
+# Terraform - Creating and EC2 instance
 
 
+Terraform workflow: 
+
+    1. Write config files to define resources
+
+    2. Terraform prepares workspace
+        a. installs files to communicate to cloud apis 
+        b. creates exeuction plan
+                create / update / destry
+    
+    3. User approves execution plan
+
+    4. Terraform applies proposed steps
 
 
+Target Infrastructure:
+
+    +---------------------+
+    | Region (us-east-1)  |
+    |  +---------------+  | 
+    |  | Default VPC   |  |
+    |  |  +---------+  |  |
+    |  |  |         |  |  |
+    |  |  |   EC2   |  |  |
+    |  |  |         |  |  |
+    |  |  +---------+  |  |
+    |  +---------------+  | 
+    +---------------------+
+
+
+5 sections to .tf file
+
+# terraform settings
+
+# providers
+
+# resources
+
+# input
+
+# output
+
+block of terraform code
+
+keyword  labels {
+    arguments 
+    blocks
+}
+
+## See terraform/main.tf
+
+provider is a plugin or binary file that Terraform will use to 
+create your resources
+
+for each provider need to provide:
+    local  name
+    source  location
+    version constraint
+
+can specifiy version constraint for terraform in terraform block 
+  required_version = ">= 1.2.0"
+
+# resources 
+specify resouce followed by resource type
+i.e. resource "aws_instance"
+
+MAP  stopped at 6:22
 
 
 .
