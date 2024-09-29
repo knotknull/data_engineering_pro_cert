@@ -1037,9 +1037,9 @@ Batch  ingestion:  boundary on data and ingest the boundary of data as a unit
 
 Ingestion Frequencies
 
-          [Batch]                      [Streaming]
+          [Batch]           [Microbatch]        [Streaming]
     -------------------------------------------------------->>
-       Semi-frequent                  Very Frequent       
+       Semi-frequent        Frequent            Very Frequent       
 
 
 File Ingestion 
@@ -1475,9 +1475,6 @@ de_c2w2lab1
 2024-09-29 14:46:19 de-c2w2lab1-471112674614-usa
 
 
-
-
-
 # check if a stream is ready 
 def is_stream_ready(stream_name: str) -> None:
     client = boto3.client("kinesis")
@@ -1488,8 +1485,80 @@ def is_stream_ready(stream_name: str) -> None:
 print(is_stream_ready(stream_name=USA_DATA_STREAM))
 print(is_stream_ready(stream_name=INTERNATIONAL_DATA_STREAM))
 
+# Week 2 Resources 
+
+Kinesis: 
+https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html#high-level-architecture
+https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html
 
 
+Kafka: 
+https://kafka.apache.org/081/documentation.html#introduction
+https://www.gentlydownthe.stream/
+
+https://www.conduktor.io/blog/apache-kafka-vs-amazon-kinesis-comparing-across-five-dimensions/
+
+
+
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 3
+
+## DataOps Automation
+
+
+DataOps:  Set of practices and cultural habits centered around building 
+          robust data systems and deliverying high quality data products.
+
+
+Three Pillars of DataOps:
+
+    [ __________________ Data Ops ________________ ]
+    [ Automation ]  [ Observability ]   [ Incident ]
+                    [      &        ]   [ Resonse  ]
+                    [ Monitoring    ]
+
+
+Automation 
+-------------
+
+Continuous Ingetration:  build -> test -> integrate -> deploy 
+and  Delivery  (CI/CD)       
+
+
+Infrastructure as code:   Code that acts to deploy the resources required to 
+                          run your data pipeline
+
+Chris Burgh - Data Kitchen / DataOps
+
+    - delivery data insights to customers
+    - similar to LEAN
+        "you are running a factory of data"
+        "people are always asking for new things"
+            - get it 80% done and then iterate 
+                - feedback early
+
+
+    test the things you produce 
+        i.e. SQL >> how do you test to prove it works
+
+DataOps Manifesto 
+
+
+DataOps: 
+    - Rapid innovation and experimentation delivering new insights to customers 
+      with increasing velocity
+    - Extremely high data quality and very low error rates
+    - Collaboration across complex arrays of people, technology and environments
+    - Clear measurement, monitoring and transparency of results
+
+
+Deliver small chunks of work, small cycle times
+
+
+MAP LAST HERE 
+
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/axv2F/dataops-automation
 
 
 
