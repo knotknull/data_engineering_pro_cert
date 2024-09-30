@@ -1654,7 +1654,6 @@ HCL is declaritive language:
 
 # Terraform - Creating and EC2 instance
 
-
 Terraform workflow: 
 
     1. Write config files to define resources
@@ -1687,13 +1686,9 @@ Target Infrastructure:
 5 sections to .tf file
 
 # terraform settings
-
 # providers
-
 # resources
-
 # input
-
 # output
 
 block of terraform code
@@ -1717,10 +1712,106 @@ can specifiy version constraint for terraform in terraform block
   required_version = ">= 1.2.0"
 
 # resources 
-specify resouce followed by resource type
-i.e. resource "aws_instance"
+specify resouce followed by resource type and name; provider and resource separated by underscore
+i.e. resource "aws_instance" "webserver" 
 
-MAP  stopped at 6:22
+NOTE: instance and name is a unique name of resource that can be referenced in other blocks
+
+
+# Steps to instantiate resource 
+    terraform init          # installs provider in config file
+                            # downloads aws provider and stores in .terraform
+    terraform plan          # creates execution plan on what is planning to create / update / destroy 
+
+    terraform apply         # shows plan again and then asks for approval 'yes'
+
+    terraform outputs       # shows outputs
+    terraform destroy       # destroy objects that were created, asks for approval 'yes'
+
+
+# Terraform - Defining Variables and Outputs
+
+variables created with variable keyword (duh)
+   with three optional arguments: description, type, default
+
+NOTE: if variable does not have a default then terraform 
+      will prompt for one before creating
+
+variable "region"  {
+  description = "region for aws resources"
+  type = string
+  default = "us-east-1"
+
+}
+
+# output
+variable "server_name"{
+  description = "name of the server running the website"
+  type = string
+
+}
+
+
+to access variable value use var.variable name 
+i.e. var.region or var.server_name
+
+two ways to initiate variables 
+
+1. pass on cli
+    terraform apply -var server_name=ExampleServer
+
+2. add variable values in "*.tfvars"file 
+    i.e. terraform.tfvars
+
+
+To update with variables file use: 
+    terraform apply
+
+print out attributes of a resource using output values
+    i.e. public_dns
+
+    get via resource_type.resource_name.attribute
+
+use terraform apply to add output variable
+i.e. 
+
+terraform apply
+
+query outputs via 
+
+terraform outputs 
+or 
+terraform outputs  output_name 
+i.e. 
+terraform outputs  server_arn
+ 
+For sanity split main.tf to:
+outputs.tf  :  contains all output variables # output
+variables.tf:  contains all input  variables # input
+providers.tf:  contains all providers  # providers
+main.tf:       contains all resources  # resources
+        NOTE: main.tf can be split by resources
+
+Terraform will concatenate all .tf files 
+
+MAP LAST HERE
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/RmYO8/terraform-defining-data-sources-and-modules
+
+# Terraform - Defining Data Sources and Modules
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .

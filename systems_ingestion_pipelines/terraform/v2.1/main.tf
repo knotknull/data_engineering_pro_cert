@@ -1,24 +1,3 @@
-# terraform settings 
-terraform {
-#   +-------- name or provder that were declared in required_provider  
-#   | 
-#   V 
-  required_providers {
-    aws = {
-        source  = "hashicorp/aws"
-        version = ">= 4.16"
-    }
-  }
-
-  required_version = ">= 1.2.0"
-}
-
-#           +-------- name or provder that were declared in required_provider  
-#           | 
-# providers v
-provider aws {
-    regtion = 'us-east-1'
-}
 
 #              +-------------- resource followed by type, separated by underscore
 #              | 
@@ -33,9 +12,6 @@ resource "aws_instance" "webserver" {
     ami = "ami-08a0d1e16fc3f61ea"
     instance_type = "t2.mico"
     tags = {
-        Name = "ExampleServer"
+        Name = var.server_name    ## Also here, we are using the variable declared below !!
     }
 }
-
-# input
-# output
