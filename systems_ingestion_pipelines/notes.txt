@@ -1794,24 +1794,52 @@ main.tf:       contains all resources  # resources
 
 Terraform will concatenate all .tf files 
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/RmYO8/terraform-defining-data-sources-and-modules
 
 # Terraform - Defining Data Sources and Modules
 
 
+Data sources:
+  Data blocks to reference resources created outside Terraform or in another 
+  Terraform workspace
+
+situation:
+    launch EC2 instance in a public subnet in a VPC that was created outside the workspace
+
+use data block to setup resources or query aws for info
+
+data "aws_subnet" "selected_subnet" {
+    id = "subnet-0597ece886ea42f19"
+}
+
+data "aws_ami" "latest_amazon_linux" {
+    most_recent = true
+    owners = ["amazon"]
+    filter {
+        name = "architecture"
+        value=  ["x86_64"]
+    } 
+    filter {
+        name = "name"
+        valuevalues =  ["a1201*-ami-202*"]
+    }
+}
+
+Modules: 
+    a subdirectory inside main directory to group resources together
+    For example, created website directory and put main.tf there
+
+NOTE:  need to move outputs.tf, variables and main.tf to website directory
+        because variables etc. are in website directory they are hidden from 
+        root directory.  Fix this by adding main.tf in in root with a module reference 
+        to source in website. 
+main.tf:
+module "website" {
+    source = "./website"
+}         
 
 
-
-
-
-
-
-
-
-
-
-
+NOTE: whenever module blocks are added, removed, modified NEED TO rerun terraform init 
+      to update changes to modules
 
 
 .
