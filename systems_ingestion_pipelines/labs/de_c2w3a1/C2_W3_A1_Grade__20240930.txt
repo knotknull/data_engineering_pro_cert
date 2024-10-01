@@ -1,0 +1,17 @@
+
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	10/10
+	
+Get the Data Batches 	15/15
+	
+Creation of Expectation Suite 	15/15
+	
+Expectation file in S3 artifacts bucket 	10/10
+	
+Validations List 	15/15
+	
+Checkpoint file in S3 artifacts bucket 	20/20
+	
+Content in S3 docs bucket 	15/15
+	

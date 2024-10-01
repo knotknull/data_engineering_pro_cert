@@ -2020,6 +2020,7 @@ Steps:
     launch jupyter notebook in great-expectations directory
         > jupyter notebook
 
+great expectations lab
 
 
 
