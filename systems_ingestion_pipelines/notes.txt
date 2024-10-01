@@ -1852,7 +1852,7 @@ de-c2w3lab1
 
 bastion_host_dns = "ec2-100-25-255-135.compute-1.amazonaws.com"
 db_host = "de-c2w3lab1-db.czc8w6gekhix.us-east-1.rds.amazonaws.com"
-db_master_password = <sensitive>
+db_master_password = 
 db_master_username = "postgres_admin"
 db_port = 5432
 project = "de-c2w3lab1"
