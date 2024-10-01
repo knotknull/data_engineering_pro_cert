@@ -2267,8 +2267,57 @@ setup data quality checks:
 
 
 
+Airflow Components 
+
+                                [ Metadata ]
+                                [ Database ]
+                    +--------------+  ^+-------------------------------------
+                    v                 |                                     |
+[  User   ]<<---[  Web   ]      [  Workers ] <<-----------------------[ Scheduler ]
+[Interface]     [ Server ]            |                               [(executor) ] 
+                    |                 |                                     |
+                    +-----------------+-------------------------------------+
+                                      | 
+                                      v 
+                                [    DAG    ]
+                                [ Directory ]
+
+Interact with UI and DAG Directory
+DAG Directory: folder where python scripts are stored
+                - connected to Web Server
+                - DAGs visualized in UI
+
+Via UI: visualize, monitor, trigger and troubleshoot DAGs
+
+Can trigger a DAG with an event or Scheduler 
+
+Sheduler monitors DAGs in DAG Directory
+    - once per minute (default)
+    - checks which tasks are ready to be triggered
+            by schedule or if dependencies are complete
+
+Scheduler pushes task to a queue when ready to exuted 
+    - uses and "Executor" to manage execution of tasks
+    
+Executor (part of scheduler) extracts tasks from queue and sends to Workers
 
 
+task status:
+    - scheduled
+    - queued
+    - running
+    - success
+    - failed
+
+
+Scheduler and Workers store status of tasks and state of the DAGs in Metadata DB
+Webserver extracts states from Metadata DB and displays in UI
+
+Amazon Managed Workflows for Apache Airflow (MWAA)
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/C72As/airflow-the-airflow-ui
 
 
 
