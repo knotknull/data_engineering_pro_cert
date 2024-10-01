@@ -2025,5 +2025,39 @@ great expectations lab
 
 
 
+Chad Sanderson 
+CEO gable.ai 
+
+Data Contracts
+    - interface for data, api for data
+    - interface is a spec (specification)
+        - structure: schema / logic 
+        - data     : data quality rules, compliance, etc.
+
+communication vs. techonology 
+    - integration tests as enforcement
+    - alerts on breaches
+
+
+Data contract is enforced in the developer workflow
+    - i.e. DevSecOps
+
+
+
+
+
+
+
+
+source and consumer do not communicate on changes
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/gGx9r/amazon-cloudwatch
+
+
+
+
+
 
 .
