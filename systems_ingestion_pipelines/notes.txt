@@ -2318,6 +2318,9 @@ Amazon Managed Workflows for Apache Airflow (MWAA)
 
 # Airflow UI
 
+# Introduction to Airflow UI
+https://www.astronomer.io/docs/learn/airflow-ui
+
 
 DAG view:  list of all DAGs in DAG Directory
 
@@ -2386,7 +2389,7 @@ Types of Operators:
 
 
 
-# Now define tasks
+
 
 my_first_dag.py
 
@@ -2427,15 +2430,116 @@ with DAG(
 
 ## Additonal Notes about Airflow Basic Concepts
 
-
-# Introduction to Airflow UI
-https://www.astronomer.io/docs/learn/airflow-ui
-
+DAG Parameters:
+https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/models/dag/index.html#airflow.models.dag.DAG
 
 
+# Scheduling Dags
+data interval: each DAG associated with data interval
+                represents the time range it operates in.
+
+    ex.  schedule a DAG to run @daily and start date is March 1.
+    Each DAG run operates in a data interval that starts each day at midnight (00:00) and ends at midnight(24:00)  
+
+       Data interval        Data interval       Data interval       Data interval       
+       of the 1st           of the 2nd          of the 3rd          of the 4th       
+       DAG Run              DAG Run             DAG Run             DAG Run       
+     <-----------------> <-----------------> <-----------------> <----------------->       
+    |-------------------|-------------------|-------------------|-------------------|-------------------|
+ March 1,           March 2,           March 3,            March 4,            March 5,
+ midnight           midnight           midnight            midnight            midnight
+start_date
 
 
 
+       Data interval     
+       of a DAG Run      
+     <-----------------> 
+Logical date:
+start date of the
+data interval of a 
+DAG Run
+
+
+
+"logical date" is a term associated with a specific DAG run and it denotes the start of the data interval
+
+the start_date argument for the DAG marks the "logical date" or the start of the first "data interval"
+
+WTF ??
+a DAG run is usually scheduled after its associated data interval has ended, to ensure the run is able 
+to collect all the data within the time period.  In other words, 
+a run covering the data period 2020-01-01 generally does not start to run until 2020-01-01 has ended i.e. 
+after 2020-01-2 00:00:00
+
+logical data (aka execution_date) of a DAG run, denotes the start of the data interval, NOT when the DATG is actually executed
+
+
+https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#data-interval
+https://airflow.apache.org/docs/apache-airflow/stable/faq.html#what-does-execution-date-mean
+
+
+timetables: Customize DAG scheduling using timetables.  
+
+DAGs can be data-aware, triggered whan a data object is updated in another task.
+# Data-aware scheduling
+
+from airflow.datasets import Dataset 
+with DAG(...):
+    MyOperator(
+       # this task updates example.csv
+       outlets=[Dataset("s3://dataset-bucket/example.csv")],
+       ..., 
+    )
+
+with DAG(...):
+   # this DAG should be run when the exmpale.csv is updated by dag1
+   schedule=[Dataset("s3://dataset-bucket/exmample.csv)], 
+
+
+## Airflow Operators
+
+https://airflow.apache.org/docs/apache-airflow/stable/_api/airflow/operators/index.html
+
+    airflow.operators.bash
+    airflow.operators.branch
+    airflow.operators.datetime
+    airflow.operators.email
+    airflow.operators.empty
+    airflow.operators.generic_transfer
+    airflow.operators.latest_only
+    airflow.operators.python
+    airflow.operators.smooth
+    airflow.operators.subdag
+    airflow.operators.trigger_dagrun
+    airflow.operators.weekday
+
+
+# Operators and Hooks Reference 
+https://airflow.apache.org/docs/apache-airflow/stable/operators-and-hooks-ref.html
+
+
+
+# Operators for interacting with AWS Services
+https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/aws.html
+
+
+#Operators for copying data (DB to S3)
+https://airflow.apache.org/docs/apache-airflow-providers/operators-and-hooks-ref/software.html#transfers
+
+
+Other parameters you can pass to any Operators (PythonOperator)
+    email(str or list[str])
+    email on_retry(bool)
+    email_on_failure(bool)
+    retries(int)
+
+# Airflow Sensors
+https://docs.astronomer.io/learn/what-is-a-sensor
+
+
+
+Definig Dependencies
 
 
 
