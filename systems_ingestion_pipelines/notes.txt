@@ -2541,6 +2541,62 @@ https://docs.astronomer.io/learn/what-is-a-sensor
 
 Definig Dependencies
 
+use bit-shift operator to specify dependencies betwe tasks
+examples:
+
+            graph                                       |        dependency definition
+[ task1 ] --->> [ task2 ] --->> [ task3]                |        task1 >> task2 >> task3
+                                                        |
+-----------------------------------------------------------------------------------------------
+            +---->[ task2 ] ----+                       |  NOTE: when two tasks should be executed in parallel, 
+            |                   |                       |        you can specify the as a list
+[ task1 ] --+                   +--> [ task 4]          |
+            |                   |                       |       task1 >> [task2, task3] >> task4
+            +---->[ task3 ] ----+                       |
+                                                        |  Could also have defined it as 
+                                                        |       task1 >> task2 
+                                                        |       task1 >> task3 
+                                                        |       task2 >> task4 
+                                                        |       task3 >> task4 
+                                                        | 
+                                                        | 
+-----------------------------------------------------------------------------------------------
+                                                        | 
+[ task1 ] ---> [ task2 ] ----+                          |    [task1 >> task2, task3] >> task4
+                              |                         |     
+                              +--> [ task 4]            |
+                              |                         |  
+               [ task3 ] ----+                          |
+                                                        | 
+-----------------------------------------------------------------------------------------------
+                                                        | 
+            +-->[ task1 ]-->[task3]---+                 |  NOTE: In airflow, you can't set dependencies between lists:
+            |                         |                 |        [task1, task2] >> [task3, task4] gives an eror 
+[ task0 ] --+                         +--> [ task 5]    |
+            |                         |                 |       task1 >> [task2, task3] >> task4
+            +-->[ task2 ]-->[task4]---+                 |
+                                                        |  Could use chain: 
+                                                        |  from airflow.models,baseoperator import chain 
+                                                        |  chain(task0, [task1, task2], [task3, task4], task5 )
+                                                        |   
+                                                        |   or can define as
+                                                        |      task0>>task1>>task3  
+                                                        |      task0>>task2>>task4  
+                                                        |      task3>>task5
+                                                        |      task4>>task5
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .
