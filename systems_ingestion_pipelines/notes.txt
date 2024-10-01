@@ -1842,4 +1842,64 @@ NOTE: whenever module blocks are added, removed, modified NEED TO rerun terrafor
       to update changes to modules
 
 
+
+
+
+Lab
+
+
+de-c2w3lab1
+
+bastion_host_dns = "ec2-100-25-255-135.compute-1.amazonaws.com"
+db_host = "de-c2w3lab1-db.czc8w6gekhix.us-east-1.rds.amazonaws.com"
+db_master_password = <sensitive>
+db_master_username = "postgres_admin"
+db_port = 5432
+project = "de-c2w3lab1"
+
+terraform output db_host  "de-c2w3lab1-db.czc8w6gekhix.us-east-1.rds.amazonaws.com"   
+terraform output db_port   5432
+
+terraform output db_master_password    "
+_4HE9esiDEk
+terraform output bastion_host_dns
+
+
+
+
+
+## tunnel
+ssh -i de-c2w3lab1-bastion-host-key.pem -L 5432:<RDS-HOST>:<DATABASE-PORT> ec2-user@<BASTION-HOST-DNS> -N -f
+
+
+## psql -h <RDS-HOST> -U postgres_admin -p 5432 -d postgres --password
+
+
+psql -h localhost -U postgres_admin -p 5432 -d postgres --password
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Optional Notes:
+
+    The ssh command uses the private key you generated using Terraform to authenticate the connection to the bastion host; the -i tag means identity_file and it specifies the file that contains the SSH private key.
+    The L options means local port forwarding (-L LOCAL_PORT:DESTINATION_HOSTNAME:DESTINATION_PORT USER@SERVER_IP): this means that you're forwarding the connection from the bastion host to the RDS instance.
+    The -f option means the command can be run in the background and -N means "do not execute a remote command".
+    If you'd like learn more about SSH tunneling, you can check this article.
+
+https://linuxize.com/post/how-to-setup-ssh-tunneling/#remote-port-forwarding
+
+
+
 .
