@@ -2177,6 +2177,95 @@ Other Open Source Orchestration tools:
 
 # Orchestration Basics
 
+    Pros                                        Cons
+ - setup dependencies                       - more operational overhead than simple cron scheduling 
+ - monitor tasks                       
+ - get alerts                       
+ - create fallback plans
+
+
+Directed Acyclic Graph
+
+[ Ingest From ]         [ Transform ]        [ Combine ]        [ Load to Data ]
+[ a REST API  ] ---->>  [    data   ] ---->> [   data  ] ---->> [  Warehouse   ]
+                                                  ^
+                                                  |
+                                                  |
+                                                  |
+                                                  |
+                                                  |
+                         ( Edge )                 |
+[ Ingest From ]-----------------------------------+
+[   Database  ]
+      ^             - Data flows only in one direction 
+      |             - No circles or cycles (i.e. Directed Acyclic)
+    Node
+
+
+Dependencies: previous step must have completed successfully before continuing forward
+
+Orchestration in Airflow
+
+with DAG(dag_id="dat_etl_example", starte_date=datetime(year: 2024, month:3, day: 23), schedule='@weekly'):
+# tasks
+    task_ingest_api      = PythonOperator(task_id='ingest_from_API'), python_callable=ingest_from_rest_api)
+    task_ingest_database = PythonOperator(task_id='ingest_from_database'), python_callable=ingest_from_database)
+    task_transform_api   = PythonOperator(task_id='transform_data'), python_callable=transform_api_data)
+    task_combine_data    = PythonOperator(task_id='combine_data'), python_callable=combine_api_and_database)
+    task_load_warehouse   = PythonOperator(task_id='load_warehouse'), python_callable=load_to_warehouse)
+# Dependencies
+    [task_ingest_api >>  task_transform_api > task_ingest_database] >> task_combine_data >> task_load_warehouse
+
+
+DAG run conditions:
+    - time-based conditions
+    - event-based conditions
+
+# DAG schedule based config
+
+with DAG(dag_id="my_first_dat", 
+         start_date=datetime(year: 2024, month: 3, day:13),
+         description="First DAG", 
+         tags=["data_engineering_team"],
+         schedule='@daily',
+         catchup=False ):
+
+# DAG event based: via dataset update
+
+dataset = Dataset("s3://dataset-bucket/example.csv")
+
+with DAG(dag_id="dat_etl_example", 
+         start_date=datetime(year: 2024, month: 3, day:23),
+         schedule=[dataset],
+         catchup= False):
+
+# DAG event based: trigger a DAG
+# Airflow taks that listens for file event i.e. Sensor
+s3_sensor = S3KeySensor(task_id='s3_file_check',
+                        bucket_key='my_file.csv', 
+                        bucket_name='my_bucket_name', 
+                        aws_conn_id='my_aws_connection')
+
+# Setup monitoring, logging, alerts
+
+t1 = PythonOperator(
+    task_id="ingest_data",
+    python_callable=extract_data,
+    email['someone@deeplearning.ai'],
+    email_on_failure=True,
+    email_on_fon =True
+)
+setup data quality checks:
+    - checking count of null values
+    - checking range of some set of values
+    - verifying if schema is as expected
+
+
+## Airflow
+
+# Airflow: Core Concepts
+
+
 
 
 
