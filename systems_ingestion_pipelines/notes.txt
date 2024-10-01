@@ -1938,20 +1938,87 @@ Pillars:
 
 # Monitoring Data Quality
 
+Data Quality Metrics:
+    - Volume: Total # of Recs ingested in each batch or over some time interval
+    - Distribution: range of values in a particular columns stays within a threshold 
+    - Null values : Total number of null values in a table 
+    - Freshness: difference between now and the most recent record in your data
+
+NOTE: IDENTIFY MOST IMPORTANT METRICS 
+    What do stakeholders care about
+
+Testing Ingested Data
+    - build in checks / tests to verify that shema and data types are consistent
 
 
+Abe Gong 
+Co-founder & CEO of Great Expectations
+greatexpectations.io
+
+Data Quality: is data fit for purpose
+
+Stakeholders are key
+
+Great Expectations
+worfklow:
+    1. Spcity data
+    2. Define your expectations
+    3. Validate your data against the expectations
+
+Data Context:
+    Instantiate a data context object
+    entry point to Great Expectations API
+
+Data Source:
+    declare the data source
+        - SQL DB, local file system, S3 bucket Pandas DataFrame 
+    declare data asset 
+        - collections of records within a data source
+        - table in SQL db, file, join query, collections of file matching a pattern
+    Batches 
+        partition data from data asset
+           - by date, column values 
+        create a batch_request object
+            - primary way to retrieve data from the data asset
+            - need to provide batch_request object to the rest of ge components
+
+Expectations:
+    define expectations
+    Expectation: statement that you can use to verify if your data meets certain conditions 
+    predefined tests:
+        expect_column_min_to_be_between
+        expect_column_values_to_be_unique
+        expect_column_values_to_be_null
+    Expectation Suite: group expectation tests
+
+Validator: 
+    expects a batch_request and corresponding expectation suite 
+    - manual interaction 
+    - automate via checkpoint object
+
+Checkpoints
+    create checkpoint: takes batch_request and expectation suite and provides to Validator 
+    
+
+Metadata saved to backend stores
+    - Expectation store
+        - expectation suites
+    - Validation store
+        - objects created when validating data against the expectation squite 
+    - Checkpoint store
+        - checkpoint configs
+    - Data docs store
+        - reports on expectations
+        - checkpoints
+        - validation results
+    Stores available via data conext object
 
 
-
-
-
-
-
-
-
-
-
-
+Steps: 
+    pip install great-expectations
+    great_expectations init: start project
+    launch jupyter notebook in great-expectations directory
+        > jupyter notebook
 
 
 
