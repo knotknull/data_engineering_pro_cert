@@ -1861,35 +1861,15 @@ terraform output db_host  "de-c2w3lab1-db.czc8w6gekhix.us-east-1.rds.amazonaws.c
 terraform output db_port   5432
 
 terraform output db_master_password    "
-_4HE9esiDEk
 terraform output bastion_host_dns
 
-
-
-
+NOTE: Terraform created an RDS instance and EC2 bastion host.
+From the bastion host, able to ssh tunnel to to the RDS.postgresql instance with the below command 
+Then able to run psql on bastion and have it connect to RDS via tunnel
 
 ## tunnel
 ssh -i de-c2w3lab1-bastion-host-key.pem -L 5432:<RDS-HOST>:<DATABASE-PORT> ec2-user@<BASTION-HOST-DNS> -N -f
-
-
-## psql -h <RDS-HOST> -U postgres_admin -p 5432 -d postgres --password
-
-
 psql -h localhost -U postgres_admin -p 5432 -d postgres --password
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Optional Notes:
 
@@ -1899,6 +1879,82 @@ Optional Notes:
     If you'd like learn more about SSH tunneling, you can check this article.
 
 https://linuxize.com/post/how-to-setup-ssh-tunneling/#remote-port-forwarding
+
+
+
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 3
+
+## DataOps Observability
+
+
+High Quality Data:                                  Low Quality Data:
+ - Accurate                                             - Inaccurate 
+ - Complete                                             - Incomplete 
+ - Discoverable                                         - Hard to find
+ - Available in a timely manner                         - Late
+
+ Exactly what stakeholders expect:
+    - well-defined schema
+    - data definitions
+
+Barr Moses 
+Co-founder & CEO of Monte Carlo
+Data Observability
+
+    - Data State:
+        - Data
+        - Code
+        - Infrastructure
+
+    - KPI 
+        - data downtime
+        - time to detection
+        - time to resolution
+
+
+    - Is the data up-to-date
+    - is the data complete
+    - are fields within expected ranges
+    - is the null rate higher or lower than it should be
+    - has schema changed
+
+Pillars:
+    - Distribution / Internal quality
+        % of nulls, % of unique elements, summary statistics, within expected range
+
+    - Freshness
+        how up-to-date is data, when last updated, how frequently updated 
+
+    - Volume
+        amount ingested and checking for dpikes or drops
+
+    - Lineage
+        trace data from source to destination, how transformed and where stored
+
+    - Schema
+        Data schema refers to monitoring changes to data structure
+
+# Monitoring Data Quality
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
