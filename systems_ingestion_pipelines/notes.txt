@@ -2042,18 +2042,67 @@ communication vs. techonology
 Data contract is enforced in the developer workflow
     - i.e. DevSecOps
 
-
-
-
-
-
-
-
 source and consumer do not communicate on changes
 
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/gGx9r/amazon-cloudwatch
+
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 3
+
+
+# Amazon CloudWatch
+
+
+Amazon services will automatically start writing to CloudWatch 
+     - Each AWS Service posts different metrics 
+
+System Level Metrics:
+ - CPU utilization
+ - Disk I/O
+ - Network traffic
+ - Memory usage
+
+Custom Metrics: monitor specific attributes of your application outside of system metrics
+ - Number of txns processed
+ - Response time of an API endpoint
+ - Number of active users
+
+CloudWatch Dashobards: visualize / monitor important metrics
+
+CloudWatch Alarms: 
+    - define thresholds for metrics
+    - establish a baseline
+        - measure performance of system under different loads and conditions
+
+CloudWatch retains metrics data for up to 15 months
+
+
+Common RDS Metrics:
+    CPU Utilization
+        - high value: instance might be under heavy load: scale up or optimize queries
+        - values over 80 - 90% can lead to bottlenecks
+
+    RAM Consumption
+        - high RAM consumption can slow performance
+
+    Disk Space: 
+        - value consistently above 85%: may need to delete / archive data
+
+    Database Connections: 
+        - # of connections approaching max limit can lead to: 
+            - connection errors
+            - application failures
+
+Third Party Monitoring:
+    - DataDog
+    - Splunk
+
+Amazon CloudWatch lab
+
+
+
+
 
 
 
