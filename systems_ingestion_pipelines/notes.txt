@@ -2271,7 +2271,7 @@ Airflow Components
 
                                 [ Metadata ]
                                 [ Database ]
-                    +--------------+  ^+-------------------------------------
+                    +-----------------^+------------------------------------+
                     v                 |                                     |
 [  User   ]<<---[  Web   ]      [  Workers ] <<-----------------------[ Scheduler ]
 [Interface]     [ Server ]            |                               [(executor) ] 
@@ -2316,8 +2316,126 @@ Webserver extracts states from Metadata DB and displays in UI
 Amazon Managed Workflows for Apache Airflow (MWAA)
 
 
-MAP LAST HERE
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/C72As/airflow-the-airflow-ui
+# Airflow UI
+
+
+DAG view:  list of all DAGs in DAG Directory
+
+    - holds DAG Info
+    - schedule
+    - Last Run / Next Run / Status
+        - queued, success, running, failed
+    - Recent tasks
+        - queued, success, running, failed, up_for_retry, up_for_reschedule, skipped
+    - can toggle a DAG / trigger / delete
+    - filter by stauts / tags
+
+DAG Detail:
+    - Details 
+        - run detail
+    - Graph
+        - can review overall graph of DAG
+        - can review specific run of a DAG via graph view with status codes (failed, etc.)
+            - click on a taks and logs tab pops up 
+                - lick on logs to review log for that specific task
+            - can also "Clear and Retry task"
+    - Gantt
+        - shows queued duration (gray) and run duration (green)
+    - Code
+        - shows code for specific DAG
+
+
+# Create a DAG
+    [extract       ] -->>  [transform     ] -->>  [load          ]          
+    [PythonOperator]       [PythonOperator]       [PythonOperator]   
+
+
+my_first_dag.py
+
+from airflow  import DAG
+from datetime import datetime
+
+# context manager
+with DAG(
+    dag_id = "my_first_dag",            # name of dag that shows in UI
+    description = "ETL Pipeline",       # value of "hover" over a dag
+    tags =["data_engineering_team"],    # can filter by tag
+    schedule = "@daily",                # can pass along a cron expression, presets @daily, @monthly, @hourly, @weekly, timedelta object
+    start_date = datetime(2024,12,1),   # first date DAG will be executed on
+    catchup = False):                   # boolean, default = true. If true, schedule will kick off a DAG run for any missed intervals 
+                                        # when DAG was paused. Also will trigger a DAG run if start_date precedes creation date 
+                                        # i.e. start_date is in the past to creation date 
+    ):
+)
+
+
+
+Airflow Operators 
+    - used to define task
+    - Operators are python classes used to encapsulate the logic of the tasks.
+        - encapsulates the logic of the task
+    - Can import Operators into your code
+    - Each task is an instance of an Airflow Operator
+
+Types of Operators: 
+    PythonOperator: execute a python script
+    BashOperator  : execute bash commands
+    EmptyOperator : organize DAGs i.e. making start or end of pipeline
+    EmailOperator : send you notification via an email
+    Sensor        : special type of Operator used to make our DAGs event-driven
+
+
+
+# Now define tasks
+
+my_first_dag.py
+
+from airflow  import DAG
+from datetime import datetime
+from airflow.operators.python import PythonOperator
+
+def extract_data():
+    #code for extracting  data
+    print("Done with extraction task")
+
+def transform_data():
+    #code for transforming  data
+    print("Done with transformation task")
+
+def load_data():
+    #code for loading  data
+    print("Done with loading task")
+
+
+# context manager
+with DAG(
+    dag_id = "my_first_dag",            
+    description = "ETL Pipeline",       
+    tags =["data_engineering_team"],    
+    schedule = "@daily",                
+    start_date = datetime(2024,12,1),   
+    catchup = False):
+        # define tasks
+        task_1 = PythonOperator(task_id='extract',   python_callable=extract_data)   # python_callable references a python function                    
+        task_2 = PythonOperator(task_id='transform', python_callable=transform_data) # python functions can be defined in this file, 
+        task_3 = PythonOperator(task_id='load',      python_callable=load_data)      #  a separate file and imported or on the task line
+                                        
+        task_1 >> task_2 >> task_3          # define dependencies of tasks. task_1 should be completed before task_2 starts
+                                            # task_2 should be completed before task_3 starts                                
+
+
+
+## Additonal Notes about Airflow Basic Concepts
+
+
+# Introduction to Airflow UI
+https://www.astronomer.io/docs/learn/airflow-ui
+
+
+
+
+
+
 
 
 
