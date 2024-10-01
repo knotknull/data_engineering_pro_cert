@@ -2116,13 +2116,66 @@ https://www.gable.ai/blog/data-contracts
 ## Week 4
 
 
+Orchestration, Monitoring and Automating Data Pipelines
+
+Apache Airflow: pipeline as code
+
+# Before Orchestration
+    - cron
+    1 8 4 2 0   command to be executed
+    ^ ^ ^ ^ ^
+    | | | | |
+    | | | | +---- Week (0=Sun ... 6=Saturday) 
+    | | | +------ Month (1 - 12)
+    | | +-------- Day   (1 - 31)
+    | +---------- hour  (0 - 23)
+    +------------ Min   (0 - 59)
+
+NOTE: * = no restriction on that value 
+
+
+schedule a cron every night at midnight, python REST API
+0 0 * * *   python ingest_from_rest_api.py       ## every midnight ingest from REST API
+0 1 * * *   python transform_api_data.py         ## every 1 AM transform data from REST
+0 0 * * *   python ingest_from_database.py       ## every midnight ingest from DB
+0 2 * * *   python combine_api_and_database.py   ## every 2 AM combine API and DB data
+
+## Failure is not good in a system like this
+
+
+# Evolution of Orchestration Tools
+
+
+late 2000s  Dataswarm (facebook)
+2010s       Apache Oozie 
+                - designed for hadoop cluster
+                - difficult to use in heterogeneous environment
+2014        Airflow (airbnb) / Open source project
+2019        Airflow full Apache project
 
 
 
+Advantages and Challenges of Airflow
+Advantages:
+    - written in python
+    - very active project
+    - available as a managed service:
+        - AWS, GCP, astronomer.io
+
+Challenges:
+    - scalability challenge
+    - ensuring data integrity
+    - no support for streaming pipelines
+
+Other Open Source Orchestration tools:
+- luigi
+- Conductor
+- Prefect:  more scalable orchestration solution than Airflow
+- dagster:  built-in capabilities for data quality testing
+- Mage:     built-in capabilities for data quality testing
 
 
-
-
+# Orchestration Basics
 
 
 
