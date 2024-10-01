@@ -2100,6 +2100,27 @@ Third Party Monitoring:
 
 Amazon CloudWatch lab
 
+resources: 
+https://developer.hashicorp.com/terraform/docs
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html
+https://docs.greatexpectations.io/docs/oss/
+https://medium.com/@mikldd/incident-management-for-data-teams-5a14acd4e3d8
+https://cloud.google.com/docs/security/incident-response
+https://learning.oreilly.com/library/view/data-quality-fundamentals/9781098112035/
+https://dataproducts.substack.com/p/the-rise-of-data-contracts
+https://learning.oreilly.com/library/view/driving-data-quality/9781837635009/B19790_02.xhtml#_idParaDest-34
+https://www.gable.ai/blog/data-contracts
+
+## Source Systems, Data Ingestion and Pipelines
+## Course 2
+## Week 4
+
+
+
+
+
+
+
 
 
 
