@@ -2588,15 +2588,16 @@ examples:
 
 
 
+Airflow Lab
 
 
 
 
+# Airflow: XCom and Variable
 
+MAP LAST HERE
 
-
-
-
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/UpJIn/airflow-xcom-and-variables
 
 
 .
