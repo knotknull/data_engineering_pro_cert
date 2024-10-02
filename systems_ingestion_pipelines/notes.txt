@@ -2960,9 +2960,37 @@ def example_branching():
 example_branching()
 
 
+LAB
+
+
+# Orchestration on AWS
+
+Amazon Managed Workflows for Apache Airflow (Amazon MWAA)
+    - runs Airflow and handles tasks like provisioning and scaling
+    - integrates with other AWS Services
+        - CloudWatch
+        - S3
+        - AWS Key Management Service (KMS)
+
+AWS Glue Workflows: create, run, monitor complex ETL workflow
+
+
+    [trigger] --> +-->[crawlers]---+--->[job]--->[trigger]--->[job]--->[end]
+                  |                |
+                  |                |
+                  +-->[crawlers]---+
+
+trigger types:
+    - schedule
+    - on-demand
+    - event from EventBridge
+
+AWS Step Functions:  orchestrate services and states into workflows called state machines
+    - states can be tasks: Lambda, Glue job, ECS task
+    - states can  make decisions on their input, perform actions from inputs, and pass outputs 
+        to other states
 
 
 
 
-
-    .
+.
