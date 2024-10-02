@@ -2686,17 +2686,62 @@ variables created:  locations, number_post  ## locations stored as json
 
 from airflow.models import Variable
 Variable.get(key='number_post')
-Variable.get(key='locations', deserialize_json=True)['geo']
+Variable.get(key='locations', deserialize_json=True)['geo'] # deserialize_json options returns json as a dictionary instead of a string
 
 
 
+# Best Practices for Writing Airflow DAGs
+
+1. Keep tasks simple / atomic.  Have a task represent one operation
+    Warning: top level code i.e. code outside of DAG operator will be run when DAG is parsed by scheduler
+             code that is part of operator is executed when the task runs not when DAG is parsed.
+             Top level code can cause issues because the scheduler checks DAG directory and 
+             parses DAG files every 30 seconds
+
+2. User created variables are global, should only be used for overall config, entire installation
+    To pass between tasks (task_id) use XCom
+    Keep most settings and config in DAG files so it can me versioned
+
+3. Airflow Variables:
+   built-in variables contin info about currently running DAG 
+    Can pass "Jinja" variables to PythonOperator calls
+
+    task_load_s3 = PythonOperator(task_id="load_to_d3", python_callable=load_to_s3,
+                        op_kwargs={'file_name': "data/created{{ds}}/file.csv"}
+
+examples of task variables :
+    {{ ts }}        logical data, same as {{ logical_date }}
+    {{ exception }} logical data, same as {{ logical_date }}
+    {{ conf }}      configuration object
 
 
+4. Task Groups:
+    group tasks using Task Groups
 
+from airflow.utils.task_group import TaskGroup  
 
+with DAG(...):     
 
+    start = DummyOperator(...)
+    with TaskGroup('task_group')as task_group:
+       task_a = PythonOperator(...)
+       task_b = PythonOperator(...)
+       task_a >> task_b
+    end = DummyOperator(...)      
 
+    start >> task_group >> end
 
+5. Heavy processing should be done by Spark (etc.) not Airflow
+
+6. Don't use XCom for large files (i.e. dataframes) use intermediate storage (S3, file)
+
+7. Streamline code, easy to read
+
+Airflow references: 
+
+https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#communication
+https://docs.astronomer.io/learn/dag-best-practices
+https://maximebeauchemin.medium.com/functional-data-engineering-a-modern-paradigm-for-batch-data-processing-2327ec32c42a
 
 
 
