@@ -2889,17 +2889,75 @@ example_xcom_taskapi()
 
 
 
+    [extract_data  ]     [ check_ratio  ]     [print_less    ]      [do_nothing    ]
+    [PythonOperator] --> [PythonOperator] +-> [PythonOperator]   +->[PythonOperator]
+                                          |                      |
+                                          |                      |
+                                          |    [print_greater ]  |
+                                          +--> [PythonOperator]--+
 
 
 
+## Traditional Paradigm
+
+with DAG(dag_id="branching", start_date=datetime(2024, 3, 13), schedule='@daily', catchup=False):
+    task_1 = PythonOperator(task_id='extract_data', python_callable=extract_from_api)
+    task_2 = BranchPythonOperator(task_id='check_ratio', python_callable=check_ratio)
+    task_3 = PythonOperator(task_id='print_greater', python_callable=print_case_greater_half)
+    task_4 = PythonOperator(task_id='print_less', python_callable=print_case_less_half)
+    task_5 = EmptyOperator(task_id='do_nothing', trigger_rule = 'none_failed_min_one_success')
+    
+    task_1 >> task_2 >> [task_3, task_4] >> task_5
 
 
+from airflow import DAG
+from datetime import datetime
+from airflow.decorators import dag, task
+
+@ dag(start_date=datetime(2024, 3, 13),schedule='@daily', catchup=False)
+def example_branching():
+    @task
+    def extract_from_api():
+        import requests
+        number_posts = 40
+        location = "usa"
+        url_link = "https://jobicy.com/api/v2/remote-jobs"
+        response = requests.get(url_link, 
+                    params={"count": number_posts,  
+                            "geo": location, 
+                            "industry": "engineering",
+                            "tag": "data engineer"}).json()
+        count = 0
+        for job in response['jobs']:
+            if job['jobLevel'] == 'Senior':
+                count += 1
+        ratio = count / len(response['jobs'])
+        return ratio
+
+    @task.branch()                              ## NOTE: @task.branch() decorator version of BranchPythonOperator
+    def check_ratio(ti=None):
+        if float(ti.xcom_pull(task_ids='extract_from_api')) > 0.5:
+            return 'print_case_greater_half' # task_id of the greater than case
+        return 'print_case_less_half'  # task_id of the less than case
+
+    @task
+    def print_case_greater_half(ti=None):
+        print( "The ratio is greater than half: " +
+                str(ti.xcom_pull(key='ratio_us', task_ids='extract_data')))
+
+    @task
+    def print_case_less_half(ti=None):
+        print("The ratio is less than half: " +
+                str(ti.xcom_pull(key='ratio_us', task_ids='extract_data')))
+
+    @task(trigger_rule='none_failed_min_one_success')
+    def empty_task():
+        pass
+    
+    extract_from_api() >> check_ratio() >> [print_case_greater_half(), print_case_less_half()] >> empty_task()
 
 
-
-
-
-
+example_branching()
 
 
 
