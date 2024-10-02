@@ -2744,17 +2744,167 @@ https://docs.astronomer.io/learn/dag-best-practices
 https://maximebeauchemin.medium.com/functional-data-engineering-a-modern-paradigm-for-batch-data-processing-2327ec32c42a
 
 
-
-
-MAP LAST HERE
-
-
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/Y2znr/airflow-taskflow-api
-
 # Airflow Taskflow API
+    - Airflow 2.0 introduced TaskFlow
+
+
+Traditional Paradigm                  |           TaskFlow API
+--------------------------------------|-------------------------------------
+- instantiate a DAG object            |     - DAGs are easier to write and 
+  to define the DA                    |       more concise
+                                      |
+- Use PythonOperator to define tasks  |     - Use decorators to create the DAG
+                                      |       and its tasks
+
+
+    [ extract      ]    [ transform    ]    [load          ]
+    [PythonOperator] -->[PythonOperator] -->[PythonOperator]
+
+instead of using with DAG use a decorator 
+
+
+import datetime import datetime
+from airflow.decorators import dag, task
+
+@dag(                                   ## @dag implicitly calls the DAG constructor
+    description = "ETL pipeline",
+    tags = ["data_engineering_team"],
+    schedule="@daily",
+    start_date = datetime(2024, 12, 1),
+    catchup = False)
+)
+def my_first_dag():                 ## NOTE: define the content of DAG as a python function directly after decorator 
+    # define tasks here             ##       function name is the dag_id 
+
+    # define dependencies here
+
+my_first_dag()                      ## Call DAG function after declaration so it shows up in Airflow
+
+
+Task Definition 
+
+# Traditional way 
+
+    # define tasks
+    task_1 = PythonOperator(task_id='extract',   python_callable=extract_data)   
+    task_2 = PythonOperator(task_id='transform', python_callable=transform_data) 
+    task_3 = PythonOperator(task_id='load',      python_callable=load_data)      
+
+Need to keep track of: 
+    - task_id
+    - name of python function
+    - name of the task variable
+
+
+# TaskFlow API / Task Definition
+
+use @task decorator
+
+import datetime import datetime
+from airflow.decorators import dat, task
+
+@dag(                                   
+    description = "ETL pipeline",
+    tage = ["data_engineering_team"],
+    schedule="@daily",
+    start_date = datetime(2024, 12, 1),
+    catchup = False)
+)
+def my_first_dag():                 
+    # define tasks here             
+    @task                                           # implicitly calls PythonOperator
+    def extract_data()                              # task_id is function name 
+        # code for extracting data
+        print("Done with the extration task")
+
+    @task 
+    def transform_data()
+        # code for transforming data
+        print("Done with the transformation task")
+
+    @task 
+    def load_data()
+        # code for loading data
+        print("Done with the loading task")
+
+    #define  dependencies here 
+    extract_data() >> transform_data() >> load_data()  ## Dependencies use bit shift but use function names 
+                                                       ## instead of task variable i.e. extract_data() vs. task_1 
+
+my_first_dag()
+
+
+
+
+# XCOM Traditional vs TaskFlow
+
+# Traditional
+def extract_from_api(**context):
+    ratio_senior_jobs = # code
+    context['ti'].xcom_push(key='ratio_senior_jobs', value=ratio_senior_jobs)
+
+def print_data(**context):
+    print(context['ti'].xcom_pull(key='ratio_senior_jobs', task_ids='extract_from_API'))
+
+# TaskFlow
+from datetime           import datetime
+from airflow.decorators import dag, task
+from airflow.models     import Variable
+
+@dag(                                   
+    start_date = datetime(2024, 3, 13),
+    description = "First DAG",
+    tags = ["data_engineering_team"],
+    schedule="@daily",
+    catchup = False)
+)
+def example_xcom_taskapi():                 
+    # define tasks here
+    @task 
+    def extract_from_api()
+        # code that connects API
+        ratio_senior_jobs = # code
+        return ratio_senior_jobs           ## NOTE: return a value from function i.e. xcom_push
+
+    @task 
+    def print_data(geo_ratios: dict)       ## NOTE: declares variable being passed in i.e. xcom_pull 
+        print(geo_ratios)
+
+    # define dependencies    
+    data = extract_from_api()           ## Assign output from function call and pass into next
+    print_data(data)                    ## can do it in one call print_data(extract_from_api())
+
+example_xcom_taskapi()
+
+## Can still use xcom_pull along with TaskFlow 
+## but you have to  
+    @task 
+    def print_data(**context)       ## NOTE: declares variable being passed in i.e. xcom_pull 
+        print(context['ti'].xcom_pull(task_ids='extract_from_api')
+
+    # define dependencies    
+    extract_from_api() >> print_data()  
+
+    # Branching in Airflow
 
 
 
 
 
-.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .
