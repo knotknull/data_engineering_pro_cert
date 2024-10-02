@@ -1,0 +1,187 @@
+## Storage Queries
+## Course 3
+## Week 1
+
+
+
+
+
+
+## Data Storage Deep Dive
+
+# Overview
+
+
+
+Storage Solution Considerations
+    - Data type         - Data size
+    - Data format       - Access and update pattern
+
+
+
+Storge Hierarchy 
+---------------------
+
+[Storage Abstraction  ]
+[Cloud Datawarehouse  ]
+[Data Lake/Lakehouse  ]
+        ^
+        |
+
+[Storage Systems     ]
+[RDBMS, Graph, Vector]
+[Object Storage      ]
+        ^
+        |
+[Raw Ingrediants      ]
+[Magnetic, SSD, RAM   ]
+[Network, compression ]
+[CPU, Caching         ]
+
+Management System:
+Organizes data in the raw components and allows 
+you to interact with stored data
+
+
+OLTP: Online Transactional Processing Systems
+  Focus on performing read / write queries with low latency
+
+
+OLAP: Online Analytical Processing Systems
+  Focus on applying analytical activities on data
+  (aggregation, summarization)
+
+
+Trade-off between storage costs and performance
+
+
+# Storage Raw Ingredients - Physical Components of Data Storage
+
+Raw Storage Ingredients
+
+Magnetic Disks / HDDs / Magnetic platters with disk heads
+    track / sector give address
+    write: encode binary data by change magnetic field
+    read:  converts magnetic field into binary data
+
+
+Solid State Drives / SSD / Flash memory
+    electrical charges in flash memory cells
+      - charged   cell = 1 bit
+      - uncharged cell = 1 bit
+    read / writes faster than HDD
+
+
+Performance Comparison
+                       |   Magnetic Disk   |       SSD            |      RAM         |   CPU Cache      |
+-----------------------|-------------------|----------------------|------------------|------------------|
+Latency                | 4ms               |    0.1ms             | 0.1 microseconds |    1 nanosecond  |
+IOPS                   | hundreds          |    10s of thousounds |  Millions        |                  |
+Data Transfer speed ** | Up to 300 MB/s    |    4 GB/s            |  100 GB/s        |    1 TB/s        |
+Cost                   |  $0.03 = 0.06/GB  |   $0.08 - 0.10/GB    |  > $3/GB         |                  |
+
+** # MBs read/ write form disk to memory 
+
+Improving Performance
+Distributed Storage 
+    - distribute daa across many HDD
+    - read simulatneously 
+    - transfer speed limiited by network
+
+
+Partitioning 
+    - slice SSDs into partitions
+    - multiple storage controllers running in parallel
+
+
+
+
+Latency (data access time)= Seek time + Rotational latency
+Commercial magnetic disk drive: 7200 RPM (rev / min)
+
+
+# Storage Raw Ingredients - Processes Required for Data Storage
+
+
+Networking / CPU  
+Enhance:
+  - read and write performance
+  - data durability
+  - data availability
+
+Serialization
+
+                Serilize
+[ In-memory ] -----------------> [Disk ]
+[  Format   ]      Transform     [Format]
+              <----------------
+                 DeSerialization
+Data structures
+optimized for 
+CPU Usage
+
+
+
+Row-based Serialization
+[first record][ second record][ third record]
+[object 1 ] [ object  2] ....
+
+Column-based Serialization
+[ bytes represent 1st col ] [ bytes represent 2nd col ] [ bytes represent 3rd col ] 
+[ bytes represent 1st key ] [ bytes represent 2nd key ] [ bytes represent 3rd key ] 
+
+
+
+
+
+Serialization Formats
+
+Human-readable Textual Formats
+    - csv:  row-based format
+            prone to error, no defined schema
+            adding new rows or columns requires manual handling
+
+    - xml   viewed as legacy format
+            slow to serialize / deserialize
+
+    - json  used for plain-text object serialiazation
+            viewed as new standard for data echanage of APIs
+
+Binaryi Formats
+
+    - parquet  Column-based format
+               for efficient storage and big data proces
+
+    - avro     row-based format
+               Uses a schema to define its data structre 
+               Supports schema evolution
+
+
+
+Compression: a way to reduce the number of bits needed to reqpresent the data
+    - remove redundancy and repetition of data to achieve 
+       more efficeint encoding 
+
+    - encode characters based on their frequency
+    - requces disk space
+    - improves query performance
+    - Reduces the I/O time needed to load data
+
+
+Compression Algorithms: 
+
+MAP LAST HERE: 
+
+https://www.coursera.org/learn/data-storage-and-queries/supplement/ebNtg/optional-compression-algorithms
+
+
+
+
+
+
+
+
+
+
+
+.
