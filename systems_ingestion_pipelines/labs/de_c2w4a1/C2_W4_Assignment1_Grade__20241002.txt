@@ -1,0 +1,9 @@
+
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	10/10
+	
+Existence of Parquet Files in Raw Data Bucket 	24/24
+	
+Existence and Syntax Check of DAG Python Files 	66/66
+	
