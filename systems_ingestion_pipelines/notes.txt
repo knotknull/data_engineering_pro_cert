@@ -2746,13 +2746,12 @@ https://maximebeauchemin.medium.com/functional-data-engineering-a-modern-paradig
 
 
 
+MAP LAST HERE
 
 
+https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/Y2znr/airflow-taskflow-api
 
-
-
-
-
+# Airflow Taskflow API
 
 
 
