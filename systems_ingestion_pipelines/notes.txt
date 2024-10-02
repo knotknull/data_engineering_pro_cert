@@ -2592,12 +2592,125 @@ Airflow Lab
 
 
 
-
 # Airflow: XCom and Variable
 
-MAP LAST HERE
 
-https://www.coursera.org/learn/source-systems-data-ingestion-and-pipelines/lecture/UpJIn/airflow-xcom-and-variables
+XCom: cross-communication, Airflow feature for sharing data among tasks
+    - designed to pass small amounts of data:
+        metadata, dates, single value metrics, simple computations
+
+
+
+To pass data from task 1 to task 2
+
+[task 1]    --------  value  -----------------> [task2]
+
+what XCom does
+
+                          XCom
+                          Variable
+           xcom_push     +---------+
+[ task 1 ] -----------> |  Value  |----+      [==========]  
+                        |  key    |    |      [ Metadata ]  xcom_pull
+                        |Timestamp|    +----> [ Database ] -----------> [ task 2] 
+                        | Dag id  |           [==========]
+                        | Task id |
+                        +---------+
+
+
+ex.
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import date time
+
+## Call xcom_push here
+def extract_from_api(**context):
+    import requests
+    # REST API to job site
+    response = requests.get("https://jobi.com/api/v2/remote-jobs",
+                            params={"count": 40,
+                            "geo":"usa",
+                            "industry":"engineering",
+                            "tag": "data engineer"}).json() 
+    count = 0
+    for job in response['jobs']:
+        if job['jobLevel'] == "Senior: 
+            count += 1
+     ratio_senior_jobs = count / len(response['jobs'])  ## pass this value to second task
+     context['ti'].xcom_push(key='ratio_senior_jobs', value=ratio_senior_jobs)
+## 
+## NOTE: xcom_push is associated task instance (object representing the currently running task)
+##       Airflow has built-in variables that contain info about currently running, via dictionary Airflow context 
+##       context['ti']: ti stands for task instance
+
+
+## Call xcom_pull here
+def print_data(**context):
+    print(context['ti'].xcom_pull(key='ratio_senior_jobs', task_ids='extract_metric))
+
+with DAG(
+    dag_id='demo_example',
+    tags=['example'],
+    schedule='@daily',
+    start_date=datetime(2023, 3, 24),
+    catchup=False):
+        # define tasks
+        extract_task = PythonOperator(task_id='extract_metric', python_callable=extract_from_api)
+        print_task   = PythonOperator(task_id='print_metric',   python_callable=print_data)
+
+        # define dependencies
+        extract_task >> print_task
+
+
+XComs can be checked from Airflow > Console > Admin > XComs
+
+XComs are not designed to send around dataframes 
+    - impact performance of DAGS and Metadata Database
+
+
+Can create Global variables in Airflow UI
+create environmental vairable and use them
+
+
+
+Airflow console > Admin > Variables 
+
+## list of variables
+'+' to create new variable
+enter Key, Val, and description
+
+variables created:  locations, number_post  ## locations stored as json
+
+# Access variables in python 
+
+from airflow.models import Variable
+Variable.get(key='number_post')
+Variable.get(key='locations', deserialize_json=True)['geo']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .
