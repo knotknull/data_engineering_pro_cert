@@ -281,7 +281,95 @@ Avro Use Cases:
 
 Clod Storage Options: Block, Object and File Storage
 
+File Storage: organizes files into a directory tree
+    Each directory contains metadata about its files / folders:
+        - Name
+        - Owner
+        - Last Modified
+        - Permissions
+        - pointer to the actual entity
 
+    Cloud FIle Storage Service 
+        - Amazon Elastic File System (EFS)
+        - provides access to shared files over a network 
+        - Networking, scaling and configuration handled by clour vendor
+
+    File storage sits on top of Block Storage
+
+
+File Storage: divides files into small, fixed-size blocks of data and stores on disk
+    - each block has a unique identifier
+    - efficiently retrieve and modify data in individual blocks
+    - can distribute blocks across multiple storage disks
+        - higher scalability
+        - stronger data durability
+
+    i.e. think direct db writes or VM storage
+
+
+Block Storage Lookup Table 
+    File Piece     Block Identifier
+  1st Piece             1232  
+  2nd Piece             1234
+  3rd Piece             1236
+  4th Piece             1238
+
+
+when ask for a file, all blocks are gathered and merged together
+    can update a specific block by identifer and don't have to write entire file
+
+
+Block Storage Use Cases:
+    - Ideal for freuent access and modification
+    - Enables OLTP systems to perform small and frequent read and 
+      write operations with low latency
+    - Provides persistent storage for virtual machines
+
+Default storage for EC2:
+    Amazon Elastic Block Storage (EBS)
+    1. SSD for latency-sensitive workloads
+    2. Magnetic disks to store infrequently-accessed data
+
+NOTE: Block storage caps out at around several TB because it is attached to compute
+
+
+Object Storage decouples data storage layer from the compute layer
+    - can scale to Petabytes
+
+
+
+Object Storage
+    - Stores immutable files as data objects in a flat structure
+    - organized into top-level logical containers (S3 Bucker)
+    - each object assigned unique identifier (key)
+
+s3://oreilly-data-engineering-book/data-example.json
+|                                | |               |
++--------------------------------+ +---------------+
+                |                         |
+           Bucket Name                Object Key
+(must be unique across AWS)
+
+    - once data is writtent object becomes immutable
+    - have to re-write the entire object if file is updated
+    - can scale horizontally and support performant parallel operations
+        - each node holds shards of objects
+
+
+Object Storage Use Cases:
+
+        Ideal for                                       Not Ideal for
+- Storage layer of cloud                            - Not good for supporting transactional workloads 
+  data warehouses and data lakes
+
+- Storing data needed in OLAP systems 
+        (read heavy analytics)
+
+- Machine learning pipelines
+    - raw text
+    - images
+    - Videos
+    - Audio
 
 
 
