@@ -659,6 +659,97 @@ Redis
     - supports high-performance applications that can tolerate minor data loss
 
 
+# Row vs Column Storage
+
+
+Row Oriented Storage
+
+Order id        Price       SKU         Quantity    Customer Id
+--------       --------   -----------   ----------  ------------
+  1             40          45865           10          67t
+  2             23          90234           14          56t
+  3             45          12558           12          87q
+  4             50          45682           13          98q
+
+Stores data row by row in physical storage
+
+  1  | 40 | 45865 | 10 | 67t |   2  | 23 | 90234 | 14 | 56t |   3  | 45 | 12558 | 12 | 87q |   4  | 50 | 45862 | 13 | 98q | 
++----------------------------+                                                             +------------------------------+
+             |                                                                                              |
+        first record                                                                                    Nth Record
+
+Row storage is ideal for OLTP. 
+    - Performs read and write operations with low latency
+
+
+What if you wanted to do analytics on price: 
+
+select sum(price) from my_table
+
+1 million rows
+30 columns  
+100 bytes per entry == 3 GB  of data to transfer to RAM
+Data Transfer speed: 200 MB /s
+Total transfer time: 3000 MB / 200 MB/s = 15 sec
+
+if 1 billion rows == 3000 GB 
+
+Total transfer time: 3000000 MB / 200 MB/s =  > 4 hrs
+
+
+Column Oriented Storage  (Column Store)
+
+Order id        Price       SKU         Quantity    Customer Id
+--------       --------   -----------   ----------  ------------
+  1             40          45865           10          67t
+  2             23          90234           14          56t
+  3             45          12558           12          87q
+  4             50          45682           13          98q
+
+
+
+Stores data column by column 
+Pysical Storage
+
+
+  1  | 2 | 3 | 4 | 40 |  23  | 45 | 50 | 45865 | 90234 | 12558  | 45682 | 10 | 14 | 12 | 14  | 67t | 56t | 87q | 98q | 
++----------------+                                                                           +-----------------------+
+         |                                                                                            |
+ all data in                                                                                      all data in 
+ first column                                                                                      Nth column
+
+
+select sum(price) from my_table
+
+1 billion rows
+1 columns  
+100 bytes per entry == 100 GB  of data to transfer to RAM
+Data Transfer speed: 200 MB /s
+Total transfer time: 100000 MB / 200 MB/s = 8.33 minutes
+
+
+
+Column storage is ideal for OLAP. 
+BUT, column storage is terrable for transaction workloads
+
+
+# The Parquet Format 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
