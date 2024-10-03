@@ -544,10 +544,120 @@ https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainab
 
 # Comparing Cloud Storage Options
 
+Object Storage
+File   Storage
+Block  Storage
+Memory
 
-MAP LAST HERE
+Lab:
 
-https://www.coursera.org/learn/data-storage-and-queries/lecture/46Pvt/lab-walkthrough-comparing-cloud-storage-options
+Object storage contains immutable objects of various sizes and types. 
+Unlike files on a local disk, objects cannot be modified in place.
+
+Between other features of object storage systems you can find:
+
+    Durability and Redundancy: Object storage systems typically employ data redundancy and 
+      replication techniques to ensure data durability and availability. Objects are often 
+      replicated across multiple storage nodes or data centers to protect against hardware failures, 
+      data corruption, and other types of data loss.
+
+    Access Methods: Objects are accessed using standardized application programming interfaces (APIs) 
+      such as Amazon S3 (Simple Storage Service) API. These APIs provide a set of operations for storing, 
+      retrieving, updating, and deleting objects, as well as managing object metadata and access control.
+
+    Data Access Patterns: Object storage systems are well-suited for storing unstructured data and large 
+      volumes of data, such as multimedia files, backups, archives, log files, and data lakes. They are 
+      commonly used in cloud storage services, content delivery networks (CDNs), and big data analytics platforms.
+
+
+
+Lab:
+
+following is an example of the timed_lru_cache decorator from cache-pandas package 
+It allows you to store in memory the resulting data from from a function.  Compare the 
+time of the first read and then after it is stored in cache:
+
+
+@timed_lru_cache(seconds=100, maxsize=None)
+def read_csv_to_memory(path: str) -> pd.DataFrame:
+    """Read CSV function with a cache decorator."""
+    return pd.read_csv(path)
+
+start = timeit.default_timer()
+df = read_csv_to_memory('data/employees.csv')
+end = timeit.default_timer()
+print(f'Elapsed time: {end - start} seconds')
+
+
+
+# first run
+Elapsed time: 2.7644586910000726 seconds
+
+# second run
+Elapsed time: 5.668999983754475e-05 seconds
+
+
+# thrid run, after waiting the 100 seconds on the cache
+Elapsed time: 2.157280639000419 seconds
+
+
+htop:  fancy top 
+   shows CPU, Mem, Swp, processes
+
+
+# Storage in Databases 
+
+# How Databases Store Data
+
+Database Management System
+[    Transport System    ]
+[    Query Processor     ]
+[    Execution Engine    ]
+[    Storage Engine      ]
+
+
+Storage Engine:
+    - serialization
+    - arrangement of data on disk
+    - indexing
+
+    Modern Storage Engines
+    - Support the performance characteristics of SSDs
+    - Handle modern data types and structures
+    - Offer robust column storage support
+
+Index: data structure that helps you efficiently locate data
+
+    Index table
+    Country  | Row Address
+    Brazil   |     ###
+    Canada   |     ###
+    Mexico   |     ###
+    Usa      |     ###
+
+
+
+Scanning all rows O(n) vs. Binary search on rows O(log n)
+
+
+In-Memory Storage Systems 
+
+    - Excellent transfer speed and low latency
+    - Volatile
+    - Used to present data for ultra-fast retrieval
+        - Caching Applications
+        - Real-time bidding
+        - Gaming leaderboards
+
+Memcached
+    - key-value store to cache database query results or API calls
+    - used when it's acceptable for data to be lost
+
+Redis
+    - key-value store that supports more cmplex data types
+    - persistent functionality: snap-shotting, journaling
+    - supports high-performance applications that can tolerate minor data loss
+
 
 
 
