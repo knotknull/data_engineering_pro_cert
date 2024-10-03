@@ -372,6 +372,19 @@ Object Storage Use Cases:
     - Audio
 
 
+Cloud Storage Options 
+
+    File Storage                    Block Storage               Object Storage
+-------------------------       ------------------------    -------------------------   
+-supports data sharing          - supports transaction      - Supports analytical queries on 
+                                   workloads                    massive datasets
+
+-Easy to manage with low        - Allows frequent read      - Offers high scalability and
+ with low performance and         and write operations        parallel data processing
+ scalabilitya requirements        with low latency
+
+
+Storage Tiers: Hot, Warm, Cold Data
 
 
 
