@@ -510,9 +510,46 @@ BASE:  Baseically Available:  consistent data is available most of the time
 
 # Database Partitioning / Sharding Methods
 
+Common Sharding Methods:
+
+Range-based sharding:
+    - method splits rows based on a range of values
+i.e. split by the first letter of  customer name
+
+Name            Shard Key
+A to I              A
+J to S              B
+T to Z              C
+ 
+
+NOTE: can lead to unbalanced shards
+
+
+Hashed sharding:
+    - method uses a mathematical fomula called a hash function to determine how to partition data.
+        - get a hash of some data attributes and use that as shard key
+
+Geo sharding:
+    - method partitions data by geographic location
+        store cutomer informatin in a node that is physically in that location 
+
+
+Partitioning / sharding resources: 
+https://aws.amazon.com/what-is/database-sharding/
+https://www.amazon.com/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321/ref=sr_1_1?adgrpid=1344703291324157&dib=eyJ2IjoiMSJ9.i1bUGZK7N-KyWM2sQR7-B8KYS_yn_vgEDIPgCZKZEqrD3_kYv1WLMRNg2a_cyMTZkenScKZLD1xQT6PoxGtZjpfYLwagMBcOcvqwyg12Ux6vvPPHgXX1vMZoOg1vTM_pc7M5GoJOYAWtL-UQU8rix049vlX-qOUnpYLTJ2MrssfiHjzXSj62mtpldPZ9F8sSVwb2QyjkabDuQFUBKt8wljiPffjJIMY5B8rR7JfDvO8.HDmJ7Lu7-7fnydSo4DSG8hxechXwbUNz0baNI01HWH0&dib_tag=se&hvadid=84044027549737&hvbmt=be&hvdev=c&hvlocphy=44152&hvnetw=o&hvqmt=e&hvtargid=kwd-84044312865379%3Aloc-190&hydadcr=16438_10463512&keywords=designing+data+intensive+applications&qid=1713574421&sr=8-1
+
+
+
+
+
+# Comparing Cloud Storage Options
 
 
 MAP LAST HERE
+
+https://www.coursera.org/learn/data-storage-and-queries/lecture/46Pvt/lab-walkthrough-comparing-cloud-storage-options
+
+
 
 
 
