@@ -347,7 +347,7 @@ s3://oreilly-data-engineering-book/data-example.json
 |                                | |               |
 +--------------------------------+ +---------------+
                 |                         |
-           Bucket Name                Object Key
+           
 (must be unique across AWS)
 
     - once data is writtent object becomes immutable
@@ -386,6 +386,133 @@ Cloud Storage Options
 
 Storage Tiers: Hot, Warm, Cold Data
 
+                         Hot Storage             Warm Storage               Cold Storage
+                        -------------           --------------             -------------- 
+Access frequency        Very frequent           Less Frequent               Infrequently
+
+Example                 Product                 Reqular reports             Archive
+                        Recommendation           & Analsysis
+
+Storage Medium          SSD & Memory            Magnetic Disk or            Low Cost magnetic disks 
+                                                hybrid storage systems
+
+Storage Cost            High                        Medium                      Low
+
+Retrieval  Cost         Low                         Medium                      How
+
+
+
+AWS Storage Tiers
+                                Amazon S3
+                              Access Frequency
+
+        Hot Storage              Warm Storage          Cold Storage
+        -------------           --------------         -------------- 
+    S3 Express One zone         S3 Standard IA         S3 Glacier Flexible Retrieval
+    S3 Standard                 S3 One Zone-IA         S3 Glacier Deep Archive
+                                                       S3 Glacier Instant Retrieval 
+** IA: Infrequently Accessed
+
+
+
+# Distributed Storage Systems
+
+How Distributed Storage System Works
+
+    - distribute data across multiple servers called nodes
+        connected by network
+
+    - groups of nodes make up a cluster
+
+    - each node contains storage mediums
+        - HDD / SSD
+
+    - each node has processing abilities 
+        - data management
+        - replication / access control
+Total Capacity is capacity of all nodes
+
+
+ [------] [------] [------]
+ [......] [......] [......] 
+ [------] [------] [------]
+    |        |        |
+    +--------+--------+
+             |
+        Nodes / Groups of Nodes = cluster
+
+Can scale horizontally by adding additional nodes to cluster
+
+Single Machine Storage Architecture 
+    - can only scale vertical
+    - can only upgrade storage capacity of a single server
+
+Multiple Nodes / Clusters: 
+    -  Higher fault tolerance and data durability
+    -  High Availability
+    -  Processing many reads and write 
+        operations in parallel
+    -  Fast data access 
+        - serve request from nearest replica
+
+
+Distributed Storage Architecture utilized by 
+    - Object Storage
+    - Cloud Data Warehouse
+    - Hadoop HDFS
+    - Spark
+
+
+Methods for Distributing Data
+
+Replication:   Same copy across many nodes 
+                High availability and performance                
+
+
+Partitioning:   splits big dataset into smaller subsets 
+(sharding)          i.e. partitions / shards
+
+Takes time for updates to complete:
+    - wait for update to complete
+    - access "sort of" recent data
+
+
+Distributed Storage Considerations: CAP Therom
+
+CAP Therom: Any distributed  system can only guarantee 2 of 3 properties
+    - Consistency
+    - Availability
+    - Partition Tolerance
+
+Strong Consistency : every read reflects the latest write operation
+
+Availability       :  Every request will recieve a response
+
+Partition Tolerance:  System continues to function when network experiences 
+                       distruptions or failures isolate some nodes from otheres
+                        s(split brain)
+
+
+No Distributed System is immune from network failures or disruptions  
+    Network Paritioning has to be tolerated
+
+
+Hence, have to choose between Availability or Consistence if Partition Tolerance is mandatory
+    i.e. only 2 of 3 guaranteed 
+
+
+    ACID (RDBMS) vs. BASE
+
+BASE:  Baseically Available:  consistent data is available most of the time
+       Soft-state          :  uncertain if transaction is committed or uncommitted   
+       Eventual Consistency:  at some point, reading data will return consistent values   
+
+
+# Database Partitioning / Sharding Methods
+
+
+
+MAP LAST HERE
 
 
 
