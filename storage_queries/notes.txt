@@ -170,12 +170,116 @@ Compression: a way to reduce the number of bits needed to reqpresent the data
 
 Compression Algorithms: 
 
-MAP LAST HERE: 
+lossless compression: decompressing file returns exact copy
+lossy compression   : decompressions recovers something that sounds/looks like original. 
+                      Not an exact copy.  (i.e. audio / video files) 
 
-https://www.coursera.org/learn/data-storage-and-queries/supplement/ebNtg/optional-compression-algorithms
+
+New compression algos prioritize speed and CPU efficiency over compression ratio:
+    - Snappy
+    - Zstandard
+    - LZFSE
+    - LZ4
+
+General purpose compression to compress row and column stores:
+    -LZO, LZ4, Snappy, Brotli, Oracle OZIP, Zstd
+    
+
+Some algos are specific to column stores: consecutive values from same column are stored together on disk. 
+Compression improves database performance:
+    - database processes queries faster 
+        - less data to read from disk to memory and memory to CPU
+
+Column-based compresion algos:
+Run-lengh Encodding: compresses a run of the same values in a column 
+      - each run is replaced with a tuple that has 3 elements 
+        (value, start position, runLength)
+      - each element is represented with a fixed number of bits
+
+eg.     
+        34 34 34 63 32 32 32 67 67 67
+
+With RLE, you'll get this result: 
+
+        (34, 1, 3), (63, 4, 1,), (32, 5, 3), (67, 8, 3)
+
+Bit-Vector Encoding (or bitmap encoding): each distinct value is associated with a sequence of bits 
+          where the length of the sequence is the same as the number of records / rows in the column  
+           a '1' in the i-th position means that the ditinct value appears in the i-th row
+
+34 34 34 63 32 32 32 67 67 67
+
+With this algorithm, this data would be represented by four sequences of ten bits (i.e. the number of rows):
+
+    bit-string for value 34: 1110000000
+
+    bit-string for value 63: 0001000000
+
+    bit-string for value 32: 0000111000
+
+    bit-string for value 67: 0000000111
+
+Bit-vecotr encoding is the most useful when columns have a limited number of unique values 
+( i.e. US Staes, store id, product id)
+
+
+Compression Resources: 
+https://stratos.seas.harvard.edu/files/stratos/files/columnstoresfntdbs.pdf
+https://docs.aws.amazon.com/redshift/latest/dg/c_Compression_encodings.html
+https://martin.kleppmann.com/2012/12/05/schema-evolution-in-avro-protocol-buffers-thrift.html
+https://airbyte.com/data-engineering-resources/parquet-vs-avro
 
 
 
+Parquet is column based
+Avro    is row based
+
+
+Parquet Benefits:
+    columnar storage
+    various compression schemes: dictionary, run-length encoding 
+    predicate pushdown:  query engines can skip reading irrelevant data blocks
+    schema evolution  :  file format enables flexibl changes to data schemas
+                            add or modify columns without breaking compatibility
+    compatability     :  accomodates big data file formats 
+
+Parquet Use Cases:
+    - Big Data analytics
+    - Data Warehousing
+    - ETL Pipelines
+        - Parquet can be used as an intermediate storage format in ETL pipelines
+            can transform and process more efficiently before loading into data warehouse
+    - Log Analytics: Parquet is well-suited for analysing log files and event data
+            faster log analysis
+    - Data Archiving: Good choice for long-term data archiving.
+
+
+
+Avro Benefits:
+    binary row-oriented format
+    efficient serialize / deserialize
+    Suitable for data interchange
+    Schema-based Serialization
+        - schema defines data structure 
+        - schema and serialized data are stored in Avro data file
+    Schema Evolution
+        forward / backwared compatability
+    Dynamic Typing 
+        data can be searialized and deserialized without generating / sharing specific code
+    Interoperability 
+        data format supports several programming languages
+
+Avro Use Cases:
+    Data Interchange   : between apps, services, languages
+    Streaming Analytics: used in streaming data pipelines
+        efficient Serialization and compatability with streaming platform   
+    Messaging Systems  :  message queues, etc.
+    Data Replication   :  replicate data from one system to another
+    Big Data Processing:  used with big data frameworks, Kafka.  
+        data ingested, processed and analyzed efficiently across different stages of data pipeline
+
+
+Clod Storage Options: Block, Object and File Storage
 
 
 
