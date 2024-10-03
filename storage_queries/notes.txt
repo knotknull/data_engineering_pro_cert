@@ -735,16 +735,42 @@ BUT, column storage is terrable for transaction workloads
 
 # The Parquet Format 
 
+Parquet and ORC (optimized row column) combine row and column approaches
+    - paritioning rows into groups where each row group is stored in a column-wise format
 
 
+Product Sku    Price       Quantity    Customer Id
+-----------   --------   -----------   ------------
+  45865         40          10          67t
+  90234         23          14          56t
+  12558         45          12          87q
+  45682         50          13          98q
+
+Hybrid approach
 
 
+ 045865 | 902348 | 40 |  23  | 1 | 4 | 67t | 56t |  
+ 125893 | 456829 | 45 |  50  | 2 | 3 | 87q | 98q |  
 
 
+Parquet file: data is horizontally partitioned into row groups, each row group has 
+              a default size of 125 MB.  A row group consists of a column chunk for  
+              each column in the data set.  Each column chunk is divided into pages, 
+              where each page contains the encoded values for that column chunk, 
+              metadata like min, max and count of values, along with other data 
+              (repetition and definition levels) used to reconsturct the nested 
+              structure of the data. 
+
+NOTE: Parquet can be used to store tabular dta as well as nested data (i.e. JSON)
+      An ADVANTAGE is that Parquet is portable and can interoperate with external tools easily.
 
 
+Resources: 
+https://www.youtube.com/watch?v=1j8SdS7s_NY&t=643s
+https://www.upsolver.com/blog/the-file-format-fundamentals-of-big-data
+https://parquet.apache.org/docs/file-format/
 
-
+# Wide-Column Databases
 
 
 
