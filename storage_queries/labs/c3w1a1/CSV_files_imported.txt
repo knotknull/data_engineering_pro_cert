@@ -1,0 +1,6 @@
+
+The graph example shown in the video was created using the CSV files of the Northwind dataset
+and the instructions in this file:
+
+https://github.com/neo4j-documentation/developer-resources/tree/gh-pages/data/northwind
+

@@ -1,0 +1,579 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c3w1a1
+
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  LabRoleName:
+    Type: String
+    Description: Role name for the Lab Instance
+    Default: LabInstanceRole
+
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+  
+  Neo4jPort1:
+    Type: Number
+    Default: 7474
+    Description: Port for Neo4j
+  
+  Neo4jPort2:
+    Type: Number
+    Default: 7687
+    Description: Port for Neo4j
+
+  LatestAmiId:
+    Description: The latest Amazon Linux 2023 AMI from the Parameter Store
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64'
+
+  InstanceType:
+    Description: The EC2 instance type
+    Type: String
+    Default: t3.medium
+    AllowedValues:
+      - t3.small
+      - t3.medium
+
+  KeyName:
+    Description: Name of an existing EC2 KeyPair
+    Type: String
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+  
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w1a1/lambda_layer_dependencies_p312.zip
+
+  PublicBucketCypherKey:
+    Type: String
+    Description: Public bucket key for data in cypher format.
+    Default: labs/models/c3w1a1/data/cypher/air-routes.cypher
+  
+  PublicBucketCSVKey:
+    Type: String
+    Description: Public bucket key for data in cypher format.
+    Default: labs/models/c3w1a1/data/csv/air-routes-latest-nodes-with-embeddings.csv
+  
+  PublicBucketLambdaKey:
+    Type: String
+    Description: Public bucket key for lab clone lambda zip file.
+    Default: labs/cfn_dependencies/c3w1a1/policy_clone.zip
+  PublicBucketPolicyPath:
+    Type: String
+    Description: Public bucket key for lab policy file.
+    Default: labs/cfn_dependencies/c3w1a1/lab.policy
+
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - ProjectPrefix
+          - AWSRegion
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackId
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-a
+
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-b
+
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  NatGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-a
+
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-b
+
+  NATGatewayEIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGatewayEIPB:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - FromPort: !Ref Neo4jPort1
+          ToPort: !Ref Neo4jPort1
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0          
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-ec2-sg
+
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+
+  EC2SecurityGroupIngress7474:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: !Ref Neo4jPort1
+      ToPort: !Ref Neo4jPort1
+  
+  EC2SecurityGroupIngress7687:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: !Ref Neo4jPort2
+      ToPort: !Ref Neo4jPort2
+  
+  EC2SecurityGroupIngress443:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+
+  EC2KeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: !Sub ${ProjectPrefix}-ec2-keypair
+
+  EC2IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-ec2-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref EC2IAMRole
+
+  Neo4jInstance:
+    DependsOn:
+      - EC2InstanceProfile      
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref EC2KeyPair
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnetA
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-neo4j-instance
+      UserData: {
+                  "Fn::Base64": {"Fn::Join": ["",
+                      ["#!/bin/bash\n",
+                      "set -ex\n", 
+                      "mkdir -p neo4j/data\n",
+                      "mkdir -p neo4j/import\n",
+                      "aws s3 cp s3://", {"Ref": "PublicBucketName"}, "/" ,{"Ref": "PublicBucketCypherKey"}, " neo4j/import/\n",
+                      "aws s3 cp s3://", {"Ref": "PublicBucketName"}, "/" ,{"Ref": "PublicBucketCSVKey"}, " neo4j/import/\n",
+                      "sudo yum install -y docker\n",
+                      "sudo service docker start\n",
+                      "sudo usermod -a -G docker ec2-user\n",
+                      "sudo docker pull neo4j:5.18.0\n",                      
+                      "sudo docker run -d -p 7474:", {"Ref": "Neo4jPort1"}, " -p 7687:", {"Ref": "Neo4jPort2"}, " -v $HOME/neo4j/data:/data -v $HOME/neo4j/import:/var/lib/neo4j/import --name neo4j-lab -e NEO4J_apoc_export_file_enabled=true -e NEO4J_apoc_import_file_enabled=true -e NEO4J_apoc_import_file_use__neo4j__config=true -e NEO4JLABS_PLUGINS=[\"apoc\",\"graph-data-science\"] --env=NEO4J_AUTH=neo4j/adminneo4j neo4j:5.18.0\n",
+                      "sleep 60\n",
+                      "sudo docker exec -i neo4j-lab sh -c \"cypher-shell -u neo4j -p adminneo4j -f /var/lib/neo4j/import/air-routes.cypher\"\n",                      
+                      ]
+                    ]
+                  }
+                }
+
+  Neo4jInstanceEIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      InstanceId: !Ref Neo4jInstance
+
+  LambdaRoleLabSetup:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-lambda-role-lab-setup"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: LabInstanceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CreateLogGroup
+                Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: "arn:aws:logs:*:*:*"
+              - Sid: LogStreamMgmt
+                Effect: Allow
+                Action: 
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:*:*:log-group:/aws/lambda/${ProjectPrefix}*:*"
+              - Sid: GetRolePolicyAccess
+                Effect: Allow
+                Action: 
+                  - iam:GetRolePolicy                  
+                Resource: "arn:aws:iam::*:role/voclabs"
+              - Sid: IAMRoleMgmt
+                Effect: Allow
+                Action: 
+                  - iam:CreateRole
+                  - iam:TagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:DeleteRole
+                  - iam:UntagRole
+                Resource: "arn:aws:iam::*:role/Lab*"
+
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64        
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLayerKey
+      Description: Lambda layer with dependencies for lambda-backed custom resource 
+      LayerName: !Sub "${ProjectPrefix}-lambda-layer"
+
+
+  LambdaFunctionLabRole:
+    DependsOn:
+      - LambdaLayer
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT_VALUE: !Ref ProjectPrefix
+          CLONE_ROLE_NAME: !Ref LabRoleName
+          BUCKET_NAME: !Ref PublicBucketName
+          POLICY_PATH: !Ref PublicBucketPolicyPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLambdaKey        
+      FunctionName: !Sub "${ProjectPrefix}-lambda-function-lab-setup"
+      Handler: policy_clone.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaRoleLabSetup.Arn
+      Timeout: !Ref Timeout
+
+  CRLabRoleWithLambda:
+    DependsOn:
+      - LambdaFunctionLabRole
+    Type: Custom::CRLabRoleWithLambda
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionLabRole.Arn      
+    DeletionPolicy: Delete
+
+  LabEC2InstanceProfile:
+    DependsOn:
+      - CRLabRoleWithLambda
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LabEC2InstanceProfile
+      Roles:
+        - !Ref LabRoleName
+
+  SubmissionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-submission
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  AWSRegion:
+    Description: This is the current AWS Region for this lab
+    Value: !Sub ${AWS::Region}
+  AWSAccount:
+    Description: This is the current AWS Account for this lab
+    Value: !Sub ${AWS::AccountId}
+  VPCID:
+    Description: This is the VPC ID for this Lab
+    Value: !Ref VPC
+  PublicSubnetAID:
+    Description: This is the Public Subnet A ID for this Lab
+    Value: !Ref PublicSubnetA
+  PublicSubnetBID:
+    Description: This is the Public Subnet B ID for this Lab
+    Value: !Ref PublicSubnetB
+  PrivateSubnetAID:
+    Description: This is the Private Subnet A ID for this Lab
+    Value: !Ref PrivateSubnetA
+  PrivateSubnetBID:
+    Description: This is the Private Subnet B ID for this Lab
+    Value: !Ref PrivateSubnetB
+  Neo4jDNSUI:
+    Description: This is the DNS of the Neo4j service to access UI
+    Value: !Join [ ":", [!GetAtt Neo4jInstance.PublicDnsName, !Ref Neo4jPort1]]
+  Neo4jDNSConnection:
+    Description: This is the DNS of the Neo4j service to DB connection
+    Value: !Join [ ":", [!GetAtt Neo4jInstance.PublicDnsName, !Ref Neo4jPort2]]
+  Neo4jPortUI:
+    Description: Neo4j port for UI access
+    Value: !Ref Neo4jPort1
+  Neo4jPortConnection:
+    Description: Neo4j port for DB connection
+    Value: !Ref Neo4jPort2
+  

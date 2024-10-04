@@ -1,0 +1,11 @@
+AWSAccount 		339713001154
+AWSRegion 		us-east-1
+Neo4jDNSConnection 	ec2-34-236-50-6.compute-1.amazonaws.com:7687
+Neo4jDNSUI 		ec2-34-236-50-6.compute-1.amazonaws.com:7474
+Neo4jPortConnection 	7687
+Neo4jPortUI 		7474
+PrivateSubnetAID 	subnet-0e69d8e8cfa7bf756
+PrivateSubnetBID	subnet-0de054a7b926f8ebe
+PublicSubnetAID 	subnet-0d21056becce5ee74
+PublicSubnetBID		subnet-06a900fba2c145a4f
+VPCID 			vpc-0ade8de231e806ba7
