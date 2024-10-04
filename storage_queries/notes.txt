@@ -1031,9 +1031,197 @@ Creating a Graph Database:
 
 # Neo4j Graph DB and Cypher Language part 2
 
-MAP LAST HERE
+MATCH statement to retrieve information from a graph (neo4j)
+i.e. select statement 
 
-https://www.coursera.org/learn/data-storage-and-queries/lecture/tXxxx/neo4j-and-cypher-query-language-part-2
+    match pattern return result
+
+ex. retrieve all nodes
+
+use parenthesis to denote a node 
+
+# this returns all nodes 
+match(n) return n
+
+# NOTE: n is a variable which represents node
+
+# get total number of nodes:
+# 
+match (n) return count(n)
+
+# explore node labels in the graph
+# only bring back unique labels
+# 
+match(n) return distinct labels(n)
+
+i.e.  labels(n)
+    ["Supplier"]
+    ["Category"]
+    ["Product"]
+    ["Order"]
+    ["Customer"]
+
+# Remember a node label is a type of node
+
+
+# count specific type of nodes
+# 
+match(n:Order) return count(n)
+> 99
+
+# explore properties of each order node
+#   - bring back just first node
+match (n:Order) return Properties(n) limit 1
+
+{
+   "shipCity": "Reims", 
+   "orderID": "10248",
+   ..... 
+   "requiredDate": "00:00.0",
+   "shipPostalCode": "51100",
+}
+
+NOTE: use [] to denote a relationship, reference variable inside []
+      relationships happen between two nodes 
+      
+      path (source_node)-[r]->(target_node)
+
+# count all directed paths in graph
+
+Match()-[r]->() return count(r)
+
+NOTE: looking for any relationship r, that goes 
+      from any source node  to any target node.
+      Notice we are returning r, for relationship, 
+      and note n for node.
+
+count(r)
+518
+
+# get the distinct type of relationships
+Match()-[r]->() return distinct type(r)
+
+type(r)
+"SUPPLIES"
+"PART_OF"
+"PURCHASED"
+"ORDERS"
+
+# Specify the type of relationship
+
+Match()-[r:ORDERS]->() return AVG(r.quantity * r.unitPrice) as average_price
+
+NOTE: take the quanity * unitPrice and averaging across all ORDERS relationships
+
+average_price
+502.464
+
+
+# Get average price for all orders grouped by product category
+
+Match()-[r:ORDERS]->()-[part:PART_OF]->(c:Category) return c.categoryName, AVG(r.quantity * r.unitPrice) as average_price
+
+NOTE: All Products that are PART_OF Category nodes
+      essential this is a relational join
+
+c.categoryName          average_price
+"Beverages"             439.2
+"Condiments"            553.40
+....
+"Produce"               645.65
+"Seafood"               553434.82 
+
+
+# Filter results with WHERE statement:
+# Retrieve product name and product unit price of all products that belong to categoy "Meat/Poultry"
+
+match(p:Product)-[:PART_OF](c:Category)
+where c.categoryName="Meat/Poultry"
+return p.productName, p.unitPrice
+
+NOTE: specify path where product node is PART_OF category node
+       use where to filter
+
+NOTE: Don't have specify node property in where statment 
+    You specify property inside the node parenthesis
+     i.e. use curly brackes to specifty category name you want to filter by
+
+match(p:Product)-[:PART_OF]->(c:Category{categoryName:"Meat/Poultry"})
+return p.productName, p.unitPrice
+
+IS EQUIVALENT TO:  
+
+match(p:Product)-[:PART_OF](c:Category)
+where c.categoryName="Meat/Poultry"
+return p.productName, p.unitPrice
+
+
+NOTE: in the above you are actually applying the where close to the property of the Category node 
+      that you are identifying 
+
+
+
+
+
+# Retrieve the product name of all products orderd by the customer QUEDE
+# 
+
+
+my thoughts: 
+        going to need (c:Customer{customerID:"QUEDE})-[:PURCHASED]->()-[:ORDERS]->(p:Product) return distinct p.productName 
+
+solution:
+        Match (c1:Customer{customerID:"QUEDE})-[:PURCHASED]->()-[:ORDERS]->(p:Product) return p.productName 
+
+
+# NOTE: chainging from customer to Product via order but order isn't specified only the ORDERS 
+        relationship is specifed:
+                 ..-[:PURCHASED]-()-[:ORDERS]->(p:Product)
+
+                                 ^-- is empty parenthesis is the Order node but we don't need to specify
+                                     because the :PURCHASED and the ORDERS relastionships get us there
+
+NOTE: again the relastion ships are similar to relational joins
+
+
+
+# Get the ID of other customers who orderd the same products as QUEDE
+# start with original query then chain in reverse <- from p:Product to Order to Customer
+# 
+
+Match (c1:Customer{customerID:"QUEDE})-[:PURCHASED]->()-[:ORDERS]->(p:Product) <-[:ORDERS]<-()-[:PURCHASED]<-(c2:Customer)
+return c2.customerID
+
+NOTE: From Products found for QUEDE go back to :ORDERS relationship to Order node and then 
+from Order node (which is anonymous), chain to relationship [:PURCHASED]<- to Customer node
+
+
+# Retrieve the orders that contain at most two products
+# 
+
+match(o:Order)-[:ORDERS]->(p:Product) return o.orderID as ID, count(p) as countProduct
+NOTE: this is equivalent to SQL GROUP BY statement 
+
+now filter for at least 2 products 
+
+match(o:Order)-[:ORDERS]->(p:Product) 
+with o.orderID as ID, count(p) as countProd
+where countProd <= 2 
+return ID, countProd
+
+
+NOTE: change original return to with to access order / product items and then utilize the where clause
+
+HENCE: 
+() : node
+[] : relationship
+{} : propertiy
+
+
+
+
+
+
 
 
 .
