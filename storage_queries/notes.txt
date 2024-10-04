@@ -772,9 +772,65 @@ https://parquet.apache.org/docs/file-format/
 
 # Wide-Column Databases
 
+Key / Value
+[ Key ] --> [ Value ]
+
+Wide Column structures the value part of a key-value pair into more key-value pairs
+    - Like two-dimensional key-value maps
+
+                    +---------------------------------------------------+
+                    |                                                   |
+[ Row Key 1] --->>  | [ Column Key 1]  [ Column Key 2]  [ Column Key 3] |
+                    |       |                 |               |         |
+                    |       V                 V               V         |
+                    | [   Value 1   ]  [   Value 2   ]  [   Value 3   ] |  
+                    |                                                   |
+                    +---------------------------------------------------+
+
+                    +---------------------------------------------------+
+                    |                                                   |
+[ Row Key 2] --->>  | [ Column Key 1]  [ Column Key 2]  [ Column Key 3] |
+                    |       |                 |               |         |
+                    |       V                 V               V         |
+                    | [   Value 1   ]  [   Value 2   ]  [   Value 3   ] |  
+                    |                                                   |
+                    +---------------------------------------------------+
+
+
+Each row describes a single entity that is identified by its row key.
+Within a row, data that's related is modeled into column families that 
+contain column names.  Actual data is stored in cells which are uniquely 
+identified by the combination of the row key, column family and column name.
 
 
 
+                    +---------------------------------------------------+ +------------------------------------+
+                    |     [ Column Family: Customer Information ]       | | [ Column Family: Purchase Info ]   | 
+[ Row Key 1] --->>  | [ Column Key 1]  [ Column Key 2]  [ Column Key 3] | | [ Column Key 1]  [ Column Key 2]   | 
+   12345            |       |                 |               |         | |       |                 |          | 
+                    |       V                 V               V         | |       V                 V          | 
+                    | [   Value 1   ]  [   Value 2   ]  [   Value 3   ] | | [   Value 1   ]  [   Value 2   ]   |   
+                    |                                                   | |                                    | 
+                    +---------------------------------------------------+ +------------------------------------+
+
+hence customer_id 12345 points  to two column families: customer information ( with three columns) 
+and purchase information (with two columns)
+
+NOTE: each cell is versioned and uniquely identified by its version number, typically a timestamp.
+
+Wide column database doesn't envorce strict table schema, adding columns becomes very flexible. 
+Column is only written if there's data for it.
+
+column families are usually stored separately on disk i.e. customer separate from purchase info.
+Data in a column family is stored in a row-oriented fashion.  
+
+
+Wide column databases: 
+
+https://databass.dev/links/118
+https://databass.dev/links/117
+https://cassandra.apache.org/_/index.html
+https://aws.amazon.com/keyspaces/
 
 
 
