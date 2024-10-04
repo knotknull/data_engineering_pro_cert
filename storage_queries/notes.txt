@@ -1469,7 +1469,102 @@ Data stored in object storage
                                                     higi-volume analytical workloads        
 
 
+# Data Lakes - Key Architectural Ideas
 
+Data Lake:  Central repository for storking large volumes of data
+            No fixed schema or predefied set of transformation
+            Schema-on-read pattern:
+                - reader determines the schema when reading the data
+
+Data Lake 1.0
+
+Storage           |    initially Hadoop (HDFS)  then S3
+                  |
+------------------+---------------------------------------------------
+Processing Tools  |  Map Reduce     Spark       Hive
+                  |  Apache Pig     presto
+
+Shortcomings of Data Lake 1.0
+
+became Data Swamps
+  - No proper data management
+  - No data cataloging 
+  - No data discovery tools 
+  - No guarantee on the data integrity and quality
+
+Write-only storage 
+    - Data Manipulation Language (DML) opertions were painful to implement
+    - Difficult to comply with data regulation (GDPR) 
+
+No schema management and data modeling 
+    - Hard to process stored data
+    - Data not optimized for query operations such as joins
+
+
+
+# Next-Generation Data Lakes 
+
+Data Zones: Used to organize data in a data lake, where each zone houses data that has been 
+            processed to varying degrees. i.e. a landing zone, cleaning zoned, xform zone 
+
+        - Apply appropriate data governance policies on each zone
+        - Ensure data quality 
+
+                                                                          +------------------+
+                                                                          |      Catalog     |
+                                                                          |   - Metadata     |
+                                                                          |   - Schema       |
+                                                                          +------------------+
+                            +----------------------------------------------------------------+
+                            |       Processng                                                |
+                            |       +--------------------+           +-------------------+   |
+                            |       | - Clean            |           | - Model           |   | 
+                   +--------------->| - Validate         |    +----->| - Apply further   |   | 
+                   |        |       | - Standardize      |    |      |   transformations |   | 
+                   |        |       | - Remove PII Info  |    |      |                   |   | 
+                   |        |       +--------------------+    |      +------|------------+   |
+                   |        |                 |               |             |                |
+                   |        +-----------------|---------------|-------------|----------------+
+                   |                          |               |             |
+                   |                          |               |             |
+                   |                          |               |             |
+    +--------------|--------------------------|---------------|-------------|--------------+
+    |              |                          v               |             v              |
+    |    +--------------------+      +--------------------+   |  +--------------------+    |
+    |    |                    |      |                    |   |  |                    |    | 
+-------->|   CSV    JSON      |      |  .parquet   .avro  |   |  |  .parquet   .avro  |    | ---> Analytics  **
+    |    |   PNG    MP3       |      |        .orc *      |---+  |        .orc *      |    |  +-> Machine Learning
+    |    |                    |      |                    |      |                    |    | 
+    |    +--------------------+      +--------------------+      +--------------------+    |
+    |        Landing / Raw           Cleaned/Transformed +         Curated / enriched +    |                                                                             |
+    |                                                                                      | 
+    |                                      Storage                                         |
+    +--------------------------------------------------------------------------------------+
+
+*  Open file formats
+** Various tooling can handle open file formats
++  To increase query performance on data lakes, partition cleaned / curated zones
+
+Data Partitioning: Divide a dataset into smaller, more manageabe parts based on a set of criteria 
+                   (e.g. time, date, location reorded in the data)
+
+
+Data Catalog:  Collecton of metadata about the datasets (owner, source, partitions, etc.)
+
+
+
+Separate Data Lakes and Data Warehouses
+
+                           ETL Pipeline
+
+       Data Lake      ---[subset of data] --->        Data Lake      
+    Low cost storage                                Superior Query Performance
+    large amounts of data                           for analytical use cases
+
+ - Expensive solutiona
+ - introduce bugs / failures
+ - Can cuse issues with data quality, 
+    dupication, consistency  
 
 
 .
