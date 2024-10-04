@@ -1398,6 +1398,75 @@ Modern Cloud Data Warhouses
         - expands capability of MPP systems
 
 
+# Modern Cloud Data Warhouses 
+    Massively Parallel Processing - Cloud Data Warehouses 
+
+                [Disk]  [Compute]
+--------------------------------------------------------
+    |               |               |               |   
+[Compute]       [Compute]       [Compute]       [Compute]
+[ Disk  ]       [ Disk  ]       [ Disk  ]       [ Disk  ]  
+
+
+MPP Archiecture for Amazon Redshift
+
++----------------------------------------------------------------------------+
+| Redshift Cluster                                                           |
+|                       [Leader Node]                                        |
+|                             |                                              |
+|           +-----------+-----+-----+-----------+                            |
+|           |           |           |           |                            |
+|       [  CPU  ]   [  CPU  ]   [  CPU  ]   [  CPU  ]                        |
+|       [ Memory]   [ Memory]   [ Memory]   [ Memory]                        |
+|       [  Disk ]   [  Disk ]   [  Disk ]   [  Disk ] <---  slices= slice of |   
+|          |                                    |             compute node   |
+|          +------------------------------------+             cpu, ram, disk |
+|                            |                                               |
+|                     compute nodes                                          |
++----------------------------------------------------------------------------+
+
+On Data Load    : Leader node determines how data is distributed across node slices
+
+On Query Request: Leader node parses request 
+( JDBC / ODBC )   Forms and exuction plan
+                  Compiles code
+                  Distributes code to appropriate compute node slices 
+                    that contain data relevant to the query
+                  Slices work in parallel to complete workload
+                  Compute node sends intermediate results to Leader Node
+                  Leader aggregates the results and sends back to client application
+
+Can spin up more compute nodes or upgrade nodes to higher compute capacity
+
+
+- Can handle Extract - Load - Transform (ELT)
+
+    - Extract for source systm 
+    - Load to staging area inside Data Warehouse
+    - Use scale to transform data in Data Warehouse
+
+
+
+Cloud Data Warehouse 
+    Columnar Architecture
+        - allows for high performance analytical queries
+
+
+Data stored in object storage
+    - separate compute and storage 
+        - manage and scale independently
+
+
+    Traditional Data Warehouse                          Cloud Data Warehouse
+
+ - stored data is highly structured                 - stored data is highly structured
+- Data modeled to enable analytical queries         - Data modeled to enable analytical queries          
+                                                    - High processing from MPP
+                                                    - Columnar Storage
+                                                    - Separation of storage and compute
+
+                                                    Efficiently stores and processes data for 
+                                                    higi-volume analytical workloads        
 
 
 
