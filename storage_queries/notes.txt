@@ -833,6 +833,74 @@ https://cassandra.apache.org/_/index.html
 https://aws.amazon.com/keyspaces/
 
 
+https://scaleyourapp.com/wide-column-and-column-oriented-databases/
+https://www.scylladb.com/glossary/wide-column-database/
+https://www.amazon.com/Cassandra-Definitive-Guide-Distributed-Scale/dp/1491933666
+http://0b4af6cdc2f0c5998459-c0245c5c937c5dedcca3f1764ecc9b2f.r43.cf2.rackcdn.com/9353-login1210_khurana.pdf
+https://aws.amazon.com/compare/the-difference-between-cassandra-and-hbase/
+
+
+
+Graph Databases
+
+    Store data with nodes and edges 
+    Node: represents data items
+            entities i.e. people, products, locations 
+
+    Edge: represents connection / relatinoship between the data items
+
+
+
+
+    [node] ---edge---> [node] ---edge---> [node]
+                        /\
+                      /    \
+                    /       \
+                [node]     [node] 
+
+
+ 
+
+Use Cases 
+    - recommending products 
+    - modeling social networks
+    - representing network and IT operations
+    - simulating supply chains logis
+    - tracing data lineage
+
+Use Case: Fraud Detection 
+    - can flag users using same credit cars from different ip addresses
+
+
+Use Case: Knowledge Graph
+    - connect diverse data from disparate sources
+    - chatbot utilizes RAG (Retrieval Augmented Generation) against purchase history (user, product, shipment)
+    - gets fresh data to LLM to improve chatbot answers    
+
+
+Graph Databases:
+    neo4j
+    ArangoDB
+    Amazon Neptune    
+
+Examples of Graph Query Languge
+    Cypher
+    Gremlin
+    Sparql
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
