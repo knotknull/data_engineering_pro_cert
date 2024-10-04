@@ -1321,14 +1321,26 @@ i.e. more context in a knowledge graph to train an LLM
 "limits of my language are the limits of my world"
 
 
+Resources: 
+
+https://www.amazon.com/Database-Internals-Deep-Distributed-Systems/dp/1492040347
+https://stratos.seas.harvard.edu/files/stratos/files/columnstoresfntdbs.pdf
+https://www.deeplearning.ai/short-courses/knowledge-graphs-rag/
+https://www.deeplearning.ai/short-courses/building-applications-vector-databases/
 
 
+## Storage Abstractions
+## Course 3
+## Week 2
+
+## Data Warehouses & Data lakes
 
 
+# BIll Inmon
 
 
-
-
+MAP LAST HERE
+https://www.coursera.org/learn/data-storage-and-queries/lecture/aaNzX/optional-conversation-with-bill-inmon
 
 
 
