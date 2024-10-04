@@ -975,12 +975,65 @@ https://www.deeplearning.ai/short-courses/vector-databases-embeddings-applicatio
 
 
 
+# Neo4j Graph DB and Cypher Language part 1
+
+
+Property Graph Model 
+
+                        [ Supplier ]
+                            |
+                            |
+                (supplies)  |
+                            v           PART_OF
+                        [ Product  ] -----------> [ Category ]
+                            ^
+                (orders)    |
+                            |
+                            |
+  [ Customer ]  ------->[  Order  ]
+                (purchased)
 
 
 
 
+Node Label: type of node  (i.e. Category)
+
+edges known as relationships and relationship has a type
+    - earch relationship type has a source node and a target node
+
+    supplies relationship has Supplier as source node and Product as target node
+
+    can associate more than one property to each node
+
+i.e. Customer Properties        Product Properties      Supplier Properties     Order Properties    Category Properties 
+        - address               - productID             - address               - freight           - categoryName
+        - city                  - productName           - city                  - orderDate
+        - companyName           - unitPrice             - contactName           - orderID
+        - contactName           - unitsInStock          - fax                   - requiredDate
+        - contactTitle          - unitesOnOrder         - region                - shipAddress
+        - country               - productID             - supplierID
+        - customerID- productID                         - postalCode
 
 
+Can specify properites for a relationship
+
+    orders properties: 
+        - discount 
+        - quantity 
+        - unitPrice 
+
+
+Creating a Graph Database:
+
+    instructions describing graph model with data (csv files)
+        - utlize Cypher to create database and query it
+
+
+# Neo4j Graph DB and Cypher Language part 2
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/data-storage-and-queries/lecture/tXxxx/neo4j-and-cypher-query-language-part-2
 
 
 .
