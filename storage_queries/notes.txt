@@ -1335,12 +1335,71 @@ https://www.deeplearning.ai/short-courses/building-applications-vector-databases
 
 ## Data Warehouses & Data lakes
 
-
 # BIll Inmon
 
+You can use data beyond transaction processing 
+    - IBM against data warehousing
+    - Marketers were the driver for data warehouses
 
-MAP LAST HERE
-https://www.coursera.org/learn/data-storage-and-queries/lecture/aaNzX/optional-conversation-with-bill-inmon
+
+
+# Data Warehouse - Key Architectural ideas
+
+
+data warehouse: subject-oriented, integrated, nonvolatile and time-variant collection of data 
+                in support of management's decisions 
+
+
+
+
+Subject Oriented: organizes and stores data around key business domains 
+                  (models data to suuport decistion making )
+
+Integrated:       combines data from different sources into a consistent format
+
+Nonvolatile:      data is read-only and cannot be deleted or updated
+                    needed for historical analysis
+
+Time-variant:     stores current and historical data
+
+[ Customers ]  [ Products ]
+[   Sales   ]  [ Finance  ]
+
+
+
+
+Data Warehouse-Centric Architecture                                           
+                                                                                        Data Marts
+    Extract                 Transform           Load                          
+                                                                              +-----  [ Sales ]   ----+
+from source system      - clean and         - Load to Data Warehouse          |                       |    Analytics 
+to staging area         standardize data    - utilize comprehensive schema  --+-----  [Marketing] ----+--> and Reports 
+                        - model the data                                      |                       |
+                                                                              +-----  [finance]   ----+
+(change data capture)
+                                                                                - simple denormalized schema
+
+
+History 
+Early Data Warehouses
+    - Big monolithic server
+
+
+Data Warehouses with Massively Parallel Processing (MPP)
+    - scans large amounts of data in parallel
+    - comples configurations and requires effort to maintain
+
+
+Modern Cloud Data Warhouses 
+    - Amazon Redshift
+    - Google Big Query
+    - Snowflake
+        - separates compute from storage
+        - expands capability of MPP systems
+
+
+
+
 
 
 
