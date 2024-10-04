@@ -886,13 +886,92 @@ Graph Databases:
 Examples of Graph Query Languge
     Cypher
     Gremlin
-    Sparql
+    SparQL
 
 
+# Vector Databases
+
+    efficiently query data based on "semantic simularities" 
+        - i.e. similarity search
+
+Vector data:  numerical values arranged in an array
+
+Vecotr embeddings:  
+    capture semantic meaning on an item, like a text document or image
+
+    [ Original  ] ---> [  ML  ] ---> [  Vector  ] ---> [  Vector  ]
+    [  Data     ]      [Model ]      [embedding ]      [ database ]
+
+    - can convert an entire database of docs or text into embeddings 
+    - Embeddings help you more efficiently find and retireve similar items
+
+    ex. finding similar text
+            - compute embeddings for the query item
+            - database returns similar vectors (based on closeness)
 
 
+Vectors that are similar to one antother SEMANTICALLY will be closer to one another 
+  in high dimensional vector space the are represented in.
+
+        i.e. if vectors are close than items are similar
+
+Distance Metric
+    Vector database uses a distance metric to find similar vectors
+        - euclidean distance (straigh line distance between points)
+        - cosine distance  (angle)
+        - Manhattan distance along their axis
+
+Similarity Search:  Popular Algorithm 
+    Want to find the K most similar items to a given item
+
+    K-nearest neighbors (KNN)
+        - will do exhaustive search over all the vector embeddings of all items to 
+          compute the distance between those items and the given one 
+
+        - becomes inefficient when the data size increases
+        - suffers from the curse of dimensionality
+
+    Approximate Nearest Neighbors (ANN)
+        - find a good guess for the nearest neighbors
+        - more efficient than KNN
+            - with less accurate result
+        - Vector databases are built to support ANN algorithms
+
+        - When storing vector embeddings/ Vector database applies ANN algorithm to represent data for search
+        - When querying Vector datbase to do a similarity search based on an item 
+                - the dabase uses specific ANN algorith to traverse data structure to 
+                  return items that are approximately close
 
 
+# ANN Algorithm:  Hierarchical Navigable Small World (HNSW)
+
+        - HNSW is a popular ANN algorithm that underpins many vector databases
+            - hierarchical graph representation of embeddings   
+            - each layer consists of a graph representation of data 
+                - top layer contains more of the longest links
+                - botom layer contains more of the shortest links
+                - as you move up from lowers layers to highest layer, number of nodes decreases
+
+        - for a query, start at bottom and go to top layer, 
+            starts entry node at top layer and navigates through the graph of that layer 
+                each time choosing the neighboring node that is closest to the entry point. 
+                stops at node the doesn't have any neighboring nodes closer to the query point. 
+                    algorithm shifts to the node in the next lower layer and starts search again.
+                    repeat until bottom layer. 
+
+Resources:
+https://www.pinecone.io/learn/what-is-similarity-search/
+
+https://hyper-space.hashnode.dev/what-is-similarity-search-definition-and-use-cases
+https://www.pinecone.io/learn/vector-database/
+https://www.pinecone.io/learn/series/faiss/hnsw/
+https://arxiv.org/pdf/1603.09320.pdf
+https://docs.aws.amazon.com/neptune-analytics/latest/userguide/algorithms.html
+
+https://www.pinecone.io/
+https://www.deeplearning.ai/short-courses/building-applications-vector-databases/
+https://weaviate.io/
+https://www.deeplearning.ai/short-courses/vector-databases-embeddings-applications/
 
 
 
