@@ -1566,5 +1566,54 @@ Separate Data Lakes and Data Warehouses
  - Can cuse issues with data quality, 
     dupication, consistency  
 
+# Lab Walkthrough: Data Lake w/ AWS
+
+
+Glue ETL uses Spark behind the scenes
+
+
+Can use Amazaon Athena to query parquet files once AWS Glue Data Catalog created by 
+Glue Crawler 
+
+import awswrangler: AWS SDK for pandas
+    built on top of boto3 and pandas
+    extends pandas capabilities to AWS
+
+
+snappy is faster than gzip
+
+
+
+Experiment      Dataset         Paritioning     Compression Algo    # of Objects        Total size of processed data
+    1            Metadata      No partition     uncompressed            4                   93.6 MB
+                 Metadata      No partition     snappy                  4                   51 MB
+
+    2            Metadata      No partition     snappy                  4                   51 MB
+                 Metadata      No partition     gzip                    4                   32.7 MB
+
+    3            Reviews       No partition     snappy                  4                   556.6 MB
+                 Reviews       Partition        snappy                  556                 578.0 MB
+                               (year, month)
+    4            Reviews       Partition        snappy                  556                 578.0 MB
+                               (year, month)
+                 Reviews       Partition        snappy                  --------- TIME OUT ----------
+                               (asin)
+
+
+
+- choose an appropriate key that organizes the data into meaningful files that 
+  are aligned with you query pattern
+- a bad paritioning key divides data into too many small files
+
+
+
+
+
+
+
+
+
+
+
 
 .
