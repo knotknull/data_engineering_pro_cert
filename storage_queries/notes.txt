@@ -1282,6 +1282,52 @@ Cypher Pattern 	Description
 
 # Conversatoin with Juan Sequeda
 
+graph models: 
+    - RDF 
+    - Property Graph 
+
+RDF: Resource Description Framework
+    - from web, the web is a graph of documents
+    RDF is standard for data vs. HTML is the standard for text 
+    RDF is based on triples (subject, predicate, object) vs node, edge, node
+        i.e. this document, was written on, 1/1/2022
+
+
+Property Graph
+    node, edge, node 
+        key-value pairs that could be associated with a node or with an edge
+
+
+SparQL:  graph query language for RDF
+Cypher: neo4j  query language
+OpenCypher is open sourced Cypeher
+ISO created standard for graphs called GQL
+
+
+graphs are east to modify, add a node and edges
+
+any model can be turned into a graph: Tables, JSON, etc
+
+knowledge of a knowledge graph is the data on the graph
+
+knowledge graph impact on LLMs
+
+LLMs are 3x more accurate if trained on knowledge graph. 
+
+the graph attributes have knowledge and are helpful in training LLMs
+where in relational databases this knowledge is dependent on foreign keys
+i.e. more context in a knowledge graph to train an LLM 
+
+"limits of my language are the limits of my world"
+
+
+
+
+
+
+
+
+
 
 
 
