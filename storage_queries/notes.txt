@@ -1608,8 +1608,8 @@ Experiment      Dataset         Paritioning     Compression Algo    # of Objects
 
 
 
-
-
+Simple Data Lake with AWS Glue
+c3w1lab1 
 
 
 
