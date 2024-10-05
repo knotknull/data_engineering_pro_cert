@@ -1675,6 +1675,116 @@ Databricks introduced notion of Data Lakehouse:
 
 
 
+Open Table Formats: Specialized storage formats that add transactional features to data Lakehouse
+                        - allows you to update / delete individual records on storage layer on object storage 
+                        - Supports ACD principles
+ex.                
+    - Databricks Delta Lake 
+    - Apache Iceberg
+    - Apache Hudi (Hadoop Update Delete Incremental)
+
+
+Open Table Formats: Track changes in data
+
+Snapshot:  Reflects the state of the dta at a given time
+
+Time Travel:  Snapshots enable Time Travel
+                - Query any prvious version of a table by specifiying a timestamp
+                - Can rollback to a previous version of a table
+
+Schema &           :  Ability to query the data even if you make changes 
+Partition Evolution:  changes to the schema or paritioning schema
+
+Open Source :  Different query engines can access the data
+    
+
+
+
+    +---------------------------------------------------+
+    |                                                   |
+    |            +----------+                           |
+    |            |          |                           |
+    |            |    +----------+                      |
+    |            |    |          |                      |
+    |      \     +----|          |                      |
+    |       +         |     +----------+                |
+    |        \        +-----| Snapshot |                |
+    |  (time) +             |          |                |
+    |          \            |          |                |
+    |           V           +----------+                |
+    |                                                   |
+    |                                                   |
+    +---------------------------------------------------+
+
+    +---------------------------------------------------+
+    |                                                   |
+    |                       Data                        |
+    |          (Insert, Update, Delete )                |
+    |                                                   |
+    +---------------------------------------------------+
+
+
+Iceberg Architecture
+( Current metadata file pointer > Metadata File > Manifest List > Manifest file > Data file )
+
+                   +---------------------------------+                                       
+                   | Iceberg Catalog                 |
+                   |   [Current metadata pointer]    | 
+                   +---------------------------------+
+                                   |
+                                   +------------------------------+
+                                                                  |
+=Metadata Layer ==================================================|========================
+                                                                  v
+                    +-------------------+               +-------------------+   Metadat file has:     
+                    |   Metadata filse  |               |   Metadata  file  |   - table schemas                     
+                    |      (s0)         |               | s(0)      (s1)    |   - partitioning informatin
+                    +-------------------+               +-------------------+   - snapshots (current, etc)
+                            |                              |         | 
+                            +------------------------------+         |          NOTE: s0, s1 == Snapshots
+                            v                                        v 
+                    +-------------------+               +-------------------+    
+                    |   Manifest        |               |   Manifest        |                     
+                    |      List         |               |      List         |                     
+                    +-------------------+               +-------------------+    
+                               |                             |       |
+                               |                   +---------+       |
+                               |                   |                 | 
+                       +-------+--------------+    |                 | 
+                       |                      |    |                 | 
+                       v                      v    v                 v
+                  +----------+           +----------+           +----------+  
+                  | Manifest |           | Manifest |           | Manifest | 
+                  |  file    |           |  file    |           |  file    | 
+                  +----------+           +----------+           +----------+               
+                       +                      +                      +
+=Storage Layer ========|======================|======================|====================
+  (Parquet)            |                      |                      | 
+                       v                      v                      v
+                 +-------------+       +-------------+       +-------------+ 
+                 | data files  |       | data files  |       | data files  |
+                 +-------------+       +-------------+       +-------------+
+
+
+
+Storage Options :
+
+    Production Database         |   Data Warehouse                |  Data Lake                |   Data Lakehouse    |
+                                |                                 |                           |                     |
+- Process small amounts         | - bring together large          | - Process large           | - Data management & |
+of structured data              |   volumes of structured /       |  volumes of               |  discoverability    |
+                                |   semi-structured data          |  structured and           |  features           |
+                                |                                 |  semi-structured          |                     |
+                                | - query current and             |                           | - Low Latency       |
+                                |   historical data               | - save on storage costs   |                     |
+--------------------------------|---------------------------------|---------------------------|---------------------+
+use case: reporting, analytics  | use case: reporting, analytics  | use case: ML              | use case: ML,       |
+                                |                                 |                           | analytics, reporting|
+
+
+
+
+
 
 
 .
