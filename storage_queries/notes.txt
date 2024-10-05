@@ -1619,13 +1619,59 @@ c3w1lab1
 # Data Lakehouse Architecture
 
 
-Data Lake    + Data Warehouse  =  Data Lakehouse 
+Data Lake               +   Data Warehouse              =    Data Lakehouse 
+
+- flexibility           - superior query performance
+- low-cost storage      - robust data management
 
 
 
+Data Lake Features
 
 
+Storage built on object storage
+Databricks introduced notion of Data Lakehouse: 
+    - Data Zones known as Medallion Architecture
+    - Transformed data stored in Silver and Gold zones
+         and open file format such as Parquet
 
+    - contain Data Lake plus Data Management of Datawarehouses
+        - Schema Enforcement
+        - Schema Evolution
+
+    - adhere to ACID principles
+        Transactions are Atomic, Consistent, Isolated, Durable
+
+    - Concurrent read, insert, update, delete
+
+    - Data Governance & Security
+        - robust access controls, data auditing capability, data lineage
+
+    - Connect via APIs and use SQL to do do incremental updates and deletes
+
+    - Rollabck to or access any version of historical data 
+
+                                                                        +------------------+
+                                                                        |      Catalog     |
+                                                                        |   - Metadata     |
+                                                                        |   - Schema       |
+                                                                        +------------------+
+                                                                             
+    +--------------------------------------------------------------------------------------+
+    |                                                                                      |
+    |   Improve Data Quality ------------------------------------------------------>>      |
+    |                                                                                      |
+    |    +--------------------+      +--------------------+      +--------------------+    |
+    |    |                    |      |                    |      |                    |    | 
+    |    |   CSV    JSON      |      |  .parquet   .avro  |      |  .parquet   .avro  |    | 
+    |    |   PNG    MP3       |      |        .orc *      |      |        .orc *      |    | 
+    |    |                    |      |                    |      |                    |    | 
+    |    +--------------------+      +--------------------+      +--------------------+    |
+    |        Landing / Raw           Cleaned/Transformed +         Curated / enriched +    |                                                                             |
+    |          (Bronze)                     (Silver)                    (Gold)             | 
+    |                                                                                      |
+    |                                      Storage                                         |
+    +--------------------------------------------------------------------------------------+
 
 
 
