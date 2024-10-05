@@ -1782,9 +1782,44 @@ use case: reporting, analytics  | use case: reporting, analytics  | use case: ML
                                 |                                 |                           | analytics, reporting|
 
 
+# Lakehouse Architecture on AWS
+
+
+AWS Lake Formation
+
+    - automates defining storage
+    - setting up access controls
+    - cataloging data
+    - managing permissions
 
 
 
+Setting up a Data Lake
+    - Identify Data Sources (S3, RDBMS, NoSQL)
+    - Move data into data lake 
+    - Catalog data (Crawler, AWS Glue Data Catalog, Metadata)
+    - Manage permissions (AWS IAM)
 
+
+
+AWS Lake Formation 
+    - sits on top of AWS Glue and AWS IAM
+    - AWS IAM, AWS Data Catalog
+
+
+AWS Data Lakehouse
+
+               +--------------+
+               | [Kinesis]    |
+               |              |
++---------+    | [Firehouse]  |
+|         |    |              |
+|  Data   |    | [DataSync]   |
+|         | ->>|              |
+| Sources |    |[DB Migration]|
+|         |    |              |
+|         |    | [App Flow]   |
++---------+    |              |
+               +--------------+
 
 .
