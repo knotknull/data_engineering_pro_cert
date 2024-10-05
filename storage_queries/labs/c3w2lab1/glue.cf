@@ -1,0 +1,773 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c3w2lab1
+
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  LabRoleName:
+    Type: String
+    Description: Role name for the Lab Instance
+    Default: LabInstanceRole
+
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+  
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w2lab1/lambda_layer_dependencies_p312.zip
+  
+  PublicBucketDataKey:
+    Type: String
+    Description: Path in S3 bucket to model 
+    Default: labs/models/c3w2lab1/staging
+  PublicBucketPolicyLambdaKey:
+    Type: String
+    Description: Public bucket key for lab clone lambda zip file.
+    Default: labs/cfn_dependencies/c3w2lab1/policy_clone.zip
+  PublicBucketPolicyPath:
+    Type: String
+    Description: Public bucket key for lab policy file.
+    Default: labs/cfn_dependencies/c3w2lab1/lab.policy
+
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - ProjectPrefix
+          - AWSRegion
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackId
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-a
+
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-b
+
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  NatGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-a
+
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-b
+
+  NATGatewayEIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGatewayEIPB:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0          
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup      
+
+  LambdaRoleLabSetup:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-lambda-role-cloud9-setup"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: LabInstanceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: IAMRoleMgmt
+                Effect: Allow
+                Action: 
+                  - iam:CreateRole
+                  - iam:TagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:DeleteRole
+                  - iam:UntagRole
+                Resource: !Sub "arn:aws:iam::*:role/${LabRoleName}"
+
+  IacS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-terraform-state'
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  DataLakeBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-data-lake'
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+    
+  LambdaCopyToS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com      
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      Policies:
+        - PolicyName: LambdaS3PutPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:Put*"
+                Resource: !Sub "arn:aws:s3:::${DataLakeBucket}/*"
+
+  LambdaCopyToS3:
+    DependsOn:
+      - DataLakeBucket
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          SOURCE_BUCKET_NAME: !Ref PublicBucketName
+          SOURCE_PATH_DATA: !Ref PublicBucketDataKey          
+          DESTINATION_BUCKET: !Ref DataLakeBucket 
+      Code:
+        ZipFile: |          
+          import json
+          import logging
+          import os
+
+          import boto3
+          import cfnresponse
+          from botocore import exceptions
+
+          SOURCE_BUCKET_NAME = os.getenv("SOURCE_BUCKET_NAME", "")
+          SOURCE_PATH_DATA = os.getenv("SOURCE_PATH_DATA", "")          
+          DESTINATION_BUCKET = os.getenv("DESTINATION_BUCKET", "")
+
+          CREATE = "Create"          
+
+          response_data = {}
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+
+          def copy_s3_to_s3(
+              source_bucket: str, source_path: str, dest_bucket: str, dest_path: str
+          ) -> bool:
+              """Copies files between S3 buckets
+
+              Args:
+                  source_bucket (str): Source bucket
+                  source_path (str): Source path
+                  dest_bucket (str): Destination bucket
+                  dest_path (str): Destination path
+
+              Returns:
+                  bool: Shows if copy was successful or not
+              """
+
+              s3 = boto3.resource("s3")
+
+              copy_source = {"Bucket": source_bucket, "Key": source_path}
+              
+              logger.info(f"copy_source {copy_source}")
+              
+              try:
+                  bucket = s3.Bucket(dest_bucket)
+                  bucket.copy(copy_source, dest_path)
+
+                  return True
+              except Exception as err:
+                  logger.error(f"Error found: {err}")
+                  return False
+
+
+          def lambda_handler(event, context):
+              logger.info(f"Event: {event}")
+              
+              logger.info(f"SOURCE_BUCKET_NAME {SOURCE_BUCKET_NAME}")
+              logger.info(f"SOURCE_PATH_DATA {SOURCE_PATH_DATA}")              
+              logger.info(f"DESTINATION_BUCKET {DESTINATION_BUCKET}")
+
+              try:
+                  if event["RequestType"] == CREATE:
+                      # Review Data
+                      logger.info(f"Copying review data")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/reviews_Toys_and_Games.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/reviews_Toys_and_Games.json.gz",
+                      )
+                      logger.info(f"Reviews data copied successfully")
+
+                      # Metadata
+                      logger.info(f"Copying review metadata")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/meta_Toys_and_Games.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/meta_Toys_and_Games.json.gz",
+                      )
+                      logger.info(f"Reviews' metadata copied successfully")
+                      
+                      # Review Sample Data
+                      logger.info(f"Copying review data")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/reviews_Toys_and_Games_sample.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/reviews_Toys_and_Games_sample.json.gz",
+                      )
+                      logger.info(f"Reviews data sample copied successfully")
+
+                      # Metadata sample
+                      logger.info(f"Copying review metadata sample")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/meta_Toys_and_Games_sample.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/meta_Toys_and_Games_sample.json.gz",
+                      )
+                      logger.info(f"Reviews' metadata sample copied successfully")                      
+
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+
+              except Exception as exc:
+                  logger.error(f"Error: {str(exc)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+
+      FunctionName: !Sub ${ProjectPrefix}-copy-s3-to-s3
+      Handler: index.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaCopyToS3Role.Arn
+      Timeout: !Ref Timeout      
+  
+  CFLambdaCopyS3ML:
+    DependsOn:
+      - LambdaCopyToS3
+    Type: Custom::CFLambdaCopyS3ML
+    Properties:
+      ServiceToken: !GetAtt LambdaCopyToS3.Arn      
+    DeletionPolicy: Delete
+
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64        
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLayerKey
+      Description: Lambda layer with dependencies for lambda-backed custom resource 
+      LayerName: !Sub "${ProjectPrefix}-lambda-layer"
+
+  LambdaFunctionLabRole:
+    DependsOn:
+      - LambdaLayer
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT_VALUE: !Ref ProjectPrefix
+          CLONE_ROLE_NAME: !Ref LabRoleName
+          BUCKET_NAME: !Ref PublicBucketName
+          POLICY_PATH: !Ref PublicBucketPolicyPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPolicyLambdaKey
+      FunctionName: !Sub "${ProjectPrefix}-lambda-function-lab-setup"
+      Handler: policy_clone.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaRoleLabSetup.Arn
+      Timeout: !Ref Timeout
+
+  CRLabRoleWithLambda:
+    DependsOn:
+      - LambdaFunctionLabRole
+    Type: Custom::CRLabRoleWithLambda
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionLabRole.Arn      
+    DeletionPolicy: Delete
+
+  LabEC2InstanceProfile:
+    DependsOn:
+      - CRLabRoleWithLambda
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LabEC2InstanceProfile
+      Roles:
+        - !Ref LabRoleName
+
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "LambdaExecutionPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "logs:CreateLogGroup"
+                Resource: !Sub "arn:aws:logs:us-east-1:${AWS::AccountId}:*"
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: 
+                  - !Sub "arn:aws:logs:us-east-1:${AWS::AccountId}:log-group:/aws/lambda/${ProjectPrefix}-lambda-clean-up:*"
+              - Effect: "Allow"
+                Action:
+                  - "glue:DeleteJob"
+                  - "iam:ListAttachedRolePolicies"
+                  - "iam:DeleteRole"
+                  - "iam:DeletePolicy"
+                  - "iam:DeleteRolePolicy"
+                  - "iam:DetachRolePolicy"
+                  - "s3:DeleteBucket"
+                  - "s3:DeleteObject"
+                  - "s3:List*"
+                  - "s3:PutBucketPublicAccessBlock"
+                Resource: "*"
+  
+  LambdaFunctionCleanUp:    
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT: !Ref ProjectPrefix
+          ACCOUNT_ID: !Ref "AWS::AccountId"
+          REGION: !Ref "AWS::Region"
+      Code:
+        ZipFile: |          
+          import os
+          import logging
+          import cfnresponse
+
+          import boto3
+          from botocore.exceptions import ClientError
+
+          CREATE = "Create"
+          DELETE = "Delete"
+
+          response_data = {}
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+
+              try:
+                  if event["RequestType"] == CREATE: 
+                      ACCOUNT_ID = os.getenv("ACCOUNT_ID", "")
+                      PROJECT = os.getenv("PROJECT", "")
+                      REGION = os.getenv("REGION", "us-east-1")
+
+                      # Initialize boto3 clients
+                      s3_client = boto3.client('s3', region_name=REGION)
+                      glue_client = boto3.client('glue', region_name=REGION)
+                      iam_client = boto3.client('iam', region_name=REGION)
+                      
+                      # Delete S3 bucket    
+                      bucket_prefix = f"{PROJECT}-"
+                      bucket_suffix = "-scripts"
+
+                      # List all buckets
+                      try:
+                          response = s3_client.list_buckets()
+                          buckets = response.get('Buckets', [])
+                          
+                          # Find the bucket with the matching pattern
+                          for bucket in buckets:
+                              bucket_name = bucket['Name']
+                              if bucket_name.startswith(bucket_prefix) and bucket_suffix in bucket_name:
+                                  # Delete the bucket
+                                  logger.info(f"Found matching bucket: {bucket_name}")
+                                  
+                                  # Delete all objects from the bucket
+                                  objects = s3_client.list_objects_v2(Bucket=bucket_name).get('Contents', [])
+                                  if objects:
+                                      delete_response = s3_client.delete_objects(
+                                          Bucket=bucket_name,
+                                          Delete={'Objects': [{'Key': obj['Key']} for obj in objects]}
+                                      )
+                                      logger.info(f"Deleted objects: {delete_response}")
+                                  
+                                  
+                                  s3_client.delete_public_access_block(Bucket=bucket_name)
+                                  logger.info(f"Deleted Public Access Block for bucket: {bucket_name}")
+                                  
+                                  # Delete the bucket
+                                  s3_client.delete_bucket(Bucket=bucket_name)
+                                  logger.info(f"Deleted bucket: {bucket_name}")
+                                  break  # Exit after deleting the bucket
+
+                      except Exception as e:
+                          logger.info(f"S3 bucket: {bucket_name} does not exist. Exception: {e}")
+                      
+                      # Delete Glue Jobs
+                      glue_jobs = [f"{PROJECT}-metadata-etl-job", f"{PROJECT}-reviews-etl-job"]
+                      for job_name in glue_jobs:
+                          try:
+                              glue_client.delete_job(JobName=job_name)
+                              logger.info(f"Deleted Glue job: {job_name}")
+                          except Exception as e:
+                              logger.info(f"Glue job: {job_name} does not exist. Exception: {e}")
+                      
+                      # Delete IAM Role and Policy
+                      iam_role = f"Lab-{PROJECT}-glue-role"
+                      iam_policy = f"{PROJECT}-glue-role-policy"
+                      
+                      try:
+                          # Delete policies
+                          try:
+                              iam_client.delete_role_policy(RoleName=iam_role, PolicyName=iam_policy)
+                              logger.info(f"Deleted policy: {iam_policy} from role: {iam_role}")
+                          except Exception as e:
+                              logger.info(f"Cannot delete policy {iam_policy} from {iam_role}. Exception: {e}")
+                          
+                          # Delete role
+                          try:
+                              iam_client.delete_role(RoleName=iam_role)
+                              logger.info(f"Deleted IAM role: {iam_role}")
+                          except Exception as e:
+                              logger.info(f"IAM role {iam_role} not found. Exception: {e}")
+
+                      except ClientError as e:
+                          logger.info(f"IAM role or policy do not exist. Exception: {e}")
+                  
+                  elif event["RequestType"] == DELETE:
+                      curl_data = {
+                          "Status": "SUCCESS",
+                          "PhysicalResourceId": event["PhysicalResourceId"],
+                          "StackId": event["StackId"],
+                          "RequestId": event["RequestId"],
+                          "LogicalResourceId": event["LogicalResourceId"],
+                      }
+
+                      curl_command = [
+                          "curl",
+                          "-H",
+                          "Content-Type: application/json",
+                          "-X",
+                          "PUT",
+                          "-d",
+                          json.dumps(curl_data),
+                          event["ResponseURL"],
+                      ]
+                      logger.info(f"curl_command: {curl_command}")
+
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+
+                      # return {
+                      #     "statusCode": 200,
+                      #     "body": "Resources deleted successfully or didn't exist"
+                      # }
+              
+              except Exception as exc:
+                  logger.error(f"Error: {str(exc)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+
+      FunctionName: !Sub "${ProjectPrefix}-lambda-clean-up"
+      Handler: index.lambda_handler     
+      Layers:
+        - !Ref LambdaLayer 
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 20
+
+  CRLambdaCleanUp:
+    DependsOn:
+      - LambdaFunctionCleanUp
+    Type: Custom::CRLambdaCleanUp
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionCleanUp.Arn      
+    DeletionPolicy: Delete
+
+
+Outputs:
+  AWSRegion:
+    Description: This is the current AWS Region for this lab
+    Value: !Sub ${AWS::Region}
+  AWSAccount:
+    Description: This is the current AWS Account for this lab
+    Value: !Sub ${AWS::AccountId}
+  VPCID:
+    Description: This is the VPC ID for this Lab
+    Value: !Ref VPC
+  PublicSubnetAID:
+    Description: This is the Public Subnet A ID for this Lab
+    Value: !Ref PublicSubnetA
+  PublicSubnetBID:
+    Description: This is the Public Subnet B ID for this Lab
+    Value: !Ref PublicSubnetB
+  PrivateSubnetAID:
+    Description: This is the Private Subnet A ID for this Lab
+    Value: !Ref PrivateSubnetA
+  PrivateSubnetBID:
+    Description: This is the Private Subnet B ID for this Lab
+    Value: !Ref PrivateSubnetB
+  IacS3Bucket:
+    Description: S3 Bucket for IaC
+    Value: !Ref IacS3Bucket
+  DataLakeBucket:
+    Description: Data Lake bucket
+    Value: !Ref DataLakeBucket
+

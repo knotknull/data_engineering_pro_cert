@@ -1608,8 +1608,23 @@ Experiment      Dataset         Paritioning     Compression Algo    # of Objects
 
 
 
-Simple Data Lake with AWS Glue
+# Simple Data Lake with AWS Glue
 c3w1lab1 
+
+
+## Storage Abstractions
+## Course 3
+## Week 2
+
+# Data Lakehouse Architecture
+
+
+Data Lake    + Data Warehouse  =  Data Lakehouse 
+
+
+
+
+
 
 
 
