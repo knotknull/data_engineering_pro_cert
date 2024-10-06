@@ -1836,4 +1836,62 @@ AWS Data Lakehouse
 +---------+     |               |     |        Storage      |                          
                 +---------------+     +---------------------+                          
 
+
+
+# Implementing a Lakehouse on AWS
+
+Storage: 
+
+    - S3      :  Structured, Semi-structured, Unstructureda
+                    (cost efficient and scalable )
+
+    - Redshift:  Highly curated Structured, Semi-structured 
+                 trusted data that fits into pre-defined schemas
+                    (performant analytics)
+
+Amazon Redshift Spectrum: Native Integration between S3 and Redshift 
+                - can query data across S3 and Redshift
+                - no need for ETL
+
+Catalog: 
+
+    - Lake Formation uses Glue to creata Data Catalog to store Metadata for all datasets 
+      hosted in the Lakehouse
+
+    - Lake Formation coordinates Glue Crawlers to identify datasets and persists
+        metadata (schema , partition, data location info) in Glue Data Catalog
+
+    - Due to schema and partition changes the Metadata in the Catlog needs to be updated frequently.
+         AWS glue can be configure to have Crawlers periodically crawl thr the Lakehouse Storage 
+         area to discover new / updated datasets and extract metadata. Stored in table in Catalog  
+
+
+Apache Iceberg:  handles evolving schema and large datasets
+        - Schema and Data versioning
+        - Utilize Time Travel feature to query old data 
+        - Lake Formation supports Apache Iceberg tables
+        - Can create Iceberg tables that utilize parquet format in AWS Glue Data Catalog
+
+
+
+Consumption: 
+
+    Redshift Spectrum: provides unified SQL interface between Redshift and S3
+        - querying data in place means faster results (don't have to process)
+        - used MPP for processing large data sets
+        - most of the compute happens in the Redshift Spectrum layer
+        - multiple Redshift clusters can query the same S3 dataset at the same time 
+            without having to make copies of data for each Redshift cluster
+
+    ex.  Have Historical Data reside in Data Lake and several months of HOT Data into Redshift
+        - can "offload" data from Redshift data to S3
+
+    Athena:  Can query data in S3 using standard SQL
+            - create tables in Athena and query S3 diectly
+            - Athena is Serverless
+            - On Demand: pay for data scanned by queries that are run
+            - supports federated queries, external query sources 
+                - can connect to Redshift
+
+
 .
