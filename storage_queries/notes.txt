@@ -1962,11 +1962,73 @@ Query Language:
 
 
 
+# Life of a Query
 
-MAP LAST HERE
-https://www.coursera.org/learn/data-storage-and-queries/lecture/i5Sjv/the-life-of-a-query
+Database Management System
+[----------------------------------------------------]
+[                                                    ]
+[   [--------------------------------------------]   ]
+[   [          Transport   System                ]   ]  # Query arrives at Transport system which hands off to Query Procesor
+[   [--------------------------------------------]   ]
+[                                                    ]
+[   [--------------------------------------------]   ]
+[   [          Query Processor                   ]   ]      +  breaks query into query tokens
+[   [                                            ]   ]      |  checks for proper syntax and validates query against db 
+[   [    [----------------------------]   -------]---]------+  perform control checks (i.e. perms etc.)
+[   [    [       Query Parser         ]          ]   ]      |  converts SQL code to bytecode
+[   [    [----------------------------]          ]   ]
+[   [    [----------------------------]          ]   ]      | devises execution plan to retrieve results from storage layer 
+[   [    [       Query Optimizer      ]   -------]---]------+  - finds strategy that uses resouces efficiently            
+[   [    [----------------------------]          ]   ]      |  - generate various plans 
+[   [                                            ]   ]      |       - considers op type, indexes, data scan size
+[   [--------------------------------------------]   ]      |  - caluclates cost
+[                                                    ]      |       - data xfer I/O cost, comp and memory cost
+[   [--------------------------------------------]   ]      |  - picks least expensive plan
+[   [          Execution Engine                  ]   ]
+[   [--------------------------------------------]---]------+ executes operations outlined in query plan 
+[                                                    ]      | produces query results
+[   [--------------------------------------------]   ]
+[   [          Storage Engine                    ]   ]
+[   [--------------------------------------------]   ]
+[                                                    ]
+[----------------------------------------------------]
 
 
+Understanding Query Performance
+EXPLAIN
+    - sequence of steps to execute the query
+    - resource consumption
+    - performance statictics in each query stage
+
+
+EXPLAIN select * from customer;
+QUERY PLAN
+---------------------------------------------------
+Seq Scan on customer (cost=0.00 .. 14.99  rows=599  width=70)
+ |                       |            |       |       |
+ + full table scan       |            |       |       +---  expected row width 
+                         |            |       |       
+startup cost for query---+            |       +--- est. # of returned rows       
+                                      |       
+       total cost of execution  ------+       
+
+
+
+EXPLAIN select * from customer where customer_id = 3;
+QUERY PLAN
+---------------------------------------------------
+Index Scan using customer_pkey on customer   --+ 
+(cost=0.28 .. 8.29  rows=1  width=70)          +--- Index Scan:  will use customer_pkey index on     
+   +           +        |     |                                   the customer table 
+   |           |        |     |                                             
+   |           \-+      |     +-- expected row width
+   |             |      |                  
+start up         |      +-- est. # of returned rows      
+cost for query   |                    
+                total cost 
+                of execution
+
+# Advanded SQL Queries pt 1
 
 
 .
