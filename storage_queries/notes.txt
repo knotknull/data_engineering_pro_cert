@@ -1894,4 +1894,32 @@ Consumption:
                 - can connect to Redshift
 
 
+# Lab Walkthrough: Building a Data Lakehouse with AWS Lake Formation and Apache Iceberg pt 1
+
+NOTE: Data lake administrator (from AWS Lake Formation) allows you to 
+      GRANT IAM users and roles permissions on databases, tables, columns, rows, cells
+
+    - Data lake users need to be attached to IAM policy to access:
+        - AWS Glue Service
+        - Lakeformation Service
+        - Amazon Athena
+
+    - Use Lake Formation to grant users fine-grained permissions to 
+       access specific resources 
+
+    glue resource role 
+        Access all catalog tables and the underlying stored data
+
+    Machine Learning team member
+        Access to the ratings_fo_ml table from the presentation zone
+
+
+# Lab: Building a Data Lakehouse with AWS Lake Formation and Apache Iceberg
+
+
+
+
+
+
+
 .
