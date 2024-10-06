@@ -1,0 +1,11 @@
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	5/5
+	
+Deployment of Landing ETL Module 	15/15
+	
+Successful Glue Job Runs for Landing ETL 	14/14
+	
+Deployment of Transform ETL Module 	42/42
+	
+Successful Glue Job Runs for Transform ETL 	24/24

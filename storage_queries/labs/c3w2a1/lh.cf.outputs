@@ -1,0 +1,13 @@
+AWSAccount 		637423658661
+AWSRegion 		us-east-1
+DatalakeAdminRole 	arn:aws:iam::637423658661:role/de-c3w2a1-DatalakeAdmin-Role
+DataLakeBucket 		de-c3w2a1-637423658661-us-east-1-data-lake
+DataSourceBucket 	de-c3w2a1-637423658661-us-east-1-source
+GlueETLRole 		arn:aws:iam::637423658661:role/Cloud9-de-c3w2a1-glue-role
+MLDatalakeUserName 	ml_data_lake_user
+MySQLEndpoint 		de-c3w2a1-rds.cpw28c48ownl.us-east-1.rds.amazonaws.com
+MySQLJDBCConnectionString jdbc:mysql://de-c3w2a1-rds.cpw28c48ownl.us-east-1.rds.amazonaws.com:3306/classicmodels
+PrivateSubnetAID 	subnet-01b65013d27dbd5ba
+PrivateSubnetBID 	subnet-0ca7e6fe26d041d8d
+PublicSubnetID 		subnet-0db951f2fd69969a5
+VPCID 			vpc-0c2286e8d83458fb1

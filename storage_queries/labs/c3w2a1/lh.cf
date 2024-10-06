@@ -1,0 +1,1018 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c3w2a1
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  LabRoleName:
+    Type: String
+    Description: Role name for the Lab Instance
+    Default: LabInstanceRole
+
+  DatabaseUserName:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: admin
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DatabaseUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+
+  PublicSubnetCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w2a1/lambda_layer_dependencies_p312.zip
+
+  PublicBucketPolicyLambdaKey:
+    Type: String
+    Description: Public bucket key for lab clone lambda zip file.
+    Default: labs/cfn_dependencies/c3w2a1/policy_clone.zip
+  PublicBucketPolicyPath:
+    Type: String
+    Description: Public bucket key for lab policy file.
+    Default: labs/cfn_dependencies/c3w2a1/lab.policy
+
+  PublicBucketLambdaKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w2a1/setup_lambda.py.zip
+
+  PublicBucketDDLObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c3w2a1/mysqlsampledatabase.sql
+
+  PublicBucketJsonObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c3w2a1/ratings/ratings.json
+
+  PublicBucketJsonEvolutionObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c3w2a1/ratings_with_timestamp/ratings.json
+
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+
+  MLDatalakeUserName:
+    Description: IAM user name to be created to query the data lake for ML
+    Type: String
+    Default: ml_data_lake_user
+    AllowedPattern: '[\w+=,.@-]+'
+    MinLength: '1'
+    MaxLength: '64'
+    ConstraintDescription: The user name can have up to 64 characters. Valid
+      characters include uppercase letters (A-Z), lowercase letters (a-z),
+      numbers (0-9), and symbols
+
+  MLDatalakeUserPassword:
+    Description: Enter password for the ML IAM user to login to AWS console
+    Type: String
+    NoEcho: 'true'
+    AllowedPattern: '[\u0009\u000A\u000D\u0020-\u00FF]+'
+    MinLength: '8'
+    MaxLength: '128'
+    Default: 'Ml_user_123!'
+    ConstraintDescription: Must be at least 8 characters long. Must include at least
+      three of the following mix of character types -  uppercase letters (A-Z),
+      lowercase letters (a-z), numbers (0-9), and symbols'
+  LFTagKey:
+    Description: LF-Tag Key to be created and assigned
+    Type: String
+    Default: labname
+  LFTagValue:
+    Description: LF-Tag Value to be assigned
+    Type: String
+    Default: de-c3w2a1
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - ProjectPrefix
+          - AWSRegion
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackId
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnet:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+  MyDBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet available for the DB Instance
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    DependsOn:
+      - PrivateSubnetA
+      - PrivateSubnetB
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+  NatGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+  NATGateway:
+    DependsOn:
+      - NATGatewayEIP
+      - PublicSubnet
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      FromPort: '3306'
+      ToPort: '3306'
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: 0.0.0.0/0
+
+  DataLakeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-data-lake
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  DataSourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-source
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  TerraformStateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-terraform-state
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLayerKey
+      Description: Lambda layer with dependencies to insert data into MySQL DB
+      LayerName: de-c3w2-lambda-layer
+
+  MySQLDB:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - MyDBSubnetGroup
+      - PrivateSubnetA
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-rds'
+      DBName: production
+      DBInstanceClass: db.t3.small
+      AllocatedStorage: '20'
+      AvailabilityZone: !GetAtt
+        - PrivateSubnetA
+        - AvailabilityZone
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: MySQL
+      EngineVersion: 8.0.32
+      MasterUsername: !Ref DatabaseUserName
+      MasterUserPassword: !Ref DatabaseUserPassword
+      MultiAZ: false
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+
+  Function:
+    DependsOn:
+      - LambdaLayer
+      - MySQLDB
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - MySQLDB
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - MySQLDB
+            - Endpoint.Port
+          DBPASSWORD: !Ref DatabaseUserPassword
+          DBUSER: !Ref DatabaseUserName
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketDDLObjectKey
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import os
+
+          import boto3
+          import sqlalchemy as sa
+          import sqlparse
+
+          DBHOST = os.getenv("DBHOST", "")
+          DBPORT = int(os.getenv("DBPORT", ""))
+          DBNAME = os.getenv("DBDATABASE", "")
+          DBUSER = os.getenv("DBUSER", "")
+          DBPASSWORD = os.getenv("DBPASSWORD", "")
+          BUCKET_NAME = os.getenv("BUCKET_NAME", "")
+          OBJECT_KEY = os.getenv("OBJECT_KEY", "")
+          CREATE = 'Create'
+          DELETE = 'Delete'
+          response_data = {}
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info(f"Event: {event}")
+              try:
+                  logger.info(f"SQLAlchemy version {sa.__version__}")
+
+                  # Reading file from S3 
+                  s3 = boto3.client("s3")
+
+                  response = s3.get_object(Bucket=BUCKET_NAME, Key=OBJECT_KEY)
+                  logger.info(f"response:  {response}")
+                  sql_statement = response["Body"].read().decode("utf-8")
+                  sql_list = sqlparse.split(sql_statement)
+
+                  # Population of Database
+                  engine = sa.create_engine(
+                      f"mysql+pymysql://{DBUSER}:{DBPASSWORD}@{DBHOST}/{DBNAME}?charset=utf8mb4"
+                  )
+
+                  with engine.connect() as conn:
+                      for statement in sql_list:
+                          db_response = conn.execute(sa.text(statement))
+
+                      conn.commit()
+              except Exception as exc:
+                  logger.error(f"Error: {str(exc)}")
+      FunctionName: !Sub '${ProjectPrefix}-lambda-function'
+      Handler: index.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+  FunctionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+
+  # Create Lake Formation Role to register data lake location
+  LFDatalakeRegisterRole:
+    DependsOn:
+      - DataLakeBucket
+      - LambdaRoleSetup
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-LF-Register-Role
+      Description: Permissions to use LF Register feature
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lakeformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt LambdaRoleSetup.Arn
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: LFRegisterPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lakeformation:*
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetTables
+                Resource:
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${DataLakeBucket}
+                  - !Sub arn:${AWS::Partition}:s3:::${DataLakeBucket}/*
+
+  #Policy to iam:PassRole itself to be attached to LFDatalakeRegisterRole
+  LFRegisterPassRolePolicy:
+    DependsOn:
+      - LFDatalakeRegisterRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: LFRegisterSelfPassRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource:
+              - !GetAtt LFDatalakeRegisterRole.Arn
+      Roles:
+        - !Ref LFDatalakeRegisterRole
+
+  # Create DatalakeAdminRole
+  DatalakeAdminRole:
+    Type: AWS::IAM::Role
+    DependsOn:
+      - LambdaRoleSetup
+      - GlueETLRole
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-DatalakeAdmin-Role
+      Description: Datalake Admin Role
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lakeformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt LambdaRoleSetup.Arn
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLakeFormationDataAdmin
+        - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSLakeFormationCrossAccountManager
+        - arn:aws:iam::aws:policy/AmazonAthenaFullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+      Policies:
+        - PolicyName: LakeFormationSetup
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                Resource: '*'
+        - PolicyName: LakeFormationSLR
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: lakeformation.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:PutRolePolicy
+                Resource:
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess
+
+  # Register datalake location using the custom LF Service role
+  LFRegisterDataLakeLocation:
+    DependsOn:
+      - LFDatalakeRegisterRole
+      - DataLakeBucket
+    Type: AWS::LakeFormation::Resource
+    Properties:
+      ResourceArn: !GetAtt DataLakeBucket.Arn
+      RoleArn: !GetAtt LFDatalakeRegisterRole.Arn
+      UseServiceLinkedRole: false
+
+  # Add DatalakeAdmin as a Data Lake Admin
+  LFDataLakeSettings:
+    DependsOn:
+      - DatalakeAdminRole
+      - GlueETLRole
+    Type: AWS::LakeFormation::DataLakeSettings
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !GetAtt DatalakeAdminRole.Arn
+        - DataLakePrincipalIdentifier: !GetAtt GlueETLRole.Arn
+
+  # Create Glue Role for ETL
+  GlueETLRole:
+    DependsOn:
+      - DataLakeBucket
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub Cloud9-${ProjectPrefix}-glue-role
+      Description: Permissions to run Glue ETL
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lakeformation.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: LFGetDataAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lakeformation:GetDataAccess
+                  - lakeformation:GrantPermissions
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetTables
+                Resource:
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${DataLakeBucket}
+                  - !Sub arn:${AWS::Partition}:s3:::${DataLakeBucket}/*
+                  - !Sub arn:${AWS::Partition}:s3:::${ProjectPrefix}*
+                  - !Sub arn:${AWS::Partition}:s3:::${ProjectPrefix}*/*
+
+  #Policy to iam:PassRole itself to be attached to GlueETLRole
+  LFGlueRegisterPassRolePolicy:
+    DependsOn:
+      - GlueETLRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: LFRegisterSelfPassRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource:
+              - !GetAtt GlueETLRole.Arn
+      Roles:
+        - !Ref GlueETLRole
+
+  S3BucketAthenaWorkgroup:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-athena-wg
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  AthenaWorkGroup:
+    DependsOn: S3BucketAthenaWorkgroup
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Description: Athena workgroup
+      Name: !Sub ${ProjectPrefix}-workgroup
+      RecursiveDeleteOption: true
+      State: ENABLED
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        EngineVersion:
+          SelectedEngineVersion: Athena engine version 3
+        PublishCloudWatchMetricsEnabled: false
+        RequesterPaysEnabled: false
+        ResultConfiguration:
+          OutputLocation: !Join
+            - ''
+            - - s3://
+              - !Ref S3BucketAthenaWorkgroup
+              - /
+          EncryptionConfiguration:
+            EncryptionOption: SSE_S3
+
+  # Create additional Lake Formation user MLDatalakeUserName
+  MLDatalakeUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref MLDatalakeUserName
+      LoginProfile:
+        Password: !Ref MLDatalakeUserPassword
+      Policies:
+        - PolicyName: DatalakeUserBasic
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - athena:ListWorkGroups
+                  - lakeformation:GetDataAccess
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:DeleteTable
+                  - glue:CreateTable
+                Resource:
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/*
+                  - !Sub arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog
+              - Effect: Allow
+                Action:
+                  - athena:GetDataCatalog
+                  - athena:GetQueryExecution
+                  - athena:GetQueryResults
+                  - athena:GetWorkGroup
+                  - athena:StartQueryExecution
+                  - athena:StopQueryExecution
+                Resource:
+                  - !Sub arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/*
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:AbortMultipartUpload
+                  - s3:CreateBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${S3BucketAthenaWorkgroup}
+                  - !Sub arn:${AWS::Partition}:s3:::${S3BucketAthenaWorkgroup}/*
+
+  MLDatalakeCredentials:
+    Type: AWS::IAM::AccessKey
+    DependsOn: MLDatalakeUser
+    Properties:
+      Status: Active
+      UserName: !Ref MLDatalakeUserName
+
+  MLDatalakeCredentialsStored:
+    Type: AWS::SecretsManager::Secret
+    DependsOn: MLDatalakeCredentials
+    Properties:
+      Name: !Sub /datalake/credentials/${MLDatalakeUserName}
+      SecretString: !Sub '{"ACCESS_KEY":"${MLDatalakeCredentials}","SECRET_KEY":"${MLDatalakeCredentials.SecretAccessKey}"}'
+
+  #Create Lambda Iceberg Role
+  LambdaRoleSetup:
+    DependsOn: Function
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-Setup-Lambda-Role
+      Description: Permissions to use LF Register feature and basic setup
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: LambdaS3PutPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:Put*"
+                Resource: !Sub "arn:aws:s3:::${DataSourceBucket}/*"
+        - PolicyName: LambdaInvoke
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:  !GetAtt Function.Arn
+
+  # Create Lambda function
+  LambdaFunctionSetup:
+    DependsOn:
+      - DataLakeBucket
+      - LambdaLayer
+      - DatalakeAdminRole
+      - GlueETLRole
+      - LFDatalakeRegisterRole
+      - LambdaRoleSetup
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to create Iceberg table and grant access
+      FunctionName: !Sub ${ProjectPrefix}-Lambda-Setup
+      Handler: setup_lambda.handler
+      MemorySize: 128
+      Role: !GetAtt LambdaRoleSetup.Arn
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          Lambda_Name: !Sub '${ProjectPrefix}-lambda-function'
+          S3Bucket_Name: !Ref DataLakeBucket
+          Datalake_Admin_RoleArn: !GetAtt DatalakeAdminRole.Arn
+          Datalake_Register_RoleArn: !GetAtt LFDatalakeRegisterRole.Arn
+          Glue_ETLJob_RoleArn: !GetAtt GlueETLRole.Arn
+          InstanceRole_Name: !Ref LabRoleName
+          LFTag_Key: !Ref LFTagKey
+          LFTag_Value: !Ref LFTagValue
+          SOURCE_BUCKET_NAME: !Ref PublicBucketName
+          SOURCE_PATH_JSON: !Ref PublicBucketJsonObjectKey
+          SOURCE_PATH_JSON_EVO: !Ref PublicBucketJsonEvolutionObjectKey
+          DESTINATION_BUCKET: !Ref DataSourceBucket
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLambdaKey
+
+  SetupLambdaExecution:
+    DependsOn:
+      - LambdaFunctionSetup
+      - LFDataLakeSettings
+      - MySQLDB
+    Type: 'Custom::CFSetupLambdaExecution'
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionSetup.Arn
+    DeletionPolicy: Delete
+
+  LambdaRoleLabSetup:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-lambda-role-lab-setup"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: LabInstanceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CreateLogGroup
+                Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: "arn:aws:logs:*:*:*"
+              - Sid: LogStreamMgmt
+                Effect: Allow
+                Action: 
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:*:*:log-group:/aws/lambda/${ProjectPrefix}*:*"
+              - Sid: GetRolePolicyAccess
+                Effect: Allow
+                Action: 
+                  - iam:GetRolePolicy                  
+                Resource: "arn:aws:iam::*:role/voclabs"
+              - Sid: IAMRoleMgmt
+                Effect: Allow
+                Action: 
+                  - iam:CreateRole
+                  - iam:TagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:DeleteRole
+                  - iam:UntagRole
+                Resource: "arn:aws:iam::*:role/Lab*"
+
+  LambdaFunctionLabRole:
+    DependsOn:
+      - LambdaLayer
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT_VALUE: !Ref ProjectPrefix
+          CLONE_ROLE_NAME: !Ref LabRoleName
+          BUCKET_NAME: !Ref PublicBucketName
+          POLICY_PATH: !Ref PublicBucketPolicyPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPolicyLambdaKey        
+      FunctionName: !Sub "${ProjectPrefix}-lambda-function-lab-setup"
+      Handler: policy_clone.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaRoleLabSetup.Arn
+      Timeout: !Ref Timeout
+
+  CRLabRoleWithLambda:
+    DependsOn:
+      - LambdaFunctionLabRole
+    Type: Custom::CRLabRoleWithLambda
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionLabRole.Arn      
+    DeletionPolicy: Delete
+
+  LabEC2InstanceProfile:
+    DependsOn:
+      - CRLabRoleWithLambda
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LabEC2InstanceProfile
+      Roles:
+        - !Ref LabRoleName
+        
+Outputs:
+  AWSRegion:
+    Description: This is the current AWS Region for this lab
+    Value: !Sub ${AWS::Region}
+  AWSAccount:
+    Description: This is the current AWS Account for this lab
+    Value: !Sub ${AWS::AccountId}
+  VPCID:
+    Description: This is the VPC ID for this Lab
+    Value: !Ref VPC
+  PublicSubnetID:
+    Description: This is the Public Subnet ID for this Lab
+    Value: !Ref PublicSubnet
+  PrivateSubnetAID:
+    Description: This is the Private Subnet A ID for this Lab
+    Value: !Ref PrivateSubnetA
+  PrivateSubnetBID:
+    Description: This is the Private Subnet B ID for this Lab
+    Value: !Ref PrivateSubnetB
+  DataLakeBucket:
+    Description: This is the S3 bucket for the data lake
+    Value: !Ref DataLakeBucket
+  DataSourceBucket:
+    Description: This is the S3 bucket for the data lake
+    Value: !Ref DataSourceBucket
+  MySQLJDBCConnectionString:
+    Description: JDBC connection string for MySQL database
+    Value: !Join
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt
+          - MySQLDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt
+          - MySQLDB
+          - Endpoint.Port
+        - /classicmodels
+  MySQLEndpoint:
+    Description: RDS endpoint for MySQL DB instance
+    Value: !GetAtt MySQLDB.Endpoint.Address
+  GlueETLRole:
+    Value: !GetAtt GlueETLRole.Arn
+    Description: GlueETL Role Arn
+  DatalakeAdminRole:
+    Value: !GetAtt DatalakeAdminRole.Arn
+    Description: DatalakeAdmin Role Arn
+  MLDatalakeUserName:
+    Value: !Ref MLDatalakeUserName
+    Description: Machine Learning Datalake User Name
+

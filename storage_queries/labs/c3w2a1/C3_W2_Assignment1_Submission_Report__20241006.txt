@@ -1,0 +1,24 @@
+
+[Executed at: Sun Oct 6 8:06:51 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Glue Connection de-c3w2a1-rds-connection exists.
+Glue Job de-c3w2a1-rds-ingestion-etl-job exists.
+Glue Job de-c3w2a1-bucket-ingestion-etl-job exists.
+Test 2 passed: All Glue resources are correctly deployed.
+========================================================================================================================
+Glue Job de-c3w2a1-bucket-ingestion-etl-job has at least one successful run.
+Glue Job de-c3w2a1-rds-ingestion-etl-job has at least one successful run.
+Test 3 passed: Both Glue jobs have at least one successful run.
+========================================================================================================================
+Glue Job de-c3w2a1-ratings-transformation-job exists.
+Glue Job de-c3w2a1-csv-transformation-job exists.
+Glue Job de-c3w2a1-ratings-to-iceberg-job exists.
+Test 4 passed: All Terraform-deployed Glue resources are correctly deployed.
+========================================================================================================================
+Glue Job de-c3w2a1-csv-transformation-job has at least one successful run.
+Glue Job de-c3w2a1-ratings-to-iceberg-job has at least one successful run.
+Glue Job de-c3w2a1-ratings-transformation-job has at least one successful run.
+Test 5 passed: All Transform ETL Glue jobs have at least one successful run.
+========================================================================================================================
