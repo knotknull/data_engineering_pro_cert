@@ -1918,6 +1918,53 @@ NOTE: Data lake administrator (from AWS Lake Formation) allows you to
 
 
 
+Resources
+
+https://www.youtube.com/watch?v=-ckvw6I9KKw  ## BIll Inmon: Data Warehousing in 2022
+
+https://www.databricks.com/resources/ebook/building-the-data-lakehouse
+
+https://www.amazon.com/Building-Data-Warehouse-W-Inmon/dp/0764599445
+
+https://www.databricks.com/glossary/medallion-architecture
+
+https://www.dremio.com/blog/exploring-the-architecture-of-apache-iceberg-delta-lake-and-apache-hudi/
+
+https://www.startdataengineering.com/post/what_why_table_format/
+
+https://iceberg.apache.org/
+
+https://delta.io/
+
+https://hudi.apache.org/
+
+https://docs.aws.amazon.com/whitepapers/latest/aws-serverless-data-analytics-pipeline/logical-architecture-of-modern-data-lake-centric-analytics-platforms.html
+
+https://aws.amazon.com/lake-formation/features/
+
+https://aws.amazon.com/blogs/big-data/use-aws-glue-etl-to-perform-merge-partition-evolution-and-schema-evolution-on-apache-iceberg/
+
+https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-format-iceberg.html
+
+
+
+
+## Batch Queries
+## Course 3
+## Week 3
+
+Query:  A statemenet that you write in a specific query language to retrieve or act on data
+
+
+Query Language:  
+    - You queries describe what data you want to retrieve
+    - Execution steps are abstracted from you and handled by the DBMS 
+
+
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/data-storage-and-queries/lecture/i5Sjv/the-life-of-a-query
 
 
 
