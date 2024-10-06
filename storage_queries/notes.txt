@@ -1809,17 +1809,31 @@ AWS Lake Formation
 
 AWS Data Lakehouse
 
-               +--------------+
-               | [Kinesis]    |
-               |              |
-+---------+    | [Firehouse]  |
-|         |    |              |
-|  Data   |    | [DataSync]   |
-|         | ->>|              |
-| Sources |    |[DB Migration]|
-|         |    |              |
-|         |    | [App Flow]   |
-+---------+    |              |
-               +--------------+
+
+
+
+
+
+                +---------------+       +---------------------------------------+     +---------------+       
+                |   Ingestion   |       |                Catalog                |     | Consumption   |
+                |               |       |                                       |     |               |
+                | [Kinesis    ] |       | [Lake     ]  [Glue] [Metadata]  [AWS] | -->>|  [SageMaker]  |
+                | [Data Stream] |       | [Formation]  [Data]             [IAM] |     |     (ML)      |  
+                |               |       +---------------------------------------+     |               |
+                | [Amazon   ]   |                           ^                         | [Quicksight]  |
+                | [Data     ]   |                           |                         |  (BI / Viz )  |
+                | [Firehose ]   |    +------------------------------------------+     |               |
+                |               |    |              Processing                  |     |   [Athena]    |
+                | [Amazon   ]   |    |                                          |     |    (Query)    |
+                | [Data     ]   |    | [EMR]  [Glue] [AMS Flink]  [ Redshift ]  |     |               |
++---------+     | [Firehouse]   |    |                            [ Spectrum ]  |     |   [Redshift]  |
+|         |     |               |    +------------------------------------------+     |   [Spectrum]  |
+|  Data   |     | [DataSync]    |                 ^                                   |    (Query)    |
+|         | -->>|               |                 |                                   |               |
+| Sources |     |[DB Migration] |     +---------------------+                         +---------------+
+|         |     |               |     |                     |                          
+|         |     | [App Flow]    | -->>| [Redshift]    [S3]  |                          
++---------+     |               |     |        Storage      |                          
+                +---------------+     +---------------------+                          
 
 .
