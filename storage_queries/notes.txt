@@ -2539,14 +2539,26 @@ Table Design:
                     - minimize disk read operations
                     - speed up query
 
+LAB: Benchmarking Row-based (PostgreSQL) vs Columnar-based DB (Redshift)
+utilizes TPC-H Benchmark
+
+Analytics
+Benchmark                        Column-Based            Row-Based
+First  TPC-H Query                  291 ms              2 min 41 s
+Second TPC-H Query                  87 ms               1 min 10 s
+Third  TPC-H Query                  4.33 s              5 min 35 s
+Fourth TPC-H Query                  233 ms              1 min 16 s
+Fifth  TPC-H Query                  3.1 s               1 min 36 s
+
+write / delete
+Benchmark                        Column-Based            Row-Based
+Write  50 rows                       7.4 s               456 ms 
+Delete 50 rows                      16.4 s               176 ms 
 
 
-
-
-
-
-
-
+LAB
+MAP LAST HERE
+https://www.coursera.org/learn/data-storage-and-queries/gradedLti/yZQCd/practice-lab-1-comparing-the-query-performance-between-row-oriented-and-column
 
 
 .
