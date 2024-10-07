@@ -2556,9 +2556,43 @@ Write  50 rows                       7.4 s               456 ms
 Delete 50 rows                      16.4 s               176 ms 
 
 
-LAB
+
+## Additional Query Strategies 
+
+Leverage Query Caching 
+    - running a comples query frequently can be costly
+    - many databases allow you to cache query results
+    - Query caching can reduce the load on your database and 
+       enhance the user experience
+
+Prioritize Readability 
+    - less likely to contain errors
+    - simple to debug
+
+CTE (Common Table Expressions): creates a temporary result set that you can reference in query
+
+
+
+Database Resources: 
+    - due to upsert, outdated data exists on disk 
+
+    Table Bloat:  data size on the disk exceeds actual disk size
+            - wated disk space
+            - slow queries
+            - suboptimal and inaccurate execution plans
+            - inefficient indexes
+
+    Vacumming:
+        - remove dead records (maintance utils)
+        - critical for RDBMS (PgSQL, MySQL)
+
+## Streaming Queries 
+
+# Queries on Streaming Data
+
+https://www.coursera.org/learn/data-storage-and-queries/lecture/smTCA/queries-on-streaming-data
+
 MAP LAST HERE
-https://www.coursera.org/learn/data-storage-and-queries/gradedLti/yZQCd/practice-lab-1-comparing-the-query-performance-between-row-oriented-and-column
 
 
 .
