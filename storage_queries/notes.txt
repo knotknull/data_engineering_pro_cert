@@ -2710,7 +2710,7 @@ AMS handles:
     - Automatic backups
 
 
-AWS consol > flink > Managed Apache Flink
+AWS console > flink > Managed Apache Flink
     choose Streaming applicatons     host Apache Flink in a production environment
      or    Studio Notebooks          interactively query data streams in real time
 
@@ -2741,10 +2741,69 @@ see github repo for demo flink app
 at Managed Apache Flink console 
     click [Open Apache Flink dashboard ]
 
-    
+at Apache Flink dashboard 
+    - 1 job running: Kinesis Data Streams to S3 Flink Streaming App
+
 NOTE: 
  - Managed Service for Apache Flink creates the hosted environment for you to run applications
  - Apache Flink applications would be writtne locally and then deployed to AMD
 
+
+
+
+# Deploying a Studio Notebook with Amazon Managed Service for Apache Flink
+
+
+
+
+[ Kinesis Data Stream ]   -------->>  [AMS Apache Flink ] --------->> [ S3 ]
+                          connector                       connector
+
+Connectors provide code for Interfacing with:
+    - Databases 
+    - Message queues
+    - Cloud storage services
+    - DynamoDB
+    - AMS Kafka
+    - RDS
+
+
+
+AWS console > flink > Managed Apache Flink
+    choose  Studio Notebooks          
+
+     [Create Studio notebook ]
+
+choose: use a blueprint 
+        NOTE: setps up MSK (Kafka) / AMS Apache Flink / Interact with data via notebook (Zeppelin)
+
+click  [deploy blueprint]
+
+stock ticker data to topic, 
+
+at Managed Apache Flink console 
+    click [Open Apache Zeppelin ]
+
+NOTE: Zeppelin supports code written in: SQL, Python, Scala
+      Data visualization as tables and charts
+      Integrate with Flink
+
+Zeppelin is similar to python notebook.
+  - different interpreters can run a paragraph: SQL , Python, Flink, Spark
+
+
+AWS Glue database used behind the scenes for data sources and destinations scripts are using
+
+
+[ Studio  ]  --->> [ AWS  ]  --->>  [ AWS Glue   ] --->> [ Glue  ] --->>  - Locations
+[Notebook ]        [ Glue ]         [Data Catalog]       [ Tables]        - Schemas
+                                  ( data sources    )                     - Parameters 
+                                  ( and destinations)                     - for sources / destinations 
+
+
+
+
+
+LAB
 
 .
