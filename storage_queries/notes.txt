@@ -2203,9 +2203,235 @@ row_number(): assigns different ranks when there is a time
 # Assignment 3 Advanced SQL Queries 
 
 
-MAP LAST HERE 
 
-https://www.coursera.org/learn/data-storage-and-queries/lecture/kYsa6/index-deep-dive
+Index: separate data structure that has its own disk space and contains information 
+       that revers to the actual table  
+
+        - DBMS uses index instead of scanning entire table
+
+Indexes are broken into blocks that are doublly linked together
+    - data in block is sorted 
+    - index blocks are linked together that maintians logical order of entire index
+
+logical index:
+    Country     Row Address
+    Brazil          8B1C
+    Canada          C456
+    Mexico          34AB
+    USA             4567
+    USA             23C5
+
+physical index on disd:
+   [ Brazil ] [ Canada ] [ Canada ] -->>[ Canada ] [ Chile  ] [ Mexico ]-->> [ Mexico ] [  USA   ] [  USA   ]  
+   [  8B1C  ] [  9CA9  ] [  D569  ]<<-- [  C456  ] [  2561  ] [  C452  ]<<-- [  34AB  ] [  4567  ] [  23C5  ]  
+
+- Physical location of the blocks does not matter
+- Structure allows for the update of the index when data is inserted or deleted
+
+Balanced Search Tree (B-Tree)
+    - Built on top of index block
+    - Index nodes are leaf nodes of the tree
+    - Internal nodes (branch nodes)
+        - these are parent nodes for groups leaf nodes
+        - Value in Internal Node represent last country of each leaf node 
+    - linkage pattern repeated up try until root node
+
+                                        [  Brazil ][  USA ]  [Venezuala]                                    (Root Node)
+                                           |         |                |     
+                              +------------+         +-----------+    +--------------------------+
+                              |                                  |                               |
+                              |                                  |                               |
+   [ Australia ][ Brazil ][ Brazil ]     [Canada ][ Mexico  ]  [ USA ]     [ USA ][  USA   ][ Venezuela ]    (Internal Node)
+                                           |        |               | 
+                                           |        |               | 
+                             +-------------+        +-----------+   +----------------------------------+
+                             |                                  |                                      |
+                             |                                  |                                      |
+   [ Brazil ] [ Canada ] [ Canada ] -->>[ Canada ] [ Chile  ] [ Mexico ]-->> [ Mexico ] [  USA   ] [  USA   ]  
+   [  8B1C  ] [  9CA9  ] [  D569  ]<<-- [  C456  ] [  2561  ] [  C452  ]<<-- [  34AB  ] [  4567  ] [  23C5  ]   (Leaf Node)
+
+
+For example if looking for country between Cananda and Mexico 
+    - it will point to 2nd block of leaf nodes
+
+For example if looking for country between Mexico and USA 
+    - it will point to 3rd block of leaf nodes
+
+
+eg.  Select * from orders where country = "Canada"
+        1. looks at root node and searches for "Canada"
+        2. Canada is not in root node 
+            - alphabetically between Brazil and USA 
+            - choose second root node 
+            - this represents countries between brazil and USA
+        3. DB searches Internal Node for Canada
+            - finds Canada at first entry of 2nd group of Internal Nodes
+        4. DB chooses first Internal Node path (via pointer) and reaches Leaf Node
+        5. DB finds all records in Leaf Node with Orders placed in Canada
+        6. DB needs to horizontally traverse leaf nodes to find all Canada entry 
+
+
+Tree Traversal
+    - balanced,  all children nodes are equally blanced between the parent nodes to Root Node
+    - O(log n)
+
+NOTE: Do NOT want to create too many indexes because there could be a performance hit on updating them.
+
+ex.  EXPLAIN SELECT * FROM payment WHERE rental_id = 1;
+     QUERY PLAN
+     ---------------------------------------------
+     Seq Scan on payment (cost = 0.00..290.45 rows=1 width=26)
+
+# create and index
+
+     CREATE INDEX rental_idx ON payment (rental_id);
+
+ex.  EXPLAIN SELECT * FROM payment WHERE rental_id = 1;
+     QUERY PLAN
+     ---------------------------------------------
+     Index Scan on rental_idx on payment 
+     (cost=0.29..8.30 rows=1 width=26)
+
+# Columnar Storage 
+    i.e. Amazon Redshift 
+
+    Sort Key: one or more columns
+        - sorts the data according to the sort key
+        - stores the sorted dta on disk
+
+Big Query sort key is known as cluste key
+
+
+
+# Aditional Index Examples
+
+# Retrieving only the data you need
+
+Avoid select *
+    - large amounts of data need to transfered from disk
+    - select * on cloud pay-as-you-go databases can be expensive
+        - charged for reading all bytes and for utilizing compute resources
+
+Query Tips:
+
+Pruning: Exclude irrelevant data from being scanned in your query
+    - row-based pruning
+        - filter rows
+        - use index or sort/cluster key
+            CREATE INDEX rental_idx on payment (rental_id);
+            SELECT * FROM payment where rental_id = 1 
+            
+    - column-based pruning
+        - specify only the columns you need
+            SELECT customer_id, rental_id
+            FROM paymenta;
+
+    - Partition pruning
+        - scan specific partitions
+        - partitions are based on partiion key (i.e. date or location)
+
+
+# Join Statement
+
+SELECT * from orders 
+JOIN customers 
+on  customers.id = orders.customer_id
+
+
+Inner Join: Combindes data from only the rows that share a matching customer_id in both tables 
+
+
+Join Methods: 
+
+Method 1:  Nested Loop Join 
+    like a nested for loop
+        for every customer_id in orders table scan customers talbe for the customer_id
+
+
+
+Method 2:  Index-based Nested Loop
+    - index exists for one of the join attributes
+        i.e. customer has an index on customer id
+                                                b-tree for customers.id
+
+                                       [10] [40]  [60]                                          root node
+                                         |    |       \
+                               +---------+    +-----+  +-------------------+
+                               |                    |                      |
+                        [3][7][10]        [20][38][40]            [45][50][60]                  internal node
+                                |                                           |
+                       +--------+                                           +-------+
+                       |                                                            |
+                [1][2][3]          Index for the id column                [53][57][60]          leaf node
+
+
+    1. get customer_id from orders table
+    2. search the customers table with this customer.id against the index
+            - O(log n) search
+
+
+
+Method 3:  Hash-Join
+    - uses hash function to map rows of each table
+    - to bucket space value of join attributed
+    - scans all rows of smaller table (customer) and sends each row to a particular bucket
+    - scans all rows of larger  table (orders)   and sends each row to a particular bucket
+    - buckets get combined records of order and customer 
+
+orders.customer_id------+----------  customers.id
+                        |
+                        |   
+                        V
+                [Hash Function]
+
+    Bucket 1            Bucket 2            Bucket 3
+    ----------          ----------          ----------
+    cust.row 1          cust.row 2          cust.row 4
+    ord.row 1           cust.row 3          ord.row 6
+    ord.row 2           ord.row 4
+    ord.row 3           ord.row 5
+
+Normalized data 
+    - less redundancy in data
+    - more comples join statements to combine data
+
+Row Explosion:  when a query returns more rows than anticipated 
+                    (Cartesian product)
+
+        - check query plan on how it will be run
+
+
+
+# Aggregate Queries 
+
+
+Aggregate queries: used to compute summary value of a column (SUM, AVG, MAX, MIN, COUNT)
+
+SELECT MIN(price ) from orders
+
+Aggregating queries with Group By
+
+
+SELECT MIN(price ) from orders GROUP BY country
+    - partition table by country
+    - get men price of that country
+    - partitioning can be done with sorting algo or hash function
+        - or you can use an index to group rows
+
+Aggregate Query is perforing operations on columns as opposed to rows 
+
+    Row      Storage - Need to transfer all rows from disk to memory
+    Columnar Storage - Transfer only the relevant columns from disk to memory 
+
+Performing analytical queries on Columnar storage is much more efficeint
+
+
+
+
+
+
+
+
 
 
 .
