@@ -2682,5 +2682,69 @@ Product details         +---------------+
 User demographics                        
 
 
+# Deploying an Application with Amazon Managed Service for Apache Flink
+
+
+                Apache Flink
+
+   YARN                     Self host
+ Application               Containerized                            Managed Service
+----------        ------------------------------------            --------------------
+Amazon EMR       Amazon Elascic          Amazon Elascic             Amazone Managed Service
+                Kubernetes Service      Container Service            for Apache Flink
+|                                                           |
++---------------------------+-------------------------------+
+                            |
+             Do it yourself option for Flink 
+
+
+
+
+AMS Apache Flink
+
+Hosted serverless environment
+AMS handles: 
+    - provisioning compute
+    - Setting up & managing AZ failover
+    - Automatic scaling
+    - Automatic backups
+
+
+AWS consol > flink > Managed Apache Flink
+    choose Streaming applicatons     host Apache Flink in a production environment
+     or    Studio Notebooks          interactively query data streams in real time
+
+     [Create streaming application ]
+
+next:   start from scatch   or 
+        use a blueprint
+
+choose: use a blueprint 
+        NOTE: setps up Kinesis Data Streams / AMS Apache Flink / S3 destination
+
+click  [deploy blueprint]
+
+resources created
+
+Flink Demo simulates stock ticker prices thru Kinesis Data Stream
+(simulating real-time ticker) 
+
+Flink applicaton does a data transformation and writes to bucket
+see github repo for demo flink app
+    - awslabs/managed-service-for-apacke-flink-blueprints
+        runAppWithKinesisSource method actually does transformation
+
+            -reads stock data from Kinesis stream and into Flink data stream
+            - filters data for stocks $1 or higher 
+            - writes to S3
+
+at Managed Apache Flink console 
+    click [Open Apache Flink dashboard ]
+
+    
+NOTE: 
+ - Managed Service for Apache Flink creates the hosted environment for you to run applications
+ - Apache Flink applications would be writtne locally and then deployed to AMD
+
 
 .
