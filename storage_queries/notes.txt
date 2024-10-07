@@ -2404,7 +2404,6 @@ Row Explosion:  when a query returns more rows than anticipated
 
 # Aggregate Queries 
 
-
 Aggregate queries: used to compute summary value of a column (SUM, AVG, MAX, MIN, COUNT)
 
 SELECT MIN(price ) from orders
@@ -2424,6 +2423,122 @@ Aggregate Query is perforing operations on columns as opposed to rows
     Columnar Storage - Transfer only the relevant columns from disk to memory 
 
 Performing analytical queries on Columnar storage is much more efficeint
+
+
+
+# Amazon Redshift Cloud Data Warehouse
+
+[ Data   ] -->> [Staging] -->> [  Data   ] -->> Analyticals &   
+[ Source ]      [ Area  ]      [Warehouse]       Reports
+
+
+
+[Columnar]      [Massively][Parallel]           [   Data    ]
+[Storage ]         [Processing]                 [Compression]
+
+
+
+Redshift: Columnar Database
+
+stores column by column together on disk as opposed to row by row
+[ bytes for col 1][ bytes for col 2][ bytes for col 3]
+
+- Efficient for:
+    -  Analytical Queries
+    -  OLAP Workloads 
+        - aggregate data over many rows but few columns
+
+
+ideal for Data Warehousing 
+    - Speed up query performance
+    - cost efficiency
+
+
+Columnar storage better for compression
+ - Red Shift reads compressed data
+    - uncompresses data only when needed
+ - use more memory for analyzing data
+ - save on storage space and I/O
+
+
+
+
++----------------------------------------------------------------------------+
+| Redshift Cluster                                                           |
+|                       [Leader Node]                                        |
+|                             |                                              |
+|           +-----------+-----+-----+-----------+                            |
+|           |           |           |           |                            |
+|       [  CPU  ]   [  CPU  ]   [  CPU  ]   [  CPU  ]                        |
+|       [ Memory]   [ Memory]   [ Memory]   [ Memory]                        |
+|       [  Disk ]   [  Disk ]   [  Disk ]   [  Disk ] <---  slices= slice of |   
+|          |                                    |             compute node   |
+|          +------------------------------------+             cpu, ram, disk |
+|                            |                                               |
+|                     compute nodes                                          |
++----------------------------------------------------------------------------+
+
+Workload data distributed across compute nodes
+
+ - compute nodes partitioned into slices
+    slice uses portion of compute node disk and memory space
+
+
+New Query -> Leader Node: 
+                - Parses the request
+                - Forms an execution plan
+                - Compiles code 
+                - Distributes tasks to nodes
+                    - each slice processes it portion of data in parallel
+                - Compute node sends reults back to Leader Node
+                - Leader Node aggregate results into final result set
+
+Query Performance depends on: 
+    - Number of nodes
+    - Type of nodes
+
+
+
+Table Design:
+    Distribution Style:
+    1. Uniform Distribution across nodes
+        - skew can result in some nodes doing significantly more work
+            - not taking advantage of MPP benefits (just waiting on one node)
+
+    2. Minimize data movement across nodes
+        - joins or aggregates of data across compute nodes can cause network traffic 
+            shuffling data back and forth
+        - impact query performance and cost
+        NOTE: related data should be on same node (avoid cross node communication )
+
+    Distribution Styles: 
+
+        AUTO (ALL/EVEN/KEY): Redshift assigns optimal Distribution Style
+                    based on the size of the table data
+                    Auto is default Distribution Style
+
+        EVEN:  Leader Node distributes data in Round-robin distribution
+                   - appropriate when no joins are needed on dataset
+
+        KEY :  distribute rows based on specified column
+               Leader Node distributes data with the same key value to same node
+
+        ALL :  full copy of entire table is distributed to each node
+                - good for frequently joininng smaller tables with much larger tables (i.e. states ?) 
+                - eliminate need for data shuffling on join operations 
+                    - push small refrence table out to each compute node
+                - CAVEAT: Take longer to load, update
+
+    Sort Key:  Stores data on disk based on sort key 
+                - Query optimizer utilizes sort order to determine 
+                  optimal query plan 
+                - When a query filters or joins data by Sort Key Redshift can more efficiently 
+                    locate the data
+                    - reduces the amount of data that needs to be scanned from disk
+                - Appropriate Sor Key can:
+                    - minimize disk read operations
+                    - speed up query
+
 
 
 
