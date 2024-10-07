@@ -2588,11 +2588,99 @@ Database Resources:
 
 ## Streaming Queries 
 
-# Queries on Streaming Data
+# Queries on Streaming Data                               +------------------+
+                                                          | Stream Procesing |
+ [Event   ] [.] [.] [.]    [    Event Router     ]        |     Systems      |
+ [Producer] ------------>> [ [.] [.] [.] [.] [.] ] --->>  |                  |
+                                                          |   Apache Flink   |
+                                                          |                  | 
+                                                          |   Apache Spark   |
+                                                          |                  | 
+                                                          +------------------+
 
-https://www.coursera.org/learn/data-storage-and-queries/lecture/smTCA/queries-on-streaming-data
+Apply SQL queries continuously on streaming data
 
-MAP LAST HERE
+Kafka supports querying data in Kafka streams
+
+Windowed Query:  Bound your queries using a window and apply operations over that window.
+                 ( aggregating, adding, removing data ) 
+
+
+Session Window                      
+    - handling events at irregular times 
+    - groups events that happen at similar time 
+    - filters out periods of time when there are no events
+    - NEED to specify maximum time gap between events
+        - when one session ends and another begins
+    - ex.  website clicks, gap of inactivity of 5 min or more
+            - session windows are unique to each key (?)
+
+    - session starts on new activity, 
+        keep aggregating until a gap in activity 
+        once inactivity gat hit, session window "closed" and 
+           compute aggregations done
+        
+    - session windows can be of any size as long as events keep arriving 
+      close to eachother (less than inactivity max )
+
+Fixed-time Window
+    - aggregate data over fixed windows (tumbpling windows)
+        i.e. aggregate every 20 seconds
+
+NOTE: Session and Fixed-time windows, sessions are non-overlapping
+
+Sliding Window
+    - group events into fixed time lengths that can overlap
+        (overlapping windows)
+
+        i.e. 60 second windows generated every 30 seconds 
+           - used for calculating a moving average withing a time interval
+
+
+Joining Data Streams
+
+Conventional Way 
+
+ [.] [.] [.] --> [Table 1] --+     
+                             |
+                             +---> [New Table]
+                             |
+ [.] [.] [.] --> [Table 2] --+
+
+ - transform each stream to a table
+ - join tables into a new table in DB
+
+
+Stream-to-Stream 
+
+                 +--------------+
+                 |  Join        |
+(web browsing)   | Processor    |
+ [.] [.] [.] --> | [buffer] --+ |    
+                 |            | |
+                 |            +---> [.] [.] [.]
+                 |            | |
+ [.] [.] [.] --> | [buffer] --+ |
+(ad platform )   |              |
+                 +--------------+
+
+
+Enrich with batch data
+
+
+                        +---------------+
+                        |   Processor   |
+(product browsing)      | (serverless?) |  
+ [.] [.] [.] [.] [.]----|-----+         |   
+                        |     |         |       Enriched stream
+                        |     +---------|---> [.] [.] [.] [.] [.] 
+                        |     |         |
+ [Object Store / ]------|-----+         |       
+ [    Database   ]      |               |
+                        |               |
+Product details         +---------------+
+User demographics                        
+
 
 
 .
