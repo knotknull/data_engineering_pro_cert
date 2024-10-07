@@ -1,0 +1,33 @@
+AWSAccount
+	
+471112865840
+	
+This is the current AWS Account for this tutorial
+	
+-
+AWSRegion
+	
+us-east-1
+	
+This is the current AWS Region for this tutorial
+	
+-
+KinesisInputStream
+	
+de-c3w3lab2-kinesis-input-stream
+	
+Kinesis Input Stream
+	
+-
+KinesisSlideDevicesOutputStream
+	
+de-c3w3lab2-kinesis-devices-output-stream
+	
+Kinesis Slide Output Stream for Devices
+	
+-
+KinesisSlideTotalSalesOutputStream
+	
+de-c3w3lab2-kinesis-total-sales-slide-output-stream
+	
+Kinesis Slide Output Stream for Sales
