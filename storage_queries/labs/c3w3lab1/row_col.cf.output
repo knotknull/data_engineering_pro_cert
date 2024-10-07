@@ -1,0 +1,47 @@
+PostgresEndpoint
+	
+de-c3w3lab1-rds.cr4cgyqce11k.us-east-1.rds.amazonaws.com
+	
+RDS endpoint for Postgres DB instance
+	
+-
+PostgresJDBCConnectionString
+	
+jdbc:mysql://de-c3w3lab1-rds.cr4cgyqce11k.us-east-1.rds.amazonaws.com:5432
+	
+JDBC connection string for Postgres database
+	
+-
+PostgresLambdaName
+	
+de-c3w3lab1-postgres-lineitem-lambda-function
+	
+Name of lambda function to invoke
+	
+-
+PostgresUser
+	
+postgresuser
+	
+user name for Postgres DB instance
+	
+-
+RedshiftClusterEndpoint
+	
+redshiftcluster-xb1ll88pbh6e.cghcqn6j51jl.us-east-1.redshift.amazonaws.com
+	
+Redshift Cluster endpoint
+	
+-
+RedshiftClusterName
+	
+redshiftcluster-xb1ll88pbh6e
+	
+Name of Redshift cluster
+	
+-
+RedshiftUser
+	
+defaultuser
+	
+user name for Redshift cluster

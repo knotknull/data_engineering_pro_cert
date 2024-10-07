@@ -1,0 +1,7 @@
+PostgresEndpoint 		de-c3w3lab1-rds.cr4cgyqce11k.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString 	jdbc:mysql://de-c3w3lab1-rds.cr4cgyqce11k.us-east-1.rds.amazonaws.com:5432
+PostgresLambdaName 		de-c3w3lab1-postgres-lineitem-lambda-function
+PostgresUser 			postgresuser
+RedshiftClusterEndpoint 	redshiftcluster-xb1ll88pbh6e.cghcqn6j51jl.us-east-1.redshift.amazonaws.com
+RedshiftClusterName 		redshiftcluster-xb1ll88pbh6e
+RedshiftUser 			defaultuser

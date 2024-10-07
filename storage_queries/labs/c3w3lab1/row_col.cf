@@ -1,0 +1,777 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c3w3lab1
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+  RedshiftDatabaseName:
+    Description: The name of the database to be created
+    Type: String
+    Default: dev
+    AllowedPattern: "([a-z]|[0-9])+"
+  RedshiftMasterUsername:
+    Description: The user name that is associated with the master user account for
+      the cluster that is being created
+    Type: String
+    Default: defaultuser
+    AllowedPattern: "([a-z])([a-z]|[0-9])*"
+  RedshiftMasterUserPassword:
+    Description: The password that is associated with the master user account for
+      the cluster that is being created.
+    Type: String
+    NoEcho: 'true'
+    Default: Defaultuserpwrd1234+
+  RedshiftPortNumber:
+    Description: The port number on which the cluster accepts incoming connections.
+    Type: Number
+    Default: '5439'
+  PostgresMasterUsername:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: postgresuser
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  PostgresMasterUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+  PostgresAllocatedStorage:
+    Default: '50'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '20'
+    MaxValue: '65536'
+    ConstraintDescription: must be between 20 and 65536 GiB.
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+  PublicBucketRedshiftLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w3lab1/lambda_layer_dependencies_p312.zip
+  PublicBucketPostgresLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c3w3lab1/lambda_layer_dependencies_p38.zip
+  PublicBucketPostgresLambdaKey:
+    Type: String
+    Description: Public bucket key for postgres load zip file.
+    Default: labs/cfn_dependencies/c3w3lab1/postgres_load.py.zip
+  PublicBucketPostgresLineitemLambdaKey:
+    Type: String
+    Description: Public bucket key for postgres lineitem load zip file.
+    Default: labs/cfn_dependencies/c3w3lab1/postgres_lineitem_load.py.zip
+  PublicBucketPostgresDDLObjectKey:
+    Type: String
+    Description: Public bucket key for postgres sql file.
+    Default: labs/cfn_dependencies/c3w3lab1/postgres_ddl.sql
+  PublicBucketRedshiftLambdaKey:
+    Type: String
+    Description: Public bucket key for redshift load zip file.
+    Default: labs/cfn_dependencies/c3w3lab1/redshift_load.py.zip
+  PublicBucketRedshiftDDLObjectKey:
+    Type: String
+    Description: Public bucket key for redshift sql file.
+    Default: labs/cfn_dependencies/c3w3lab1/redshift_ddl.sql
+  PostgresBucketPath:
+    Type: String
+    Description: Public bucket key for postgres csv file.
+    Default: labs/cfn_dependencies/c3w3lab1/csv
+  PostgresLineItemBucketPath:
+    Type: String
+    Description: Public bucket key for postgres line item csv files.
+    Default: /labs/cfn_dependencies/c3w3lab1/csv/lineitem_parts
+  RedshiftBucketPath: 
+    Type: String
+    Description: Public bucket key for redshift csv files.
+    Default: labs/cfn_dependencies/c3w3lab1/csv
+  PublicBucketLambdaKey:
+    Type: String
+    Description: Public bucket key for lab clone lambda zip file.
+    Default: labs/cfn_dependencies/c3w3lab1/policy_clone.zip
+  PublicBucketPolicyPath:
+    Type: String
+    Description: Public bucket key for lab policy file.
+    Default: labs/cfn_dependencies/c3w3lab1/lab.policy
+  RedshiftLambdaRuntime:
+    Type: String
+    Description: Redshift Lambda function Runtime
+    Default: python3.12
+  PostgresLambdaRuntime:
+    Type: String
+    Description: Postgres Lambda function Runtime
+    Default: python3.8
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 900
+  LabRoleName:
+    Type: String
+    Description: Role name for the Lab Instance
+    Default: LabInstanceRole
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackId
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-a
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-b
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+  NatGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-a
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-b
+  NATGatewayEIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  NATGatewayEIPB:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      FromPort: '5432'
+      ToPort: '5432'
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: 0.0.0.0/0
+  RedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      ClusterType: single-node
+      NumberOfNodes: 1
+      NodeType: dc2.large
+      DBName:
+        Ref: RedshiftDatabaseName
+      MasterUsername:
+        Ref: RedshiftMasterUsername
+      MasterUserPassword:
+        Ref: RedshiftMasterUserPassword
+      ClusterParameterGroupName:
+        Ref: RedshiftClusterParameterGroup
+      VpcSecurityGroupIds:
+        - Ref: RedshiftSecurityGroup
+      ClusterSubnetGroupName:
+        Ref: RedshiftClusterSubnetGroup
+      PubliclyAccessible: 'true'
+      Port:
+        Ref: RedshiftPortNumber
+      IamRoles:
+        - !GetAtt LoadIAMRole.Arn
+  RedshiftClusterParameterGroup:
+    Type: AWS::Redshift::ClusterParameterGroup
+    Properties:
+      Description: Cluster parameter group
+      ParameterGroupFamily: redshift-1.0
+      Parameters:
+        - ParameterName: enable_user_activity_logging
+          ParameterValue: 'true'
+  RedshiftClusterSubnetGroup:
+    Type: AWS::Redshift::ClusterSubnetGroup
+    Properties:
+      Description: Cluster subnet group
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    DependsOn:
+      - PrivateSubnetA
+      - PrivateSubnetB
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort:
+            Ref: RedshiftPortNumber
+          ToPort:
+            Ref: RedshiftPortNumber
+          IpProtocol: tcp
+      VpcId:
+        Ref: VPC
+
+  LoadIAMRole:
+    Type: 'AWS::IAM::Role'
+    DependsOn: FunctionRole
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-load-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "redshift.amazonaws.com"
+                - "rds.amazonaws.com"
+                - "glue.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt FunctionRole.Arn
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: Spectrum-Glue-Access-Policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListMultipartUploadParts
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                Resource:
+                  - !Sub "arn:aws:s3:::${PublicBucketName}"
+                  - !Sub "arn:aws:s3:::${PublicBucketName}/*"
+              - Effect: Allow
+                Action:
+                  - glue:CreateDatabase
+                  - glue:DeleteDatabase
+                  - glue:GetDatabase
+                  - glue:GetDatabases
+                  - glue:UpdateDatabase
+                  - glue:CreateTable
+                  - glue:DeleteTable
+                  - glue:BatchDeleteTable
+                  - glue:UpdateTable
+                  - glue:GetTable
+                  - glue:GetTables
+                  - glue:BatchCreatePartition
+                  - glue:CreatePartition
+                  - glue:DeletePartition
+                  - glue:BatchDeletePartition
+                  - glue:UpdatePartition
+                  - glue:GetPartition
+                  - glue:GetPartitions
+                  - glue:BatchGetPartition
+                  - logs:*
+                Resource:
+                  - "*"
+
+  RedshiftLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64
+      CompatibleRuntimes:
+        - !Ref RedshiftLambdaRuntime
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketRedshiftLayerKey
+      Description: Lambda layer with dependencies to insert data into redshift DBs
+      LayerName:  !Sub '${ProjectPrefix}-lambda-layer-redshift'
+
+  PostgresLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64
+      CompatibleRuntimes:
+        - !Ref PostgresLambdaRuntime
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLayerKey
+      Description: Lambda layer with dependencies to insert data into postgres DBs
+      LayerName: !Sub '${ProjectPrefix}-lambda-layer-postgres'
+
+  PostgresSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet available for the DB Instance
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    DependsOn:
+      - PrivateSubnetA
+      - PrivateSubnetB
+
+  PostgresDB:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - PostgresSubnetGroup
+      - PrivateSubnetA
+      - LoadIAMRole
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-rds'
+      DBName: dev
+      DBInstanceClass: db.t3.small
+      AllocatedStorage: !Ref PostgresAllocatedStorage
+      AvailabilityZone: !GetAtt
+        - PrivateSubnetA
+        - AvailabilityZone
+      DBSubnetGroupName: !Ref PostgresSubnetGroup
+      Engine: postgres
+      EngineVersion: 14.12
+      MasterUsername: !Ref PostgresMasterUsername
+      MasterUserPassword: !Ref PostgresMasterUserPassword
+      MultiAZ: false
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+      AssociatedRoles:
+          - FeatureName: s3Import
+            RoleArn: !GetAtt LoadIAMRole.Arn
+
+  PostgresLoadFunction:
+    DependsOn:
+      - PostgresLambdaLayer
+      - PostgresDB
+      - LoadIAMRole
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - PostgresDB
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - PostgresDB
+            - Endpoint.Port
+          DBPASSWORD: !Ref PostgresMasterUserPassword
+          DBUSER: !Ref PostgresMasterUsername
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketPostgresDDLObjectKey
+          IAM_ROLE_ARN: !GetAtt LoadIAMRole.Arn
+          DATA_BUCKET_NAME: !Ref PublicBucketName
+          DATA_BUCKET_PATH : !Ref PostgresBucketPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLambdaKey
+      FunctionName: !Sub '${ProjectPrefix}-postgres-lambda-function'
+      Handler: postgres_load.lambda_handler
+      Layers:
+        - !Ref PostgresLambdaLayer
+      Runtime: !Ref PostgresLambdaRuntime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+  FunctionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+  CRPostgresLambda:
+    DependsOn:
+      - FunctionRole
+      - PostgresLoadFunction
+    Type: Custom::CRPostgresLambda
+    Properties:
+      ServiceToken: !GetAtt PostgresLoadFunction.Arn
+    DeletionPolicy: Delete
+
+  PostgresLineItemLoadFunction:
+    DependsOn:
+      - PostgresLambdaLayer
+      - PostgresDB
+      - LoadIAMRole
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - PostgresDB
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - PostgresDB
+            - Endpoint.Port
+          DBPASSWORD: !Ref PostgresMasterUserPassword
+          DBUSER: !Ref PostgresMasterUsername
+          IAM_ROLE_ARN: !GetAtt LoadIAMRole.Arn
+          DATA_BUCKET_NAME: !Ref PublicBucketName
+          DATA_BUCKET_PATH : !Ref PostgresLineItemBucketPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLineitemLambdaKey
+      FunctionName: !Sub '${ProjectPrefix}-postgres-lineitem-lambda-function'
+      Handler: postgres_lineitem_load.lambda_handler
+      Layers:
+        - !Ref PostgresLambdaLayer
+      Runtime: !Ref PostgresLambdaRuntime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+
+  RedshiftLoadFunction:
+    DependsOn:
+      - RedshiftLambdaLayer
+      - RedshiftCluster
+      - LoadIAMRole
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - RedshiftCluster
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - RedshiftCluster
+            - Endpoint.Port
+          DBPASSWORD: !Ref RedshiftMasterUserPassword
+          DBUSER: !Ref RedshiftMasterUsername
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketRedshiftDDLObjectKey
+          DB_NAME: !Ref RedshiftDatabaseName
+          IAM_ROLE_ARN: !GetAtt LoadIAMRole.Arn
+          DATA_BUCKET_NAME: !Ref PublicBucketName
+          DATA_BUCKET_PATH: !Ref RedshiftBucketPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketRedshiftLambdaKey
+      FunctionName: !Sub '${ProjectPrefix}-redshift-lambda-function'
+      Handler: redshift_load.lambda_handler
+      Layers:
+        - !Ref RedshiftLambdaLayer
+      Runtime: !Ref RedshiftLambdaRuntime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+  CFRedshiftLambdaExecution:
+    DependsOn:
+      - RedshiftLoadFunction
+    Type: 'Custom::CFRedshiftLambdaExecution'
+    Properties:
+      ServiceToken: !GetAtt RedshiftLoadFunction.Arn
+    DeletionPolicy: Delete
+
+  LambdaRoleLabSetup:
+    DependsOn:
+     - PostgresLineItemLoadFunction
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-lambda-role-lab-setup"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: LabInstanceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CreateLogGroup
+                Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: "arn:aws:logs:*:*:*"
+              - Sid: LogStreamMgmt
+                Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:log-group:/aws/lambda/${ProjectPrefix}*:*"
+              - Sid: IAMRoleMgmt
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:TagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                Resource:  !Sub "arn:aws:iam::*:role/${LabRoleName}"
+        - PolicyName: LambdaInvoke
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:
+                - !GetAtt PostgresLineItemLoadFunction.Arn
+
+  LambdaFunctionLabRole:
+    DependsOn:
+      - RedshiftLambdaLayer
+      - LambdaRoleLabSetup
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT_VALUE: !Ref ProjectPrefix
+          CLONE_ROLE_NAME: !Ref LabRoleName
+          BUCKET_NAME: !Ref PublicBucketName
+          POLICY_PATH: !Ref PublicBucketPolicyPath
+          Lambda_Name: !Sub '${ProjectPrefix}-postgres-lineitem-lambda-function'
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLambdaKey
+      FunctionName: !Sub "${ProjectPrefix}-lambda-function-lab-setup"
+      Handler: policy_clone.lambda_handler
+      Layers:
+        - !Ref RedshiftLambdaLayer
+      Runtime: !Ref RedshiftLambdaRuntime
+      Role: !GetAtt LambdaRoleLabSetup.Arn
+      Timeout: !Ref Timeout
+
+  CRLabRoleWithLambda:
+    DependsOn:
+      - LambdaFunctionLabRole
+    Type: Custom::CRLabRoleWithLambda
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionLabRole.Arn
+    DeletionPolicy: Delete
+
+  LabEC2InstanceProfile:
+    DependsOn:
+      - CRLabRoleWithLambda
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LabEC2InstanceProfile
+      Roles:
+        - !Ref LabRoleName
+Outputs:
+  RedshiftClusterEndpoint:
+    Description: Redshift Cluster endpoint
+    Value: !Sub "${RedshiftCluster.Endpoint.Address}"
+  RedshiftClusterName:
+    Description: Name of Redshift cluster
+    Value:
+      Ref: RedshiftCluster
+  PostgresJDBCConnectionString:
+    Description: JDBC connection string for Postgres database
+    Value: !Join
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Port
+  PostgresEndpoint:
+    Description: RDS endpoint for Postgres DB instance
+    Value: !GetAtt PostgresDB.Endpoint.Address
+  PostgresUser:
+    Description: user name for Postgres DB instance
+    Value: !Ref PostgresMasterUsername
+  RedshiftUser:
+    Description: user name for Redshift cluster
+    Value: !Ref RedshiftMasterUsername
+  PostgresLambdaName:
+    Description: Name of lambda function to invoke
+    Value: !Ref PostgresLineItemLoadFunction
+
