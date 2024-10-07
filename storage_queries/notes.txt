@@ -2072,48 +2072,140 @@ END
 select 
 fact_rental.customer_id, 
 vact_retnal.rental_id, 
-(CASE
-WHEN payment_date < return_date THEN 1
-ELSE 0
+(CASE WHEN payment_date < return_date THEN 1
+      ELSE 0
 END) as on_time_payment 
 from fact_rental 
-JOIN dim_customer on dim.customer_id = fact_rental.customer.id 
+JOIN  dim_customer on dim.customer_id = fact_rental.customer.id 
 WHERE dim_customer.country IN ("United State", "Canada")
 AND   (fact_rental.rental_date between "2005-05-24" and "2005-05-24")
 
 
 
+# Advanded SQL Queries pt 2
+
+# Find the total number of customer served by each staff member
+
+# compute for each customer the average of on_time_payment
+
+Common Table Expressions to define temporary results 
+    - use the below queries in CTEs
+
+
+WITH staff_customer_pairs as (
+SELECT DISTINCT fact_rental.staff_id, 
+CONCAT(dim_staff.firstname, ' ', dim_staff.last_name ) as staff_name, 
+fact_rental.customer_id
+FROM fact_rental
+JOIN dim_staff on fact_rental.staff_id = dim_staff.id
+)
+SELECT staff_name, count(customer_id)
+FROM staff_customer_pairs 
+GROUP by staff_name
+
+
+WITH customer_payment_info AS(
+select 
+fact_rental.customer_id, 
+vact_retnal.rental_id, 
+(CASE WHEN payment_date < return_date THEN 1
+      ELSE 0
+END) as on_time_payment 
+from fact_rental 
+JOIN  dim_customer on dim.customer_id = fact_rental.customer.id 
+WHERE dim_customer.country IN ("United State", "Canada")
+AND   (fact_rental.rental_date between "2005-05-24" and "2005-05-24")
+), customer_percent_on_time_payment AS (
+
+select customer_id, AVG(on_time_payment) AS percent_on_time_payment
+FROM customer_payment_info
+GROUP by customer_id
+)
+SELECT MAX(percent_on_time_payment)
+FROM   customer_on_time_payment
+
+# Subqueries 
+
+Get the ids of the films that have length greater than the average length
+
+SELECT AVG(length) from dim_film
+
+SELECT film_id, length
+from dim_film 
+WHERE length > (SELECT AVG(length) from dim_film)
 
 
 
+SQL Window Functions:
+    - Allows you to apply an aggregate or ranking function over a particular window 
+      or set of rows
+        - Aggregation done on a subset of rows
+
+    - Does not group rows into a a single output row, reach row remains separate
+
+
+SELECT coumn_name1, 
+ranking_function() OVER (
+    PARTITION BY column_name            << partition by 
+    ORDER BY     column_name3)          << rank by
+as new_column
+FROM table_name;
+
+
+ranking functions: rank(), row_number()
+
+# compute the average duration in days that a customer spend on a film category
+
+SELECT fact_rental.customer_id,  dim_category.name, 
+avg(datediff(return_date, rental_date)) as average_rental_days
+from fact_rental
+JOIN dim_category 
+ON  fact_rental.category_id = dim_category.category_id
+GROUP by fact_rental.customer_id, dim_category.name
+ORDER by fact_rental.customer_id, average_rental_days DESC
+
+Now rank each customer 
+
+WITH customer_info as (
+SELECT fact_rental.customer_id,  dim_category.name, 
+avg(datediff(return_date, rental_date)) as average_rental_days
+from fact_rental
+JOIN dim_category 
+ON  fact_rental.category_id = dim_category.category_id
+GROUP by fact_rental.customer_id, dim_category.name
+ORDER by fact_rental.customer_id, average_rental_days DESC
+)
+SELECT customer_id, name, average_rental_days, 
+rank() OVER (PARTITION BY customer_id ORDER BY average_rental_days DESC) as rank_category **
+from customer_info
+order by customer_id, rank_category
+
+
+** rank a customer by the average_rental_days for that category
+    - the PARTITION is by customer_id  NOTE: you want to break up data by customer
+    - the ORDER BY (ranking) is by using rank() over average_rental_days
+
+ex. output 
+
+customer_id         name        average_rental_days         rank_category
+-----------       ----------    --------------------        ---------------
+1                 Documentary       9.0                         1
+1                      Travel       8.0                         2
+1                      Games        6.0                         3
+1                      Music        5.5                         4
 
 
 
+      rank(): assigns same rank to rows when there is a tie
+row_number(): assigns different ranks when there is a time
 
 
+# Assignment 3 Advanced SQL Queries 
 
 
+MAP LAST HERE 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+https://www.coursera.org/learn/data-storage-and-queries/lecture/kYsa6/index-deep-dive
 
 
 .
