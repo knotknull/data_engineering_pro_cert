@@ -2,45 +2,64 @@
 ## Course 4
 ## Week 1
 
+# Introduction to Data Modeling for Analytics
+
+Overview
+
+Data Modeling: A data model organizes and standardizes data in a precise structured representation 
+              to enable and guide human and machine behavior, inform decision-making and facilitate actions 
 
 
 
 
+Define the structure, relastionshiops and meaning of data.
 
-MAP LAST HERE
-
-
-
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/iMceV/course-4-overview
+Structure the data in a way that connects back to the organization
+    - Data is understandable and valuable
 
 
+Good Data Models 
+    - Reflect the business goals and logic while incorporating business rules
+    - Ensure compliance with operational standards and legal requirements
+    - Outline the relationships between business processes
+    - Serve as a powerful communication too, creating a "shared language"
 
-
-
-
-
-
-
+ex. what is "an active users"
 
 
 
+Poor Data Models 
+    - Don't reflect how the busienss operates
+    - Create more problems than they solve
+    - Provide stakeholders with innaccurate information 
+        and create confusion 
 
 
+Targeted Data Modeling Approach
+- Focus on specific business domains 
+
+    Marketing:  Better understand customer behavior and campaign effectiveness
+    Finance  :  Analyze spending patterns and identify cost-saving opportunities
+    Machine Learning  :  Drive better decision-making and impactful AI models
+
+# Conceptual, Logical and Physical Data Modeling
 
 
+Conceptual:
+    - describes business entities, relationships and attributes
+    - business logic and rules
+        - Entity - Relationshiop Diagram (ER)  (1 to 1, 1 to Many)
 
+Logical 
+    - details about the implementation of the conceptual model
+        - column types, primary / foreign keys
 
-
-
-
-
-
-
-
-
-
-
-
+Physical 
+    - Details about the implementation of the logical model in a specific DBMS
+    - Configuration details 
+        - Data storage approach
+        - Partitioning details
+        - Replication details
 
 
 
