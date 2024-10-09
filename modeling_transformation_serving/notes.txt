@@ -78,6 +78,14 @@ Edgar Codd's Objectives of Normalization
        new types of data are intruduced
 
 
+
+    Reduce Data Redundancy: Eliminating duplicate data saves storage space and ensures consistency across the database.
+    Improve Data Integrity: Ensuring that each piece of data is stored in only one place reduces the likelihood of data anomalies and maintains the accuracy of the data.
+    Enhance Update/Delete Query Performance
+
+
+
+
 SalesOrders 
 Denormalized Form 
  - contains redundant data 
@@ -180,27 +188,104 @@ OrderID   Item Number  sku    quantity      OrderID CustomerID  OrderDate    Cus
 
 
 
+# Dimensin Modeling: Star Schema
+                                                                         
+                                                                [Dim]  [Dim]  [Dim]
+    Fact Table     :  business measures                            \     |     /
+    Dimension Table:  Contextual Informtion                         \    |    /
+                                                                    \   |   / 
+                                                            [Dim]----- [Fact] -----[Dim] 
+                                                                         |
+                                                                         |
+                                                                       [Dim]
 
-Lab: Data Normalization
-
-
-MAP LAST HERE 
-
-
-
-
-
-
-https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/ubaZV/practice-lab-data-normalization
-
-
-
-
-
-
+Fact Table: contains quantitative business measurements that result from a business event or process
+       - Each row contins the facts of a particular business event 
+       - Data in Fact table is immutable (append-only)
+       - Typically narrow and long
+            - not alot of columns but alot of rows
 
 
+Business Event          Facts                          Grain (detail of Fact)                       Dimensions
+order a ride share      Trip duration, trip price      - all rides by all customers in one day,     - customers
+                        tip paid, trip delays, etc.    - all rides by one customer on one day       - drivers
+                                                            - one ride by one customer              - trip locations
 
+Atomic Grain: most detailed level of a business proces
+
+
+Dimension Table: Provide the reference data, attributes and relational context for the events in the fact table
+        - Describe the events' what, who, where and when  
+        - Typically wide and short
+            - many columns fewer rows 
+
+
+
+Conformed Dimension:  Dimension table used with multiple fact tables
+                [Dim]  [Dim]  [Dim]                [Dim]  [Dim]  [Dim]
+                  \     |     /                      \     |     /
+                   \    |    /                        \    |    /
+                    \   |   /                          \   |   /
+           [Dim]----- [Fact] ----------[Dim]------------ [Fact] -----[Dim] 
+                        |                                   |
+                        |                                   |
+                      [Dim]                               [Dim]
+
+Each DIM   has a PKey
+Fact table has a PKey
+Fact connected to Dim via FKey
+
+Best practice:  create a surrogate key 
+                    - used to combine data from differnt source systems with 
+                      natural primary keys that are in different formats
+
+                    - used to decouple the primary key of the star schema from source systems
+
+
+Analytical Queries:
+    - Apply aggregate queries to find the sum, average, maximum of fact
+    - Use dim tables to filter or group facts
+
+
+         [ dim_customers ]                   [ fact_orders ]               [ dim_products ]
+         customerNumber (pk)+--+            OrderLineNumber (pk)    +---- productCode (pk)
+         customerName          |            OrderNumber     (pk)    |     productName
+         contactLastName       +-----------+customerNumber  (fk)    |     productLine
+         contactFirstName                   postalCode      (fk)-+  |     productScale
+         phone                              productCode     (fk)-|- +     productVendor
+         addressLine1                       orderDate            |        productDescription
+         addressLine2                       quantityOrdered      |        productLineDescription
+                                            priceEac             |
+                                            buyPrice             |  
+                                            orderAmount          | 
+                                            MSRP                 | 
+                                                                 | 
+                                            [dim_location]       | 
+                                            postalCode (PK) +----+
+                                            city 
+                                            state 
+                                            country 
+
+
+ex. Find the total sales amount for each product line within the usa
+SELECT  
+  dim_product.productLine, 
+  SUM(fact_orders.orderAmount) AS total_sales
+FROM fact_orders 
+JOIN dim_product ON 
+  fact_orders.productCode =       
+  dim_products.productCode       
+JOIN dim_locations ON 
+  fact_orders.postalCode =       
+  dim_locations.postalCode
+WHERE dim_locations.country = 'USA' 
+GROUP by dim_products.productLine         
+
+
+Star Schema vs 3NF
+
+ - Star Schema organizes data so it's easier for business users to understand, navigate and use
+ - Star Schema results in simpler queries with fewer joins
 
 
 

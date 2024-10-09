@@ -1,0 +1,3 @@
+PostgresEndpoint 	de-c4w1lab1-rds.cj2geg26einv.us-east-1.rds.amazonaws.com
+PostgresUser 		postgresuser
+PostgresJDBCConnectionString jdbc:mysql://de-c4w1lab1-rds.cj2geg26einv.us-east-1.rds.amazonaws.com:5432
