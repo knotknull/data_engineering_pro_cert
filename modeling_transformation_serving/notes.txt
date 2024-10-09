@@ -289,4 +289,61 @@ Star Schema vs 3NF
 
 
 
+## Data Modeling Techniques 
+
+# Inmon vs kimball Data Modeling Approaches for Data Warehouses
+
+
+Inmon Data Modeling Approach
+
+  datawarehouse: A subject-oriented, integrated, nonvolatile and time-variant collection of data 
+                 in support of management's decisions.
+
+The data warehouse contains granular corporate data.  Data in the data warehouse is able to be used
+for many different purposes, including sitting and waiting for future requirements which are unknown today.
+
+
+             +-------------------- Data Warehouse ----------------+    +----> [Sales: Data Mart]
+ [Source1]-+   Major Subject Areas              Subject Details        |       (star schema)            +---------------+
+ [Source2]-+>  [Products]  [Orders]           - business keys          |                                |   Reports     | 
+ [Source3]-+   [Customers] [Shipments]        - relationships       ---+----> [Marketing Data Mart]     |     &         |
+                                              - attributes             |                                |   Analysis    |
+                      (Highly normalized (3NF))                        |                                |               |
+                                                                       |                                |               |
+                                                                       +----> [Purchasing Data Mart]    +---------------+
+
+
+Kimball Data Modeling Approach:
+  Kimball's approach effectively allows you to server data that's structured as star schemas 
+  (or similar variants) directly from the data warehouse
+      - faster modeling and iteration 
+      - more data redundancy and duplications
+
+                [Dim]  [Dim]  [Dim]                [Dim]  [Dim]  [Dim]                [Dim]  [Dim]  [Dim]      +--------------+
+                  \     |     /                      \     |     /                      \     |     /          |              |
+[Source1]+         \    |    /                        \    |    /                        \    |    /      -->> |  Reports     |
+         |          \   |   /                          \   |   /                          \   |   /            |     &        |
+[Source1]+> [Dim]----- [Fact] ----------[Dim]------------ [Fact] ----------[Dim]----------- [Fact] -----[Dim]  |  Analyssis   |
+         |              |                                   |                                 |                |              |
+[Source1]+              |                                   |                                 |           -->> |              |
+                      [Dim]                               [Dim]                             [Dim]              +--------------+
+
+
+Kimball Data Modeling Approach:
+  - Quick insights are your highest priority
+  - Rapid implementation and iteration
+
+Inmon Data Modeling Approach
+  -  Data quality is your highest priority
+  -  The analysis requiremetns are not defined
+
+
+# From Normalized Model to Star Shema
+
+
+MAP LAST HERE
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/P8cxi/exercise-from-normalized-model-to-star-schema
+
+
+
 .
