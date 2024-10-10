@@ -448,9 +448,45 @@ AWS Glue
 # Conversation about dbt with Drew Banin
 
 
-MAP LAST HERE 
+dbt: applies business logic rules to data to become information (?)
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/hu2bf/optional-conversation-about-dbt-with-drew-banin
+    - setup rules with SQL and python
+    - instruct data warehouse (db) to transform (t) in place 
+
+
+pre-dbt:  sql scripts,  wildwest etc.
+
+
+
+post-dbt:  version control code
+           community of practice:  analytics engineer, between engineers and business
+
+dbt: "ruby on rails for data"
+  there is a "dbt way"
+
+Things to standardize around dbt: 
+ - use a sql style code 
+ - column names
+ - how logic is transformed to: 
+    - staging tables 
+    - intermediate transformations
+    - marts / dimensional models
+ - software engineering best practices 
+    - modular code
+    - test as you go / unit testing
+    - code review 
+    - CI/CD etc.
+
+
+# Data Vault
+
+
+
+
+
+
+
+
 
 
 
