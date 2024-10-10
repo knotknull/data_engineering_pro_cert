@@ -682,15 +682,13 @@ Cons:
 
 
 # Demo: Transforming Data with dbt  pt 1
+# Demo: Transforming Data with dbt  pt 2
+
+
 
 
 MAP LAST HERE 
-
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/CHaBK/one-big-table
-
-
-
-
+https://www.coursera.org/learn/data-modeling-transformation-serving/assignment-submission/q88vk/pre-lab-exercise-transforming-a-normalized-model-into-a-star-schema
 
 
 
