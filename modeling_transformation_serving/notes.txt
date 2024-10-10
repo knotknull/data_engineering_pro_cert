@@ -622,12 +622,71 @@ Step 3:  Satellites
 satelite table has additional information with hash_key and load date and record source
 
 
+# One Big Table (OBT)
 
 
+All data into a single wide table 
+  - thousands of columns
+  - column can be single or nested  
+  - highly denormalized and flexible
+
+example of a wide table 
+
+OrderID         OrderItems              CustomerID      Customer Name   address     OrderDate
+
+ 101           [{                             5               Joe Reis    1st. St     1/08/2024
+                "sku":1,
+                "price":50,
+                "quantity":1,
+                "name": "Thigamajig",
+               },{
+                "sku":2,
+                "price":50,
+                "quantity":1,
+                "name": "Whatchmacallit",
+               }]
+
+ 102           [{                             5               Matt Housley    1st. St     1/08/2024
+                "sku":3,
+                "price":75,
+                "quantity":1,
+                "name": "Whoozeewhatzit",
+               },{
+                "sku":1,
+                "price":50,
+                "quantity":1,
+                "name": "Thigamajig",
+               }]
+ 
+
+- Can have hundreds or more columns
+- combines varous data types
+- no need for complex joins 
+- supports fast analytical queries
+- wide table contains ALL the data 
+
+Why OBT becoming popular: 
+  - Low cost of cloud storage
+  - Nested data allows for flexible schemas
+
+Columnar storage helps optimiase the storage and processing of OBTs
+- wide tables are sparse (expensive in an RDBMS) 
+- columnar database reads only columns selected in a query and 
+   reading nulls is esentially free
+
+Cons:
+  - You might lose the business logic in your analytics
+  - Your need complex data structures to store nested data
+
+  - Can have poor update and aggregation performance
 
 
+# Demo: Transforming Data with dbt  pt 1
 
 
+MAP LAST HERE 
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/CHaBK/one-big-table
 
 
 
