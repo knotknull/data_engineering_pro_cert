@@ -481,6 +481,150 @@ Things to standardize around dbt:
 # Data Vault
 
 
+3 layers to Data Vault
+
+                      [Enterprise]                  [ Information ]
+[ Staging ]           [Data      ]                  [ Delivery    ]
+                      [Warehouse ]
+
+                     Data Vault Model                 
+insert only         - hubs, links, satellites         Data delivered to Data Marts
+
+                   separate business objects and 
+                   their relationshipsfrom their 
+                   descriptive attributes
+
+
+- Only change the structure in which the data is stored: 
+    - Allows you to trace the data back to its source
+    - Helps you avoid restructuring the data when business requirements change 
+
+
+Data Vault Model: Three types of tables 
+
+Hub : Stores a unique list of business keys to represent a core business concept: 
+        Customers, products, employees, vendors
+
+
+Link: Connects two or more hubs. Represents relationship, transaction, event between 
+      two or more business concepts 
+
+
+Satellite: Contains attributes that provide context for hubs and links  
+        eg. User will query a hub which will link to a satellite table containing 
+        the query's relevant attributes.
+
+
+                  Data Vault Model 
+
++-----------------------------------------------------------------------+
+  [ Hub ]-------[ Link ]-------[ Hub ]-------[ Link ]-------[ Hub ]
+     |             |              |              |             | 
+  [Satellite]   [Satellite]    [Satellite]   [Satellite]    [Satellite]
+
+
++-----------------------------------------------------------------------+
+
+
+Data Vault Steps 
+
+OrderItems                     Items                                  
++-------------------+         +---------+  
+order_id         (pk)           sku    (pk)
+item_line_number (pk)           price    
+itme_sku         (fk)           name
+item_quantity                   brand
+
+Orders                         Stores                                  
++-------------------+         +----------------+   
+order_id         (pk)          store_id     (pk)
+customer_id      (fk)          store_name
+store_id         (fk)          store_city
+order_date                     store_zipcode
+
+Customers
++-------------------+
+customer_id      (pk)
+customer_name     
+customer_zipcode     
+
+                                                                               
+Step 1:  Model the Hubs, which contain business keys 
+
+        Identify business keys: 
+          - what is the identifiable business element ? 
+          - How do users commonly look for data ?
+          - business key: 
+              - colmn(s) used by the business to identify and locate the data
+              - not be a key generated in or tied to particular source system 
+
+      
+    [  Customer   ]             [  Order   ]
+     customer_hash_key (PK)     order_hash_key (PK)
+     customer_id                order_id
+     load_date                  load_date
+     resource_source            resource_source 
+
+    [  item   ]                 [  Store   ]
+     item_hash_key (PK)         store_hash_key (PK)
+     sku                        store_id
+     load_date                  load_date
+     resource_source            resource_source 
+
+
+  Hubs:  should contain 
+    - The business key 
+    - The hash key
+        - Calculated as a hash of the business key 
+        - Used as the Hub primary key
+    - The load date    : date on which the business key was first loaded
+    - The record source: the source of the businexx key 
+
+
+Step 2:  Model the links, link table to connect 2 or more hubs
+
+
+
+                    (link table)                                   (link table)
+[  item   ]---------[Item_Order ]------------[  Order   ]---------[Order_Customer] -------------[  Customer   ]             
+item_hash_key (PK)  item_order_hash_key(pk)  order_hash_key (PK)   customer_order_hash_key(pk)  customer_hash_key (PK)     
+sku                 item_hash_key            order_id              order_hash_key               customer_id                
+load_date           order_hash_key           load_date             customer_hash_key            load_date                  
+resource_source     sku                      resource_source       order_id                     resource_source            
+  |                 order_id                      |                customer_id
+  |                 load_date                (link table)          load_date
+  |                 record_source            [Order_Store]         record_source
+  |                       |                  order_store_hash_key
+ (satellite)        (satellite)              order_hash_key
+[item]              [item_order]             store_hash_key 
+item_hash_key(pk)                            order_id
+load_date(pk)                                store_id
+price                                        load_date
+name                                         record_source
+brand                                             |                     (satelite)
+record_source                                [  Store   ]-------------[  Store   ]
+                                             store_hash_key (PK)      store_hash_key (PK)
+                                             store_id                 load_date(PK)
+                                             load_date                store_name
+                                             resource_source          store_zipcode
+                                                                      record_source
+
+Each table must contain must containt the primary and business keys from its parent hubs,
+the load date of a row, and the source for the record.
+
+For each table, the primary key consists of a hash calculated based on the business keys of the parent hubs.
+
+With link tables, you can easily add new relationships or update a current relationship
+without having to re engineer the Data Vault
+
+
+Step 3:  Satellites
+satelite table has additional information with hash_key and load date and record source
+
+
+
+
+
 
 
 
