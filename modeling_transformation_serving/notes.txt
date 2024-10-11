@@ -437,7 +437,7 @@ Model data with dbt
   - connects to data warehouse
   - transforms and validates your data with the data warehouse
   - generates the sql code behind the scense to transform your data
-  - CAN'T joint together data from different sources or move transformed data to another target system
+  - CAN'T join together data from different sources or move transformed data to another target system
 
 AWS Glue 
   - can connect to differnt sources, apply transformations and store processed data somewhere else
