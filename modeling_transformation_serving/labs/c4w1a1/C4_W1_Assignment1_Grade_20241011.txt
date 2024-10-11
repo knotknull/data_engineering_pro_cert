@@ -1,0 +1,19 @@
+
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	10/10
+	
+classicmodels_star_schema.fact_orders rows count output 	10/10
+	
+classicmodels_star_schema.dim_customers rows count output 	10/10
+	
+classicmodels_star_schema.dim_employees rows count output 	10/10
+	
+classicmodels_star_schema.dim_offices rows count output 	10/10
+	
+classicmodels_star_schema.dim_products rows count output 	10/10
+	
+classicmodels_star_schema.dim_dates rows count output 	20/20
+	
+classicmodels_obt.orders_obt rows count output 	20/20
+	

@@ -686,9 +686,94 @@ Cons:
 
 
 
+# Lab: Data Modeling with DBT
 
-MAP LAST HERE 
-https://www.coursera.org/learn/data-modeling-transformation-serving/assignment-submission/q88vk/pre-lab-exercise-transforming-a-normalized-model-into-a-star-schema
+
+source lab-venv/bin/activate
+
+dbt --version
+
+
+
+# Initiate the `classicmodels_modeling` project with the `init` command
+
+dbt init classicmodels_modeling
+
+
+
+
+(lab-venv) voclabs:~/environment $ ls -ltR classicmodels_modeling/
+-rw-r--r--. 1 ec2-user ec2-user 1280 Oct 11 12:47 dbt_project.yml
+-rw-r--r--. 1 ec2-user ec2-user  571 Oct 11 12:41 README.md
+drwxr-xr-x. 2 ec2-user ec2-user   22 Oct 11 12:41 analyses
+drwxr-xr-x. 2 ec2-user ec2-user   22 Oct 11 12:41 macros
+drwxr-xr-x. 3 ec2-user ec2-user   21 Oct 11 12:41 models
+drwxr-xr-x. 2 ec2-user ec2-user   22 Oct 11 12:41 seeds
+drwxr-xr-x. 2 ec2-user ec2-user   22 Oct 11 12:41 snapshots
+drwxr-xr-x. 2 ec2-user ec2-user   22 Oct 11 12:41 tests
+classicmodels_modeling/analyses/
+classicmodels_modeling/macros/
+classicmodels_modeling/models
+classicmodels_modeling/models/example/
+-rw-r--r--. 1 ec2-user ec2-user 475 Oct 11 12:41 my_first_dbt_model.sql
+-rw-r--r--. 1 ec2-user ec2-user 115 Oct 11 12:41 my_second_dbt_model.sql
+-rw-r--r--. 1 ec2-user ec2-user 447 Oct 11 12:41 schema.yml
+classicmodels_modeling/seeds/
+classicmodels_modeling/snapshots/
+classicmodels_modeling/tests/
+
+
+
+
+cp ./scripts/packages.yml ./classicmodels_modeling/
+cd classicmodels_modeling
+
+
+## fetch latest versions of tools / libraries specified in packages.yml
+dbt deps
+
+scripts/profile.yaml contains connection informatino 
+
+cp ../scripts/profiles.yml ~/.dbt/profiles.yml 
+
+# attempt to connect to profile source
+dbt debug
+
+
+Resources: 
+https://www.amazon.com/Building-Data-Warehouse-W-Inmon/dp/0764599445
+
+https://www.amazon.com/Data-Warehouse-Toolkit-Definitive-Dimensional/dp/1118530802
+
+https://www.oreilly.com/library/view/building-a-scalable/9780128026489/
+
+https://vertabelo.com/blog/data-vault-series-data-vault-2-0-modeling-basics/
+
+
+
+## Data Modeling, Transformation and Serving
+## Course 4
+## Week 2
+## Data Modeling and Transformation for Machine Learning
+
+# Modeling and Processing Tabular Data for Machine Learning 
+# Overview 
+
+Machine Learning Project Lifecycle Framework 
+
+
+[--- Scoping --]  [------------ Data ------]  [---Modeling/Algo Dev ----]  [------- Deployment ------]
+[Define Project]  [define data/] [label and]  [select and ] [Perform err]  [Deploy in ] [Monitor &   ]     
+                  [est baseline] [org data ]  [train model] [analysis   ]  [production] [maintain sys]    
+
+
+# Machine Learning Overview
+
+MAP LAST HERE
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/RQPUY/machine-learning-overview
+
+
+
 
 
 

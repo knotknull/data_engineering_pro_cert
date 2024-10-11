@@ -1,0 +1,5 @@
+AWSAccount		058264205252
+AWSRegion  		us-east-1
+PostgresEndpoint	de-c4w1a1-rds.cle0kcwwoc3r.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString jdbc:mysql://de-c4w1a1-rds.cle0kcwwoc3r.us-east-1.rds.amazonaws.com:5432
+PostgresUser 		postgresuser

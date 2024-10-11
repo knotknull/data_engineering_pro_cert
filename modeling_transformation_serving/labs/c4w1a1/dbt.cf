@@ -1,0 +1,505 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c4w1a1
+
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  Cloud9RoleName:
+    Type: String
+    Description: Role name for the Cloud9 Instance
+    Default: Cloud9InstanceRole
+
+  PostgresMasterUsername:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: postgresuser
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+
+  PostgresMasterUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+
+  PostgresAllocatedStorage:
+    Default: '20'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '20'
+    MaxValue: '65536'
+    ConstraintDescription: must be between 20 and 65536 GiB.
+  
+  PostgresDBName:
+    Type: String
+    Default: 'postgres'
+
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+
+  PublicBucketPostgresLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c4w1a1/lambda_layer_dependencies_p38.zip
+
+  PublicBucketPostgresDDLObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c4w1a1/classicmodels.sql
+  
+  PublicBucketPostgresLambdaKey:
+    Type: String
+    Description: Public bucket key for postgres load zip file.
+    Default: labs/cfn_dependencies/c4w1a1/postgres_load.py.zip
+
+  PostgresLambdaRuntime:
+    Type: String
+    Description: Postgres Lambda function Runtime
+    Default: python3.8
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Database Configuration
+        Parameters:
+          - DatabaseUserName
+          - DatabaseUserPassword
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}'
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-igw'
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-subnet-a'
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-subnet-b'
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-subnet-a'
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-subnet-b'
+  
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-routetable'
+      VpcId: !Ref VPC
+  PublicSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+  NatGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-routetable'
+      VpcId: !Ref VPC
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA      
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-natgw-a'
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-natgw-b'
+  NATGatewayEIPA:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NATGatewayEIPB:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-sg'
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup 
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: "5432"
+      ToPort: "5432"
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: "0.0.0.0/0"
+
+  LambdaExecutionSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-lambda-sg'
+  
+  LambdaSGSelfRefIngress:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref LambdaExecutionSecurityGroup 
+
+  LambdaSGIngressRule:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:      
+      GroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: -1
+      CidrIp: "0.0.0.0/0"
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup    
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC  
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ec2-sg'
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  EC2SecurityGroupIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443    
+   
+  PostgresLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64
+      CompatibleRuntimes:
+        - !Ref PostgresLambdaRuntime
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLayerKey
+      Description: Lambda layer with dependencies to insert data into postgres DBs
+      LayerName: !Sub ${ProjectPrefix}-lambda-layer-postgres
+
+  PostgresSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet available for the DB Instance
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    DependsOn:
+      - PrivateSubnetA
+      - PrivateSubnetB
+  
+  PostgresDB:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - PostgresSubnetGroup
+      - PrivateSubnetA      
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-rds'
+      DBName: dev
+      DBInstanceClass: db.t3.small
+      AllocatedStorage: !Ref PostgresAllocatedStorage
+      AvailabilityZone: !GetAtt
+        - PrivateSubnetA
+        - AvailabilityZone
+      DBSubnetGroupName: !Ref PostgresSubnetGroup
+      Engine: postgres
+      EngineVersion: 15.5
+      MasterUsername: !Ref PostgresMasterUsername
+      MasterUserPassword: !Ref PostgresMasterUserPassword
+      MultiAZ: false
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+  
+  PostgresLoadFunction:
+    DependsOn:
+      - PostgresLambdaLayer
+      - PostgresDB      
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - PostgresDB
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - PostgresDB
+            - Endpoint.Port
+          DBNAME: !Ref PostgresDBName
+          DBUSER: !Ref PostgresMasterUsername
+          DBPASSWORD: !Ref PostgresMasterUserPassword
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketPostgresDDLObjectKey
+                    
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLambdaKey
+      FunctionName: !Sub '${ProjectPrefix}-postgres-lambda-function'
+      Handler: postgres_load.lambda_handler
+      Layers:
+        - !Ref PostgresLambdaLayer
+      Runtime: !Ref PostgresLambdaRuntime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess        
+
+  CFPostgresLambdaExecution:
+    DependsOn:
+      - PostgresLoadFunction
+    Type: 'Custom::CFPostgresLambdaExecution'
+    Properties:
+      ServiceToken: !GetAtt PostgresLoadFunction.Arn
+      DeletionPolicy: Delete
+  
+  SubmissionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-submission
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:  
+  PostgresJDBCConnectionString:
+    Description: JDBC connection string for Postgres database
+    Value: !Join
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Port
+  PostgresEndpoint:
+    Description: RDS endpoint for Postgres DB instance
+    Value: !GetAtt PostgresDB.Endpoint.Address
+  PostgresUser:
+    Description: user name for Postgres DB instance
+    Value: !Ref PostgresMasterUsername    
+  AWSRegion:
+    Description: This is the current AWS Region for this tutorial
+    Value: !Sub '${AWS::Region}'
+  AWSAccount:
+    Description: This is the current AWS Account for this tutorial
+    Value: !Sub '${AWS::AccountId}'
+

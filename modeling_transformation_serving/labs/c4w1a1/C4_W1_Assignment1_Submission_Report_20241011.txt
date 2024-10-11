@@ -1,0 +1,18 @@
+[Executed at: Fri Oct 11 7:51:25 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Test 2 passed: Correct output in classicmodels_star_schema.fact_orders rows count output.
+========================================================================================================================
+Test 3 passed: Correct output in classicmodels_star_schema.dim_customers rows count output.
+========================================================================================================================
+Test 4 passed: Correct output in classicmodels_star_schema.dim_employees rows count output.
+========================================================================================================================
+Test 5 passed: Correct output in classicmodels_star_schema.dim_offices rows count output.
+========================================================================================================================
+Test 6 passed: Correct output in classicmodels_star_schema.dim_products rows count output.
+========================================================================================================================
+Test 7 passed: Correct output in classicmodels_star_schema.dim_dates rows count output.
+========================================================================================================================
+Test 8 passed: Correct output in classicmodels_obt.orders_obt rows count output.
+========================================================================================================================
