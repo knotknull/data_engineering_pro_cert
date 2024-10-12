@@ -769,8 +769,97 @@ Machine Learning Project Lifecycle Framework
 
 # Machine Learning Overview
 
-MAP LAST HERE
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/RQPUY/machine-learning-overview
+
+
+ML System 1 : Predict customer churn                               Learn            
+                                                        ----------->>                 categorical label
+[cust        ] [browsing ] [hist sales  ] [customer  ]  [Supervised]   [ML    ] -->> [ Predict churn]
+[demographics] [ history ] [product data] [churn data]  [Learning  ]   [System]      [ / not churn  ]
++---------------------------------------+ +----------+
+                  features                    label     (Classification)
+
+Supervised Learning:  Labels subervised what needs to be learned from the features
+Classification:  value given is a classification of customer who will or will not churn
+
+
+ML System 2 : Predict sales for the next new year holiday    Learn
+                                                        ----------->>                 numerical label
+[cust        ] [browsing ] [hist sales  ] [historical]  [Supervised]   [ML    ] -->> [ Predict churn]
+[demographics] [ history ] [product data] [sales data]  [Learning  ]   [System]      [ / not churn  ]
++---------------------------------------+ +----------+   
+                  features                    label     (Regression)
+                  
+Regression:  value given is a number
+
+
+
+
+ML System 3 : segment customers into groups based on similar purchasing behaviors
+                                                            Learn
+                                                        ------------->> 
+[cust        ] [browsing ] [hist sales  ] [  NO   ]  [Unsupervised]   [ML    ] -->> [ Predict churn]
+[demographics] [ history ] [product data] [LABELS ]  [  Learning  ]   [System]      [ / not churn  ]
++---------------------------------------+ 
+                  features only                   
+                  
+Unsupervised Learning:   No lables, algo has to figure out grouping based on similarities
+
+
+
+
+
+[--- Scoping --]  [------------ Data ------]  [---Modeling/Algo Dev ----]  [------- Deployment ------]
+[Define Project]  [define data/] [label and]  [select and ] [Perform err]  [Deploy in ] [Monitor &   ]     
+                  [est baseline] [org data ]  [train model] [analysis   ]  [production] [maintain sys]    
+
+Scoping:
+  - ML Engineer / Data Scientist defines project and decide which business problems to apply ML to 
+
+Data: 
+  - ML Eng will work with Data Eng to determine which features and labels are needed to train ML algo
+
+Algo Development:
+  - Select and train model and perform err analaysis
+  - ML Eng takes data provided and uses it to train ML algo
+    - split data into training and test set
+    - use training set to train several ML algos with different configs
+
+    - Classical ML algorithms:
+      - Linear regression
+      - Logistic regression
+      - Decision trees
+      - Random  foreset / boosted trees 
+
+    - Classical ML algos expect tabluar data
+      - as data increases, Classical ML algos will reach a "plateau"
+
+    - Complex ML algorithms:
+      - Deep neural networks
+        - can work with tabular data
+      - Convolutional neural networks
+        - can work with image data
+      - Recurrent neural networks
+        - can work with timeseries data
+      - Large language models
+        - can work with text data
+
+  - select the best model through cross-validation 
+    - Evaluate the model performance using the test set
+
+  - May go back to data engineer to:
+    - fix something in collected data
+    - add more features
+    - collect more data
+    - go back to Data step
+
+Deployment:
+  - ML Eng / Data Scientists check to make sure the system's performance is good an reliable
+  - Write software to put system in to production
+  - Monitor the system, track data and maintain system 
+  - Data Engineer may:
+    - prepare and serve the data that is needed for the deployed model
+    - serve an updated set of data to re-train and update the model
+
 
 
 
