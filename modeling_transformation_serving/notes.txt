@@ -861,7 +861,88 @@ Deployment:
     - serve an updated set of data to re-train and update the model
 
 
+# Modeling Data for Traditional ML Algorithms
 
+Traditional ML Algos expect tabular Numerical data
+
+ex.  customer
+# of Items   Date of          Customer    Minutes on    Account     
+purchased    last purchase     income      Platform     Type       Churned
+   14         7/5/2024         $50,000       15         Family      No
+    9         3/4/2024         $40,000       13         Platinum    Yes
+ Null         8/12/2024         null         null       Null        Yes
+    2         8/24/2024         null         35         Basic       No
+
+                                               derived field -----+
+customer as numerical                                             |
+# of Items   Days since        Customer    Minutes on  Account  Purchase   
+purchased    last purchase     income      Platform     Type    per min      Churned
+   0.93         0.90           0.5          0.24         1       0.93           0
+   0.57         0.29           0.4          0.20         2       0.69           1   Churn
+   0.07         0.35           0.35         0.64         0       0.06           0   Not Churn
++---------------------------------------------------------------------+    +----------+   
+                                    features                                  labels
+
+- No missing valaues or duplicat rows 
+- Each column consists of numerical values that are within a similar range
+
+
+
+Feature Engineering:
+  - any change or processing done to a raw column and any creation of new features
+        - handling missing values
+        - feature scaling 
+        - converting categorical columns into numerical ones
+        - creating new columns by combining or modifying existing ones
+
+Handling missing values:
+  - delete the entire column or row (if there is no risk of losing valuable data)
+  - impute the missing values with summary statistics 
+      - replace missing values with the column mean or median
+      - replace missing values with values from a similar record
+
+Scaling Numerical Features:
+  - scale features so that the values of each feature end up within a similar range 
+  - Training an ML algo is based on solving an optimization problem:
+      - if values vary drastically, it could take longer for the optimizaiton algo to converge
+  - Certain ML algo are based on distinct metrics
+      - accuracies can be affected by different ranges of values
+
+  Standardiztion scaling 
+    value - column mean / column standard deviation 
+        - reulting value has mean of 0 and variance of 1
+
+  Min-Max scaling 
+    value - column min / (column max - molumn min)
+        - reulting value is between 0 and 1 
+
+
+How to handle non-numerical values (Family, Basic, Platinum, etc.)
+
+One Hot Encoding:  break out values into columns and place a one in the column that it is
+
+Acct Type     Basic   Family  Platinum
+---------     -----   ------- ----------
+Family          0       1        0 
+Platinum        0       0        1
+Basic           1       0        0
+
+Ordinal Encoding:  assign a value to each "level" of acct type
+
+Acct Type     Acct Type
+---------     ----------
+Family           2            middle  
+Platinum         3            most expensive
+Basic            1            least
+
+
+NOTE:  Preprocessing of data == Feature Engineering 
+
+
+
+
+
+# Conversation with Wes McKinney (creator of Pandas)
 
 
 
