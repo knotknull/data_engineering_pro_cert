@@ -944,6 +944,255 @@ NOTE:  Preprocessing of data == Feature Engineering
 
 # Conversation with Wes McKinney (creator of Pandas)
 
+Apache Arrow 
+ibis-project.org  <<-- look at this 
+polars            <<-- look at this 
+
+
+
+# Processing Tabular Data for Classical Machine Learning Algorithms  
+# Using Scikit-Learn pt 1.
+
+
+utilize sci-kit learn for pre-processing 
+
+
+
+Two processing methods:
+  - Standardiztion for the numerical columns
+  - One-hot encoding for the categorical columns
+
+
+
+0. download data set
+https://www.kaggle.com/datasets/muhammadshahidazeem/customer-churn-dataset
+
+
+1. start jupyter
+jupyter notebook 
+
+import pandas as pd 
+data = pd.read_csv("customer_churn_dataset-training-master.csv")
+data.shape
+data.head(5)
+data.describe()
+data.isnull().sum()
+data[data['CustomerID'].isnull()]   ## this retrieves the row that the CustomerID is null
+data = data.dropna()   ## drop null row
+data.isnull().sum()    ## verify it is gone
+
+for col in ['Subscription Type', 'Contract Length']:   ## returns each column value and % or rows for each value
+    print(col)
+    print(data[col].value_counts(normalize=True))
+    print('\n')
+
+
+features = data.iloc[:,0:-1     ## gets features columns, all columns but last one on right]
+labels = data.iloc[:,-1]        ## gets labels column (Churn), the last column on right
+
+Preparing Data for Training a Machine Learning Model 
+
+1. Split the data into training and test sets
+
+2. Process the training data
+  a. Numerical columns   -->> standardize
+  b. Categorical columns -->> one hot encoding
+  c. Combine processed columns with the Customer ID into a Pandas data frame
+  d. Convert Pandas data frame into a parquet file
+
+3. Process the test data
+  a. Numerical columns   -->> standardize
+  b. Categorical columns -->> one hot encoding
+  c. Combine processed columns with the Customer ID into a Pandas data frame
+  d. Convert Pandas data frame into a parquet file
+
+
+Use the same computed statistics (i.e. standardize, one hot encoding) on test set that was 
+done on the training set 
+
+
+
+# Processing Tabular Data for Classical Machine Learning Algorithms  
+# Using Scikit-Learn pt 2.
+
+
+Preparing Data for Training a Machine Learning Model 
+
+
+use scikit learn tran_test_split 
+
+import sklearn.model_selection import train_test_split
+
+
+# x == features, y == labels for each train and test 
+# 
+X_train, X_test, y_train, y_test = train_test_split(features, 
+                                                    labels, 
+                                                    test_size = 0.2,
+                                                    random_state=32)
+
+from sklearn.preprocessing import StandardScaler
+
+numerical_columns = ['Age', 'Tenure', 'Usage Frequency', 'Support Calls', 
+                     'Payment Delay', 'Total Spend', 'Last Interaction']
+
+X_train_numerical = X_train[numerical_columns]  ## Just pull out numerical cols from X_train 
+
+scaler = StandardScaler()
+
+
+## NOTE:  
+  scaler.fit()        computes  the mean and the std dev of each column
+  scaler.transform()  uses the mean and std deviation to scale the values of each column
+
+scaler.fit(X_train_numerical)                         # first part of transforming values
+X_train_scaled = scaler.transform(X_train_numerical)  # scale numerical values accordingly
+
+## below creates a data frame with X_train_scale as data and pass in index and columns
+## 
+X_train_scaled_df = pd.DataFrame(data=X_train_scaled, index=X_train.index, columns=numerical_columns)
+
+X_train_scaled_df.head(5) shows all features have been scaled to lay within a similar range 
+
+ 	        Age 	    Tenure 	    Usage Frequency 	Support Calls 	Payment Delay 	Total Spend 	Last Interaction
+21498 	-0.751860 	-0.882836 	-1.375749 	      0.129657 	      1.578870 	      -1.703974 	  -1.336266
+302478 	0.291831 	  -0.477252 	0.254667 	        -1.172992 	    -1.207105 	    0.661850 	    0.525345
+253281 	-0.912428 	1.376846 	  -0.909916 	      -1.172992 	    0.973223 	      1.232594 	    1.339801
+177014 	-0.189873 	0.913322 	  -1.259290 	      1.106644 	      0.488706 	      0.320443 	    -0.754513
+308214 	0.291831 	  1.492727 	  -0.327624 	      -0.521667 	    -0.964846 	    1.315442 	    0.059943
+
+
+from sklearn.preprocessing import OneHotEncoder     ## handles One Hot Encoding
+
+categorical_columns = ['Subscription Type', 'Contract Length']  # set column names for categories / One Hot
+
+X_train_categorical = X_train[categorical_columns]  ## now get the training set just for these columns
+
+## NOTE:  
+  encoder.fit()   - check the unique values within each categorical column 
+                  - prepares the labels of the output columns
+
+X_train_encoded = encoder.transform(X_train_categorical)  ## returns encoded columns as compressed matrix
+
+print(type(X_train_encoded))
+<class 'scipy.sparse._csr.csr_matrix'>       #csr = compresses sparse row
+
+
+print(X_train_encoded)          # returns only locations where 1's are stored
+
+<Compressed Sparse Row sparse matrix of dtype 'float64'
+	with 705330 stored elements and shape (352665, 6)>
+  Coords	Values
+  (0, 2)	1.0
+  (0, 3)	1.0
+  (1, 0)	1.0
+.....
+  (352663, 0)	1.0
+  (352663, 3)	1.0
+  (352664, 1)	1.0
+  (352664, 4)	1.0
+
+
+X_train_encoded.todense()       ## convert to regular matrix
+matrix([[0., 0., 1., 1., 0., 0.],
+        [1., 0., 0., 0., 0., 1.],
+        [1., 0., 0., 0., 0., 1.],
+        ...,
+        [1., 0., 0., 1., 0., 0.],
+        [1., 0., 0., 1., 0., 0.],
+        [0., 1., 0., 0., 1., 0.]])
+
+encoder.get_feature_names_out()   ## column names of One Hot Columns
+array(['Subscription Type_Basic', 'Subscription Type_Premium',
+       'Subscription Type_Standard', 'Contract Length_Annual',
+       'Contract Length_Monthly', 'Contract Length_Quarterly'],
+      dtype=object)
+
+
+
+## now create data frame with encoded categorical columns
+
+X_train_encoded_df = pd.DataFrame(X_train_encoded.todense(),
+                                  index=X_train.index,
+                                  columns = encoder.get_feature_names_out())
+
+ 	    Subscription Type_Basic 	Subscription Type_Premium 	Subscription Type_Standard 	Contract Length_Annual 	Contract Length_Monthly 	Contract Length_Quarterly
+21498 	0.0 	0.0 	1.0 	1.0 	0.0 	0.0
+302478 	1.0 	0.0 	0.0 	0.0 	0.0 	1.0
+253281 	1.0 	0.0 	0.0 	0.0 	0.0 	1.0
+177014 	0.0 	1.0 	0.0 	0.0 	0.0 	1.0
+308214 	0.0 	1.0 	0.0 	1.0 	0.0 	0.0
+
+
+## Now concatenate the CustomerID, the scaled df and the encoded df, axis=1 means concat horizontally
+## 
+
+X_train_transf = pd.concat([X_train['CustomerID'], 
+                            X_train_scaled_df,
+                            X_train_encoded_df], axis=1)
+
+X_train_transf.head(5)
+
+
+ 	CustomerID 	Age 	Tenure 	Usage Frequency 	Support Calls 	Payment Delay 	Total Spend 	Last Interaction 	Subscription Type_Basic 	Subscription Type_Premium 	Subscription Type_Standard 	Contract Length_Annual 	Contract Length_Monthly 	Contract Length_Quarterly
+21498 	21507.0 	-0.751860 	-0.882836 	-1.375749 	0.129657 	1.578870 	-1.703974 	-1.336266 	0.0 	0.0 	1.0 	1.0 	0.0 	0.0
+302478 	309592.0 	0.291831 	-0.477252 	0.254667 	-1.172992 	-1.207105 	0.661850 	0.525345 	1.0 	0.0 	0.0 	0.0 	0.0 	1.0
+253281 	260395.0 	-0.912428 	1.376846 	-0.909916 	-1.172992 	0.973223 	1.232594 	1.339801 	1.0 	0.0 	0.0 	0.0 	0.0 	1.0
+177014 	181825.0 	-0.189873 	0.913322 	-1.259290 	1.106644 	0.488706 	0.320443 	-0.754513 	0.0 	1.0 	0.0 	0.0 	0.0 	1.0
+308214 	315328.0 	0.291831 	1.492727 	-0.327624 	-0.521667 	-0.964846 	1.315442 	0.059943 	0.0 	1.0 	0.0 	1.0 	0.0 	0.0
+
+
+## scale the numerical columns in test set
+## 
+X_test_scaled = scaler.transform(X_test[numerical_columns])
+X_test_scaled_df = pd.DataFrame(data=X_test_scaled, 
+                                index=X_test.index, 
+                                columns = numerical_columns)
+
+## encoding the categorical columns in testing set
+## 
+X_test_encoded = encoder.transform(X_test[categorical_columns])
+X_test_encoded_df = pd.DataFrame(data=X_test_encoded.todense(), 
+                                 index=X_test.index,
+                                 columns = encoder.get_feature_names_out())
+
+
+## concatenate the two dataframes 
+## 
+X_test_trans = pd.concat([X_test['CustomerID'],
+                          X_test_scaled_df, 
+                          X_test_encoded_df], axis=1)
+
+X_test_trans.head(5)
+
+ 	CustomerID 	Age 	Tenure 	Usage Frequency 	Support Calls 	Payment Delay 	Total Spend 	Last Interaction 	Subscription Type_Basic 	Subscription Type_Premium 	Subscription Type_Standard 	Contract Length_Annual 	Contract Length_Monthly 	Contract Length_Quarterly
+207158 	212278.0 	0.452398 	1.260965 	0.836958 	-0.847330 	0.004189 	0.795828 	0.408995 	0.0 	0.0 	1.0 	0.0 	1.0 	0.0
+383379 	390494.0 	-0.029305 	-0.766954 	1.652166 	-0.196005 	0.609835 	-0.260777 	1.805204 	1.0 	0.0 	0.0 	1.0 	0.0 	0.0
+258610 	265724.0 	0.452398 	0.044213 	0.487584 	-0.847330 	-1.570493 	1.165128 	-1.219915 	1.0 	0.0 	0.0 	1.0 	0.0 	0.0
+299098 	306212.0 	-0.029305 	-1.346360 	0.254667 	-0.847330 	0.125318 	0.866079 	-0.870863 	0.0 	0.0 	1.0 	1.0 	0.0 	0.0
+340382 	347497.0 	-1.715267 	-0.940776 	1.535708 	-0.847330 	0.125318 	-0.300309 	-0.987214 	0.0 	1.0 	0.0 	1.0 	
+
+
+X_train_transf.to_parquet("train.parquet")   ## Write out as parquet files
+X_test_trans.to_parquet("test.parquet")
+
+
+
+# Practice Lab: Feature Engineering for ML
+
+MAP LAST HERE 
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/ciCWi/practice-lab-feature-engineering-for-ml
+
+
+
+
+
+
+
+
+
+
 
 
 
