@@ -1,0 +1,5 @@
+AWSAccount 	654654322264
+AWSRegion 	us-east-1
+DataBucket 	de-c4w2lab1-654654322264-us-east-1-data-bucket
+MySQLEndpoint  	de-c4w2lab1-rds.cn2isika8j32.us-east-1.rds.amazonaws.com
+MySQLJDBCConnectionString	jdbc:mysql://de-c4w2lab1-rds.cn2isika8j32.us-east-1.rds.amazonaws.com:3306/classicmodels

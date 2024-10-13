@@ -1,0 +1,614 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c4w2lab1
+  DatabaseUserName:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: admin
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DatabaseUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c4w2lab1/lambda_layer_dependencies_p312.zip
+  PublicBucketDDLObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c4w2lab1/mysqlsampledatabase.sql
+  PublicBucketLambdaKey:
+    Type: String
+    Description: Public bucket key for lab clone lambda zip file.
+    Default: labs/cfn_dependencies/c4w2lab1/policy_clone.zip
+  PublicBucketPolicyPath:
+    Type: String
+    Description: Public bucket key for lab policy file.
+    Default: labs/cfn_dependencies/c4w2lab1/lab.policy
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+  LabRoleName:
+    Type: String
+    Description: Role name for the Lab Instance
+    Default: LabInstanceRole
+  
+  KeyName:
+    Description: Name of an existing EC2 KeyPair
+    Type: String
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Database Configuration
+        Parameters:
+          - DatabaseUserName
+          - DatabaseUserPassword
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-a
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-b
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+  MyDBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet available for the Source DB Instance
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+  
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+  PublicSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+  NatGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA      
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-a
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-b
+  NATGatewayEIPA:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NATGatewayEIPB:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup 
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: "3306"
+      ToPort: "3306"
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: "0.0.0.0/0"
+
+  LambdaExecutionSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-lambda-sg
+  
+  LambdaSGSelfRefIngress:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref LambdaExecutionSecurityGroup 
+
+  LambdaSGIngressRule:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:      
+      GroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: -1
+      CidrIp: "0.0.0.0/0"
+  
+  MySQLDB:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - MyDBSubnetGroup
+      - PrivateSubnetA      
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub ${ProjectPrefix}-rds
+      DBName: production
+      DBInstanceClass: db.t3.small
+      AllocatedStorage: '20'
+      AvailabilityZone: !GetAtt 
+        - PrivateSubnetA
+        - AvailabilityZone
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: MySQL
+      EngineVersion: 8.0.32
+      MasterUsername: !Ref DatabaseUserName
+      MasterUserPassword: !Ref DatabaseUserPassword
+      MultiAZ: false
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64        
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLayerKey
+      Description: Lambda layer with dependencies to insert data into MySQL DB
+      LayerName: !Sub ${ProjectPrefix}-lambda-layer
+
+  Function:
+    DependsOn:
+      - LambdaLayer
+      - MySQLDB
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt 
+            - MySQLDB
+            - Endpoint.Address
+          DBPORT: !GetAtt 
+            - MySQLDB 
+            - Endpoint.Port
+          DBPASSWORD: !Ref DatabaseUserPassword
+          DBUSER: !Ref DatabaseUserName
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketDDLObjectKey
+      Code:
+        ZipFile: |          
+          import json
+          import logging
+          import os
+
+          import boto3
+          import sqlalchemy as sa
+          import sqlparse
+          import cfnresponse
+
+          DBHOST = os.getenv("DBHOST", "")
+          DBPORT = int(os.getenv("DBPORT", ""))
+          DBNAME = os.getenv("DBDATABASE", "")
+          DBUSER = os.getenv("DBUSER", "")
+          DBPASSWORD = os.getenv("DBPASSWORD", "")
+          BUCKET_NAME = os.getenv("BUCKET_NAME", "")
+          OBJECT_KEY = os.getenv("OBJECT_KEY", "")
+          CREATE = 'Create'
+          DELETE = 'Delete'
+
+          response_data = {}
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+
+          def lambda_handler(event, context):
+              
+              logger.info(f"Event: {event}")
+
+              try:
+                  if event['RequestType'] == CREATE:
+                      logger.info(f"SQLAlchemy version {sa.__version__}")
+              
+                      # Reading file from S3 
+                      s3 = boto3.client("s3")
+              
+                      response = s3.get_object(Bucket=BUCKET_NAME, Key=OBJECT_KEY)
+                      logger.info(f"response:  {response}")
+                      sql_statement = response["Body"].read().decode("utf-8")
+                      sql_list = sqlparse.split(sql_statement)
+              
+                      # Population of Database
+                      engine = sa.create_engine(
+                          f"mysql+pymysql://{DBUSER}:{DBPASSWORD}@{DBHOST}/{DBNAME}?charset=utf8mb4"
+                      )
+              
+                      with engine.connect() as conn:
+                          for statement in sql_list:
+                              db_response = conn.execute(sa.text(statement))
+                                                    
+                          conn.commit()
+
+                  elif event["RequestType"] == DELETE:
+                      curl_data = {
+                        "Status": "SUCCESS",
+                        "PhysicalResourceId": event["PhysicalResourceId"],
+                        "StackId": event["StackId"],
+                        "RequestId": event["RequestId"],
+                        "LogicalResourceId": event["LogicalResourceId"]
+                      }
+                    
+                      curl_command = [
+                        "curl",
+                        "-H", "Content-Type: application/json",
+                        "-X", "PUT",
+                        "-d", json.dumps(curl_data),
+                        event["ResponseURL"]
+                      ]
+                      logger.info(f"curl_command: {curl_command}")
+
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+
+              except Exception as exc:
+                  logger.error(f"Error: {str(exc)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+
+      FunctionName: !Sub ${ProjectPrefix}-lambda-function
+      Handler: index.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaExecutionSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess        
+  
+  CFLambdaExecution:
+    DependsOn:
+      - Function
+    Type: Custom::CFLambdaExecution
+    Properties:
+      ServiceToken: !GetAtt Function.Arn      
+    DeletionPolicy: Delete
+
+  LambdaRoleLabSetup:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-lambda-role-lab-setup"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: LabInstanceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CreateLogGroup
+                Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: "arn:aws:logs:*:*:*"
+              - Sid: LogStreamMgmt
+                Effect: Allow
+                Action: 
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:log-group:/aws/lambda/${ProjectPrefix}*:*"
+              - Sid: GetRolePolicyAccess
+                Effect: Allow
+                Action: 
+                  - iam:GetRolePolicy                  
+                Resource: "arn:aws:iam::*:role/voclabs"
+              - Sid: IAMRoleMgmt
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:TagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                Resource: !Sub "arn:aws:iam::*:role/${LabRoleName}"
+
+  LambdaFunctionLabRole:
+    DependsOn:
+      - LambdaLayer
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          PROJECT_VALUE: !Ref ProjectPrefix
+          CLONE_ROLE_NAME: !Ref LabRoleName
+          BUCKET_NAME: !Ref PublicBucketName
+          POLICY_PATH: !Ref PublicBucketPolicyPath
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLambdaKey
+      FunctionName: !Sub "${ProjectPrefix}-lambda-function-lab-setup"
+      Handler: policy_clone.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaRoleLabSetup.Arn
+      Timeout: !Ref Timeout
+
+  CRLabRoleWithLambda:
+    DependsOn:
+      - LambdaFunctionLabRole
+    Type: Custom::CRLabRoleWithLambda
+    Properties:
+      ServiceToken: !GetAtt LambdaFunctionLabRole.Arn      
+    DeletionPolicy: Delete
+
+  LabEC2InstanceProfile:
+    DependsOn:
+      - CRLabRoleWithLambda
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LabEC2InstanceProfile
+      Roles:
+        - !Ref LabRoleName
+  
+  DataBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub '${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-data-bucket'
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+  
+Outputs:  
+  MySQLJDBCConnectionString:
+    Description: JDBC connection string for MySQL database
+    Value: !Join 
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt 
+          - MySQLDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt 
+          - MySQLDB
+          - Endpoint.Port
+        - /classicmodels
+  MySQLEndpoint:
+    Description: RDS endpoint for MySQL DB instance
+    Value: !GetAtt MySQLDB.Endpoint.Address
+  AWSRegion:
+    Description: This is the current AWS Region for this tutorial
+    Value: !Sub '${AWS::Region}'
+  AWSAccount:
+    Description: This is the current AWS Account for this tutorial
+    Value: !Sub '${AWS::AccountId}'
+  DataBucket:
+    Description: Bucket to store processed data and artifacts
+    Value: !Ref DataBucket
+  
+

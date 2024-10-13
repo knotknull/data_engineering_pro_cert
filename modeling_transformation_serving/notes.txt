@@ -1180,9 +1180,6 @@ X_test_trans.to_parquet("test.parquet")
 
 # Practice Lab: Feature Engineering for ML
 
-MAP LAST HERE 
-
-https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/ciCWi/practice-lab-feature-engineering-for-ml
 
 
 
