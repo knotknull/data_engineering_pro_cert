@@ -1181,16 +1181,121 @@ X_test_trans.to_parquet("test.parquet")
 # Practice Lab: Feature Engineering for ML
 
 
+## Modeling and Processing Unstructured Data for Machine Learning
+# Modeling Image Data for ML Algorithms
+
+Convolutional Neural Network (CNN)
+  - made up of several layers
+  - each layer tries to identify more image features  
+    to help with the ML task
+        - First layer: generic features
+        - Later layer: Complex patterns and textures
+
+
+- Start with pre-trained CNN algorithms
+- fine tune these models for the specific task
+
+
+Preparing Image Data for Training an ML Algorithm 
+- resize image
+- scale pixels
+
+Data Augmentation: technique used to create new versions of existing images 
+    - flipping, rotating, cropping, adjusting brightness
+    - can increase the size and variety of training data
+
+
+TensorFlow
+  - has pre-processing functions that could be deployed to images
+
+# Image Preprocessing Using TensorFlow
+
+https://colab.research.google.com/drive/1NVBjtIfGuYoSomwBYkPg6hqyhj7HNhLS?usp=sharing#scrollTo=GB_biegiU5xU
 
 
 
+# Preprocessing Textual Daa for Analysis and Text Classification
+
+- Sentiment analysis of product reviews 
+- Classification of news articles
+- Chatbots and virtual assistants
+- Spam detection
+- Customer segmentation
+- Product recommendations
 
 
 
+Pre-processing Texts for ML 
 
 
 
+[Textual Data might contain ] 
+[contain typos, &           ]             [ Clean and   ]
+[inconsistencies repititions]             [high-quality ]      ML
+                                Data      [data         ]     Engineering           [Train a classical or ]
+[May contain words or      ]   Engineer                       Team                  [ advanced ML model   ]
+[characters not relevant   ]   ------->>>                      ------->>>
+[to the NLP Task           ]
+                                          [Removve and ]                            [  Other use cases    ]
+[Training LLMs is expensive ]             [ irrelevant ]
+[and time consuming         ]             [ words or   ]
+                                          [ characters ]
 
+Processing Text 
+
+Cleaning: 
+  - removing punctuations, extra spaces, characters that add no meaning 
+
+Normalization:
+  - convert test to a consistent format
+      - transforming to lower-case
+      - converting numbers or symbols to characters
+      - expanding contractions / replacing accronyms, abbreviations
+
+Tokenization:
+  - splitting each review into individual tokens 
+    ( works, subswords, short sentences)
+  python str.split()
+    ex. "This is a wonderful price for the amount you get" 
+    becomes [this, is, a, wonderful, price, for, the, amount, you, get]
+
+
+Removal of Stop Words:
+  - removing frequently used words such as: "is", "are", "the", "for", "a"
+  - define own list of stop words
+  - use built-in set of NLP libraries: spaCy, NLTK, Gensim, TextBlob
+    from [this, is, a, wonderful, price, for, the, amount, you, get]
+    to   [this, wonderful, price, you, get]
+
+Lemmatization: 
+  - replacing each word with its base form or lemma
+      i.e. getting / got  -->>  get
+  - can use NLP libraries to get lemma of each word 
+
+  ex. [i, bought, this, my, son, his, hair, thinning, i, do, not, know, yet, how,
+       well, helping, he, said, smell, great]
+
+to >> [i, buy, this, my, son, his, hair, thin, i, do, not, know, yet, how,
+       well, help, he, say, smell, great ]
+
+
+
+This file (functions_preprocess_texts.py) contains python functions that you can 
+use to pre-process texts by: 
+
+    - removing special characters and extra spaces
+    - expanding contractions
+    - converting characters to lower case
+    - removing stop words
+    - lemmatizing
+
+
+# Text Vectorization and Embedding
+
+
+MAP LAST HERE 
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/eqWs3/text-vectorization-and-embedding
 
 
 .
