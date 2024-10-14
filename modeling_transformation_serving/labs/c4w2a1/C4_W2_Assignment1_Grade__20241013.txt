@@ -1,0 +1,24 @@
+Total score 	100/100
+	
+Creation of Cloud9 Environment 	5/5
+	
+Output from review_sample_df.head() 	10/10
+	
+Output from metadata_sample_df.head() 	5/5
+	
+process_review() function 	10/10
+	
+process_metadata() function 	10/10
+	
+clean_text() function 	10/10
+	
+Output from reviews_product_metadata_df.head() 	10/10
+	
+Output from scaled_price_sales_rank_df.head() 	10/10
+	
+Output from encoded_sales_category_df.head() 	10/10
+	
+Insertion of product embeddings 	10/10
+	
+Insertion of review embeddings 	10/10
+	

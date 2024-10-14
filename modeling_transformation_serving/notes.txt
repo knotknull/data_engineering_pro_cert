@@ -1371,5 +1371,13 @@ Text Reviews -->> Embeddings ------>> Features to train an ML Algo
                                 +-->> Clustering, Similarity Search  
 
 
+Assignment: Modeling and Transforming TExt Data for ML
+
+Different encoding techniques for Feature Engineering
+
+https://medium.com/anolytics/all-you-need-to-know-about-encoding-techniques-b3a0af68338b
+
+
+
 
 .

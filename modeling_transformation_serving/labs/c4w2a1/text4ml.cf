@@ -1,0 +1,694 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c4w2a1
+
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  Cloud9RoleName:
+    Type: String
+    Description: Role name for the Cloud9 Instance
+    Default: Cloud9InstanceRole
+
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c4w2a1/lambda_layer_dependencies_p312.zip
+
+  PublicBucketDataKey:
+    Type: String
+    Description: Path in S3 bucket to model 
+    Default: labs/models/c4w2a1/staging
+  
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+
+  VectorDBMasterUsername:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: postgresuser
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+
+  VectorDBUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+
+  VectorDBAllocatedStorage:
+    Default: '20'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '20'
+    MaxValue: '65536'
+    ConstraintDescription: must be between 20 and 65536 GiB.
+  LatestAmiId:
+    Description: The latest Amazon Linux 2 AMI from the Parameter Store
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  InstanceType:
+    Description: The EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues:
+      - t2.small
+  InferenceDockerRepo:
+    Description: ECR repo with the producer docker image
+    Type: String
+    Default: public.ecr.aws/e4g9p6i2/dlai-de-c4w2-text-embedder:latest
+  KeyName:
+    Description: Name of an existing EC2 KeyPair
+    Type: String
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - ProjectPrefix
+          - AWSRegion
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref AWS::StackId
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-igw
+
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-a
+
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-subnet-b
+
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-a
+
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-subnet-b
+
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-public-routetable
+      VpcId: !Ref VPC
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  NatGatewayRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-private-routetable
+      VpcId: !Ref VPC
+
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-a
+
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-natgw-b
+
+  NATGatewayEIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGatewayEIPB:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  VectorDBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet group with public subnets, available for the vectorDB Instance
+      SubnetIds:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+    DependsOn:
+      - PublicSubnetA
+      - PublicSubnetB
+
+
+  VectorDBInstance:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - VectorDBSubnetGroup
+      - PrivateSubnetA
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-rds'
+      DBName: aws_reviews
+      AllocatedStorage: !Ref VectorDBAllocatedStorage
+      DBInstanceClass: db.t3.small
+      Engine: postgres
+      MasterUsername: !Ref VectorDBMasterUsername
+      MasterUserPassword: !Ref VectorDBUserPassword
+      DBSubnetGroupName: !Ref VectorDBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+      AvailabilityZone: !GetAtt
+        - PrivateSubnetA
+        - AvailabilityZone
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: true
+      EngineVersion: 16.2
+      MultiAZ: false
+      StorageType: gp3
+      BackupRetentionPeriod: 0
+      DeletionProtection: false
+      PubliclyAccessible: false
+
+
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0          
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-sg
+
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup
+
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: "5432"
+      ToPort: "5432"
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: "0.0.0.0/0"
+      
+  DataLakeBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-data-lake'
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+    
+  LambdaCopyToS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com      
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      Policies:
+        - PolicyName: LambdaS3PutPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:Put*"
+                Resource: !Sub "arn:aws:s3:::${DataLakeBucket}/*"
+
+  LambdaCopyToS3:
+    DependsOn:
+      - DataLakeBucket
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          SOURCE_BUCKET_NAME: !Ref PublicBucketName
+          SOURCE_PATH_DATA: !Ref PublicBucketDataKey
+          DESTINATION_BUCKET: !Ref DataLakeBucket 
+      Code:
+        ZipFile: |          
+          import json
+          import logging
+          import os
+
+          import boto3
+          import cfnresponse
+          from botocore import exceptions
+
+          SOURCE_BUCKET_NAME = os.getenv("SOURCE_BUCKET_NAME", "")
+          SOURCE_PATH_DATA = os.getenv("SOURCE_PATH_DATA", "")          
+          DESTINATION_BUCKET = os.getenv("DESTINATION_BUCKET", "")
+
+          CREATE = "Create"          
+
+          response_data = {}
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+
+          def copy_s3_to_s3(
+              source_bucket: str, source_path: str, dest_bucket: str, dest_path: str
+          ) -> bool:
+              """Copies files between S3 buckets
+
+              Args:
+                  source_bucket (str): Source bucket
+                  source_path (str): Source path
+                  dest_bucket (str): Destination bucket
+                  dest_path (str): Destination path
+
+              Returns:
+                  bool: Shows if copy was successful or not
+              """
+
+              s3 = boto3.resource("s3")
+
+              copy_source = {"Bucket": source_bucket, "Key": source_path}
+              
+              logger.info(f"copy_source {copy_source}")
+              
+              try:
+                  bucket = s3.Bucket(dest_bucket)
+                  bucket.copy(copy_source, dest_path)
+
+                  return True
+              except Exception as err:
+                  logger.error(f"Error found: {err}")
+                  return False
+
+
+          def lambda_handler(event, context):
+              logger.info(f"Event: {event}")
+              
+              logger.info(f"SOURCE_BUCKET_NAME {SOURCE_BUCKET_NAME}")
+              logger.info(f"SOURCE_PATH_DATA {SOURCE_PATH_DATA}")              
+              logger.info(f"DESTINATION_BUCKET {DESTINATION_BUCKET}")
+
+              try:
+                  if event["RequestType"] == CREATE:                    
+                      # Review Sample Data
+                      logger.info(f"Copying review data")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/reviews_Toys_and_Games_sample.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/reviews_Toys_and_Games_sample.json.gz",
+                      )
+                      logger.info(f"Reviews data sample copied successfully")
+
+                      # Metadata sample
+                      logger.info(f"Copying review metadata sample")
+                      copy_data_response = copy_s3_to_s3(
+                          source_bucket=SOURCE_BUCKET_NAME,
+                          source_path=f"{SOURCE_PATH_DATA}/meta_Toys_and_Games_sample.json.gz",
+                          dest_bucket=DESTINATION_BUCKET,
+                          dest_path="staging/meta_Toys_and_Games_sample.json.gz",
+                      )
+                      logger.info(f"Reviews' metadata sample copied successfully")                      
+
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+
+              except Exception as exc:
+                  logger.error(f"Error: {str(exc)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+
+      FunctionName: !Sub ${ProjectPrefix}-copy-s3-to-s3
+      Handler: index.lambda_handler
+      Layers:
+        - !Ref LambdaLayer
+      Runtime: !Ref Runtime
+      Role: !GetAtt LambdaCopyToS3Role.Arn
+      Timeout: !Ref Timeout
+  
+  CFLambdaCopyS3ML:
+    DependsOn:
+      - LambdaCopyToS3
+    Type: Custom::CFLambdaCopyS3ML
+    Properties:
+      ServiceToken: !GetAtt LambdaCopyToS3.Arn      
+    DeletionPolicy: Delete
+
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64        
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketLayerKey
+      Description: Lambda layer with dependencies for lambda-backed custom resource 
+      LayerName: !Sub "${ProjectPrefix}-lambda-layer"
+
+  EC2KeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: !Sub ${ProjectPrefix}-ec2-keypair
+
+  EC2IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${ProjectPrefix}-ec2-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonAthenaFullAccess
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+        - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
+        - arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds
+
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref EC2IAMRole
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-ec2-sg
+
+  EC2SecurityGroupIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+
+  MLModelInstance:
+    DependsOn:
+      - EC2InstanceProfile
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref EC2KeyPair
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnetA
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda  # Root volume
+          Ebs:
+            VolumeSize: 30
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectPrefix}-ml-model-instance
+      UserData: {
+                  "Fn::Base64": {"Fn::Join": ["",
+                      ["#!/bin/bash\n",
+                      "set -ex\n",
+                      "export DOCKER_REPO=", {"Ref": "InferenceDockerRepo"}, "\n",
+                      "echo $DOCKER_REPO\n",
+                      "sudo yum update -y\n",
+                      "sudo amazon-linux-extras install -y docker\n",
+                      "sudo service docker start\n",
+                      "sudo docker pull $DOCKER_REPO\n",
+                      "echo 'Pulled Model image from' $DOCKER_REPO\n",
+                      "sudo docker run -d -e AWS_DEFAULT_REGION=us-east-1 -p 8080:8080 $DOCKER_REPO\n",
+                      "echo Ml Model API ready!\n",
+                      ]
+                    ]
+                  }
+                }
+  MLModelInstanceEIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      InstanceId: !Ref MLModelInstance
+        
+  SubmissionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-submission
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+
+Outputs:
+  AWSRegion:
+    Description: This is the current AWS Region for this lab
+    Value: !Sub ${AWS::Region}
+  AWSAccount:
+    Description: This is the current AWS Account for this lab
+    Value: !Sub ${AWS::AccountId}
+  VPCID:
+    Description: This is the VPC ID for this Lab
+    Value: !Ref VPC
+  PublicSubnetAID:
+    Description: This is the Public Subnet A ID for this Lab
+    Value: !Ref PublicSubnetA
+  PublicSubnetBID:
+    Description: This is the Public Subnet B ID for this Lab
+    Value: !Ref PublicSubnetB
+  PrivateSubnetAID:
+    Description: This is the Private Subnet A ID for this Lab
+    Value: !Ref PrivateSubnetA
+  PrivateSubnetBID:
+    Description: This is the Private Subnet B ID for this Lab
+    Value: !Ref PrivateSubnetB
+  DataLakeBucket:
+    Description: Data Lake bucket
+    Value: !Ref DataLakeBucket
+  MlModelDNS:
+    Description: This is the DNS of the Ml model service
+    Value: !Join [ ":", [!GetAtt MLModelInstance.PublicDnsName, 8080]]
+  PostgresJDBCConnectionString:
+    Description: JDBC connection string for Postgres database
+    Value: !Join
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt
+          - VectorDBInstance
+          - Endpoint.Address
+        - ':'
+        - !GetAtt
+          - VectorDBInstance
+          - Endpoint.Port
+  PostgresEndpoint:
+    Description: RDS endpoint for Postgres DB instance
+    Value: !GetAtt VectorDBInstance.Endpoint.Address
+

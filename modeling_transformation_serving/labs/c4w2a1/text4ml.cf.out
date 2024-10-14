@@ -1,0 +1,11 @@
+AWSAccount 		891376960355
+AWSRegion 		us-east-1
+DataLakeBucket 		de-c4w2a1-891376960355-us-east-1-data-lake
+MlModelDNS 		ec2-184-72-235-191.compute-1.amazonaws.com:8080
+PostgresEndpoint 	de-c4w2a1-rds.chaquyuaoei9.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString jdbc:mysql://de-c4w2a1-rds.chaquyuaoei9.us-east-1.rds.amazonaws.com:5432
+PrivateSubnetAID 	subnet-0371376fe37277a91
+PrivateSubnetBID 	subnet-0d20e572182f677ee
+PublicSubnetAID 	subnet-028029a39a26add8c
+PublicSubnetBID 	subnet-045e1abf4300484c7
+VPCID 			vpc-0a9a86baba0f78492

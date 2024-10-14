@@ -1,0 +1,19 @@
+[Executed at: Sun Oct 13 18:23:03 PDT 2024]
+
+Test 1 passed: Created Cloud9 environment.
+========================================================================================================================
+Test 2 passed: Correct output in Output from review_sample_df.head().
+========================================================================================================================
+Test 3 passed: Correct output in Output from metadata_sample_df.head().
+========================================================================================================================
+Test 4 passed: Correct output in process_review() function.
+========================================================================================================================
+Test 5 passed: Correct output in process_metadata() function.
+========================================================================================================================
+Test 6 passed: Correct output in clean_text() function.
+========================================================================================================================
+Test 7 passed: Correct output in Output from reviews_product_metadata_df.head().
+========================================================================================================================
+Test 8 passed: Correct output in Output from scaled_price_sales_rank_df.head().
+========================================================================================================================
+Test 9 passed: Correct output in Output from encoded_sales_category_df.head().
