@@ -1306,7 +1306,7 @@ Traditional Vectorization: assign a number to each word in a text based on its f
       - Account for the weight and rarity of each word
           TF: the number of times the term occurred in a document divided by the total number of words in that document
 
-         IDF: how common or rate that word is in the entire corpus
+         IDF: how common or rare that word is in the entire corpus
                 closer to 0: more common
                 closer to 1: more rare
 
@@ -1376,6 +1376,108 @@ Assignment: Modeling and Transforming Text Data for ML
 Different encoding techniques for Feature Engineering
 
 https://medium.com/anolytics/all-you-need-to-know-about-encoding-techniques-b3a0af68338b
+
+
+Resources
+
+Courses
+
+https://www.deeplearning.ai/courses/machine-learning-specialization/
+
+https://www.deeplearning.ai/courses/deep-learning-specialization/
+
+
+Andrew explains the best practice of applying the same preprocessing steps and 
+computed statistics from the training set to the testing set 
+https://www.coursera.org/learn/deep-neural-network/lecture/lXv6U/normalizing-inputs
+
+Convolutional Neural Networks
+https://www.coursera.org/learn/convolutional-neural-networks?specialization=deep-learning
+
+https://www.deeplearning.ai/courses/natural-language-processing-specialization/
+
+https://www.deeplearning.ai/courses/machine-learning-in-production/
+
+https://www.deeplearning.ai/courses/generative-ai-with-llms/
+
+https://www.deeplearning.ai/short-courses/preprocessing-unstructured-data-for-llm-applications/
+
+https://www.deeplearning.ai/short-courses/google-cloud-vertex-ai/
+
+https://www.deeplearning.ai/short-courses/large-language-models-semantic-search/
+
+https://www.deeplearning.ai/short-courses/serverless-llm-apps-amazon-bedrock/
+
+https://www.deeplearning.ai/short-courses/pretraining-llms/
+
+Reference
+
+Pandas:
+https://www.kaggle.com/learn/pandas
+https://www.w3schools.com/python/pandas/default.asp
+
+
+Sci-kit:
+https://scikit-learn.org/stable/modules/preprocessing.html
+https://scikit-learn.org/stable/modules/impute.html
+https://scikit-learn.org/stable/modules/feature_extraction.html#text-feature-extraction
+
+https://www.kaggle.com/datasets/muhammadshahidazeem/customer-churn-dataset
+
+https://medium.com/@lars.chr.wiik/best-embedding-model-openai-cohere-google-e5-bge-931bfa1962dc
+
+https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+
+https://www.sbert.net/index.html
+
+https://seattledataguy.substack.com/p/data-engineering-vs-machine-learning
+
+https://docs.cohere.com/docs/embeddings
+
+https://docs.cohere.com/docs/how-to-convert-text-into-vectors
+
+https://cohere.com/blog/sentence-word-embeddings
+
+https://mccormickml.com/2016/04/19/word2vec-tutorial-the-skip-gram-model/
+
+https://p.migdal.pl/blog/2017/01/king-man-woman-queen-why
+
+https://medium.com/deeper-learning/glossary-of-deep-learning-word-embedding-f90c3cec34ca
+
+https://medium.datadriveninvestor.com/from-word-embeddings-to-sentence-embeddings-part-1-3-7ba9a715e917
+
+
+
+## Data Modeling, Transformation and Serving
+## Course 4
+## Week 3
+## Data Transformations & Technical Considerations 
+
+# Batch Transformations
+
+
+Transformation:  Manipulate and enhance data for downstream stakeholders
+
+
+Transformations 
+
+      Technical Considerations        |       Transformation Approaches
+--------------------------------------------------------------------------------------
+  Batch Transformations               |         - Single machine or use a distributed 
+    - Size of the Data                |             processing tool (i.e. Spark)
+    - Specification of the hardware   |         - Write transformation logic in SQL or Python 
+    - Performance requirement         |
+                                      |
+  Streaming Transformation            |
+    - Latency requirement             |
+                                      |
+
+
+# Batch Transformation Patterns and Use Cases
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/OeBHP/batch-transformation-patterns-and-use-cases
 
 
 
