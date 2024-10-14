@@ -1475,9 +1475,172 @@ Transformations
 
 # Batch Transformation Patterns and Use Cases
 
-MAP LAST HERE
+
+
+Transformations for Data Modeling
+
+Target Model        Star            Data Vault
+
+
+[data source]   -->>   [ Transformation ]  -->>   [Final Data Form]
+
+
+
+ETL :  [data  ]  -->> [Extract ] -->> [Transform / ]  -->> [ Load ] -->> [   Target System  ]
+       [source]                       [Staging Area]                     [Expected Data Form]
+
+
+
+ELT :  [data  ]  -->> [Extract ] -->> [ Load  to     ]  -->> [ Transform in  ] -->> [ Expected Data Form ]
+       [source]                       [Target System ]       [ Target System ] 
+
+
+EtLT : [data  ]  -->> [Extract ] -->> [transform   ] -->> [ Load  to     ]  -->> [ Transform in  ] -->> [ Expected Data Form ]
+       [source]                       [clean/dedupe]      [Target System ]       [ Target System ] 
+
+
+examples:                             +----- based on Spark
+                                      |
+                                      v
+ETL:            [AWS RDS] -->>  [AWS Glue ETL] -->>  [S3]
+
+
+ELT:            [Target System                    ]
+                [                                 ]  Note:  
+                [                                 ]    - dbt is not an execution tool like Spark.
+                [ source data          expected   ]
+                [   |                  data form  ]    - SQL-tool that facilitates transformation 
+                    |                      ^             within the database or data warehouse
+                    v                      |             (utilizes resources of data platform itself)
+                [------------- dbt  --------------]
+                [                                 ]
+
+
+
+Transformations for Data Cleaning
+
+Data Wrangling:  take messy, malformed data and turn into clean data
+
+
+[ Data  ]   ----------------->>  [ETL / ELT]  ----------------->>  [ Target ]  
+[Source ]       source data                                        [ System ]
+             
+             - missing values                 clean and normalize
+             - dupe entries                     - write your own code
+             - outliers                         - Use wrangling tool
+             - inconsistencies                      - AWS Glue DataBrew
+
+
+
+
+
+Transformations for Data Updating
+
+
+Truncate and Reload :  Delete all records in target system and reload the data from the source
+                        - have small data set
+                        - updated data once in a while
+
+
+Change Data Capture :  Identify and capture changes in source system and apply to target
+                        - check last updated columnt
+                        - check db transaction log
+                            I / U / D
+        Capture Updates: 
+            - Insert Only
+                - insert new records without change / deleting old records 
+                - add additional information  to new record to distinguish it from old record
+            - Upsert Merge
+                - use key of new data to search for existing record 
+                - if key exists, update record with new
+                - if key doesn't exists, insert new record
+
+        Capture deletes: 
+             - Hard delete: permanently delete record 
+             - Soft delete: mark record as "deleted"
+             - Insert only:  insert record with "deleted" flag and do not modify prior record
+
+
+
+Single Row Inserts:  OK for row-oreiented database
+
+
+Single Row Inserts:  BAD for OLAP Column-oriented databases:
+                      - puts massive load on OLAP system
+                      - Extremely inefficient for subsequent reads
+
+                    GOOD for OLAP Column-oriented databases:
+                        - micro-batch or batch fashion
+                        - when inserted in bulk 
+                            - organized data more efficiently into row groups
+                                  and better compressed
+                            - Leverage distributed parallel processing to speed up data loading
+
+
+
+
+
+# Distributed Processing Framework: Hadoop MapReduce
+
+
+2000s Big Data:   Commodity hardware became cheap and ubiquitous
+                  Several innovations in large-scale distributed storage and computing:
+
+2003  GFS:        Google File System  (GFS)
+
+2004  MapReduce:  Parallel programming paradigm for processing data distributed over GFS
+
+2006  Hadoop:     Yahoo Hadoop
+                    - Hadoop Distributed File System 
+                        - Key ingredient of current big data engines (EMR, Spark)
+
+                    - Hadoop MapReduce
+                        - Influences many of today's distributed systems
+
+Hadoop Distributed File System
+
+HDFS:   combines compute and storage on the same nodes
+
+Object Storage: limited compute support for internal processing
+
+
+HDFS: 
+Large File -->> [1] [2] [3]  large file broken into blocks of few hundred megabytes in size
+
+                                    [Data Node]           [Data Node ]
++------------------------+       +  [ [1] [2] ]           [[1][3][2] ]        Each block of data replicated to 3 data nodes
+| NameNode               |       |                          +
+| Maintains:             |       |                          |                                 
+|    - Directories       |-------+--------------------------+                 Replication increases durability and 
+|    - File metadata     |       |                          |                  availability of the data
+|    - Detailed catalog  |       |                          +
+|                        |       + [Data Node ]           [Data Node ]        If data node fails, Name Node will redistribute data
++------------------------+         [  [2][3]  ]           [ [1][3]   ]         to maintain 3x replication  
+
+
+                                                                              Combining compute and storage allows in-place
+                                                                              data processing (via MapReduce)
+
+
+
+
+Hadoop MapReduce
+
+last here @ 2:49
+
+
+MAP LAST HERE 
 
 https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/OeBHP/batch-transformation-patterns-and-use-cases
+
+
+
+
+
+
+
+
+
 
 
 
