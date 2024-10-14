@@ -802,7 +802,7 @@ ML System 3 : segment customers into groups based on similar purchasing behavior
 +---------------------------------------+ 
                   features only                   
                   
-Unsupervised Learning:   No lables, algo has to figure out grouping based on similarities
+Unsupervised Learning:   No labels, algo has to figure out grouping based on similarities
 
 
 
@@ -1371,7 +1371,7 @@ Text Reviews -->> Embeddings ------>> Features to train an ML Algo
                                 +-->> Clustering, Similarity Search  
 
 
-Assignment: Modeling and Transforming TExt Data for ML
+Assignment: Modeling and Transforming Text Data for ML
 
 Different encoding techniques for Feature Engineering
 
