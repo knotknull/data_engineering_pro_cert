@@ -2569,9 +2569,74 @@ Best Practices:
 
 # Stream Processing
 
+Streaming Transformations: Prepares data for downstream consumption by converting a stream of 
+                           events into another stream 
+
+
+Enrich a Stream:
+
+IoT events 
+[.] [.] [.] [.] [.] --+
+                      |    Enriched stream
+                      +--> [+] [+] [+] [+]
+                      |
+[Additional Data ]  --+
+[Device Metadata ]
 
 
 
+Join two Streams
+                              Join
+clickstream                 Processor
+[.] [.] [.] [.] [.] --+    [----------]
+                      |    [  Buffer  ]            Unified user 
+                      +--> [          ] -------->  [+] [+] [+] [+]
+                      |    [  Buffer  ]            activity view
+[.] [.] [.] [.] [.] --+    [----------]
+IoT data
+ 
+Windowed Queries 
+---------time---------->
+[.][.][.]                      [+] [+] [+] 
+      [.][.][.]                ^
+            [.][.][.]          |
+         +------+              |
+            |                  |
+            +------------------+
+                (roll up stats)
+
+
+            Streaming Platform            Stream Processor     - Distributed stream processing tools 
+            Kinesis Data Streams            Apache Spar        - Open-sourcek
+                 Kafka                      Apache Flink       - Python or SQL queries
+
+
+
+
+Stream Processing Tool Considerations 
+  - use case 
+  - latency requirements
+  - performance capabilities of the stream processing framework
+
+Spark Streaming: 
+  - Microbatch stream processing 
+  - batches events up to 2 minutes
+  - process each batch in parallel
+        i.e. sales metrics
+
+Apack Flink:
+  - Each node continuously listens to messages and updates its dependent nodes
+  - Delivers processed events at very low latency
+  - comes with significant overhead
+        i.e. security metrics
+
+
+
+LAB: Capture Data Change with Flink and Debezium
+
+MAP LAST HERE 
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/EKi4c/streaming-processing
 
 
 
