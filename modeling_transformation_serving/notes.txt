@@ -1668,7 +1668,7 @@ Hadoop MapReduce Shortcomings
 
 
 Spark:   [RAM] --read--> [mapreduce] --write--> [RAM] --read--> [mapreduce] --write--> [RAM]
-                  [   task  ]                            [   task  ]
+                         [   task  ]                            [   task  ]
 
 - In-memory processing speeds up data processing tasks
 - Disk is treated as a second-class data storage layer
@@ -1678,8 +1678,118 @@ I
 # Distributed Processing Framework: Spark 
 
 
-MAP LAST HERE
+Spark:  Computing engine designed for processing large datasets 
+          - Retains intermediate results in memory 
+          - Limits disk I/O interactions, enabling faster computation
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/sOmlp/distributed-processing-framework-spark
+
+Spark:   [RAM] --read--> [mapreduce] --write--> [RAM] --read--> [mapreduce] --write--> [RAM]
+                         [   task  ]                            [   task  ]
+
+
+    Run it                              Separate persistent storage systems
+      - Locally                             - RDBMS
+      - Data centers                        - Object Store
+      - Cloud                               - HDFS
+
+
+Unified Platform:     Can run different types of analytical workloads on one engine
+                        - Perform SQL queries
+                        - Train and test ML algorithms
+                        - Apply streaming transformations
+
+          Spark Libs:   [ Sparl ]     [ MLlib ]   [  Spark  ]   [ GraphX  ]
+                        [  SQL  ]                 [Streaming]
+
+          Spark APIs    [ Python ]    [ Java ]    [ Scala ]     [    R    ]   <--> External 3rd party libs
+
+
+Spark Applications
+
+
+                    +---------------+              +---------------+
+                    | Driver Node   |              | Worker Node   |
+                    |               |              |               |
+Central controller  | [  Spark  ]   |--------------|   Executor    |
+of a Spark          | [ Session ]   |              | [CPU]  [CPU]  |
+Applications -------|    |   ^      |              | [CPU]  [CPU]  |              +---------------+
+                    |    v   |      |              +---------------+              | Worker Node   |
+                    | [User Code ]  |                  |      ^                   |               |
+                    |               |------------------|------|-------------------|   Executor    |
+                    |               |                  |      |                   | [CPU]  [CPU]  |
+                    +---------------+                  |      |                   | [CPU]  [CPU]  |
+                        |      ^                       |      |                   +---------------+
+                        |      |                       |      |                       |      ^
+                        v      |                       v      |                       v      |
+                   +-------------------------------------------------------------------------------------------------+ 
+Allocates and       |                                                                                                 |
+manages resources   |                                          Cluster Manager                                        |
+          +---------|                                                                                                 |
+                    +-------------------------------------------------------------------------------------------------+
+
+
+
+
+
+Driver Node     :  Central cotnroller of Spark Application 
+
+Cluster Manager :  Communicates with Driver Node.  Allocates computational and memory resources 
+                    across the cluster and manages resources
+
+Worker Node     :  Contains Spark executor that executes tasks assigned to them by Driver Node.
+
+
+Spark applies partitioning scheme to break up data into partitions when loading from disk and  
+allocates to each executor the partitins that are closest to it in the network.
+    - each executors cpu core gets a partition of data to work on
+
+Spark Application:    start with instantiating a Spark session object: 
+                        - represents a single unified entry point to all Spark's functionality
+                        - via sesion object: 
+                            - define data frames
+                            - read data sources 
+                            - perform SQL queries
+
+                      Driver node translates instructions (via python, scala, etc.)  into Spark Jobs
+                        - will be executed one by one based on job's priority.  
+                        - Driver transforms each job into sequence of stages  
+                            - represented by a Directed Acyclical Graph (DAG)
+                            - DAG like execution plan for each job
+                            - Each stage broken down into tasks (written in smart code) 
+                              that can run in parallel. 
+                            - Executor executes the tasks and returns results to Driver Node
+                        - Driver aggregates computations across all tasks and returns results back 
+
+       +---------------------------------------------+
+       |    [ Job ]   [ Job ]   [ Job ]   [ Job ]    |
+       +---------------------------------------------+
+                         |
+                         v
+       +---------------------------------------------------------+
+       | DAG                                                     |
+       |                    * Run in parallel    +->  [Task]     |
+       |                          +-[ Stage 2]---+->  [Task]     |
+       |                          |              +->  [Task]     |
+       |                          |              +->  [Task]     |
+       |                          |                              |
+       |                          |                              |
+       |    [ Stage 1 ]-----------+                              |
+       |      | | | |             |                              |
+       |      v | | |             |                              |
+       |   Task | | v             |               +->  [Task]    |
+       |        v | Task          |               +->  [Task]    |
+       |     Task |               +-[ Stage 3]----+->  [Task]    |
+       |          v         ** Run in parallel    +->  [Task]    |
+       |         Task                                            |
+       |                                                         |
+       |                                                         |
+       +---------------------------------------------------------+
+
+
+
+
+Spark DataFrames
+
+
 
 .
