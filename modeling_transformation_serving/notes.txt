@@ -1837,7 +1837,7 @@ spark = SparkSession.builder.appName('example').getOrCreate()
 ## show Spark session:
 spark
 
-
+NOTE:  See all of the below in spark/demo_walk_thru.ipynb
 
 SparkSession - in-memory
 
@@ -2122,6 +2122,132 @@ NOTE:
 Demo: Working with Spark SQL
 
 
+- Need to create a temporary view to interact with SQL 
+- persists as long as the spark session is running
+- provides an interface for you to work with SQL
+
+
+transactions_df.createOrReplaceTempView('orders')
+
+use spark session object and use sql method, returns dataframe with results of the query
+
+
+total_df = spark.sql("""
+SELECT ID, SUM(amount) as total
+from orders
+GROUP BY ID
+ORDER BY total DESC
+""")
+
+
+total_df.show(n=6)
+
+
+[Stage 20:=============================>                            (4 + 4) / 8]
+
++------+------------------+
+|    ID|             total|
++------+------------------+
+|581483|          168469.6|
+|541431|           77183.6|
+|493819|44051.600000000006|
+|556444|           38970.0|
+|524181|33167.799999999996|
+|537659|31770.979999999996|
++------+------------------+
+only showing top 6 rows
+
+
+
+Can create function and use it within query
+  - need to register function for sql queries
+
+
+# create function
+def toLower(word:str):
+    return word.lower()
+
+# register function
+_ = spark.udf.register("udf_to_lower", toLower)
+
+# use registered function in an sql query
+spark.sql("""
+SELECT DISTINCT udf_to_lower(country)
+FROM orders
+""").show()
+
+[Stage 23:==================================================>       (7 + 1) / 8]
+
++---------------------+
+|udf_to_lower(country)|
++---------------------+
+|              finland|
+|            australia|
+|               greece|
+|             portugal|
+|              nigeria|
+|               poland|
+|              austria|
+|                malta|
+|                japan|
+|          switzerland|
+|               sweden|
+|          netherlands|
+| united arab emirates|
+|                 eire|
+|               france|
+|          unspecified|
+|       united kingdom|
+|              germany|
+|                  rsa|
+|                italy|
++---------------------+
+only showing top 20 rows
+
+
+
+
+Can create multiple tables / views and join together
+
+# create a data frame with static data
+# 
+product_category_df = spark.createDataFrame(
+    data = [(22423, 'category_a'), (21212, 'category_b'), 
+            (21232, 'category_c'), (84879, 'category_a')],
+    schema = 'itemID string, category string')
+
+
+
+
+# create temp table / view called items off of above dataframe
+product_category_df.createTempView('items')
+
+
+spark.sql("""
+SELECT category, AVG(amount)
+from items
+LEFT JOIN orders ON items.itemID = orders.stockcode
+GROUP by category
+""").show()
+
+[Stage 27:=======>                                                  (1 + 7) / 8]
+
++----------+------------------+
+|  category|       avg(amount)|
++----------+------------------+
+|category_c|20.994959999999978|
+|category_a| 66.62807636539425|
+|category_b|16.604122079879243|
++----------+------------------+
+
+
+
+# Amazon Elastic MapReduce (EMR)
+
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/dLMWO/amazon-emr
 
 
 .
