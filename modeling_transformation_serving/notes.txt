@@ -2372,19 +2372,70 @@ notebook was run as a job on serverless EMR cluster that it was attached to
 
 
 
+# AWS Glue Overview
+
+
+AWS Glue utilizes Spark
+  - is a data integration service
+  - can read from sources
+  - transform
+  - deliver to targets
 
 
 
+Ways to Create Glue Jobs:
+
+1. AWS Glue Data Brew (No code / low code)
+  like a spreadsheet that utilizes Spark
+    - UI based, don't need code to get functionality
 
 
+2. Glue Studio (SQL Code)
+  - drag and drop 
+    - sources
+    - transformations
+    - targets
+    - Popular ??
 
 
+3. Jupyter Notebook (Spark code from scratch)
+      Can utilize Amazon Q Developer or Q chatbot to start
 
 
+Perform ETL operations 
+  - Glue ETL
 
 
+Orchestrate ETL operatins 
+  - Glue triggers, blueprints, workflows 
 
 
+AWS Glue Data Catalog 
+  - utilized for Data Lakes and Lakehouses
+
+AWS Glue Crawler
+  - crawl over data from data sources and extracts 
+     metadata and stores to Glue Data Catalog
+        - definition 
+        - structure 
+        - data types 
+        - partitioning information of data
+
+
+- AWS Glue is serverless 
+- Easy to scale the ETL jobs
+    - Start with a few Data Procesing Units (DPUs)
+    - Scale up as needed
+
+
+AWS Glue Data Catalog can integrate with other AWS Services:
+  - Athena    :  run SQL queries against your data
+  - QuickSight:  Analyitics and BI dashboards  
+  - SageMaker :  Build, train and deploy ML Model
+
+In prior course, Terraform was used to perform:
+  - extract, transform and load of ETL pipeline.
+    utilizing Glue_jobs.py
 
 
 
