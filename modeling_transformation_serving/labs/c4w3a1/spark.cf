@@ -1,0 +1,1103 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c4w3a1
+
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+
+  Cloud9RoleName:
+    Type: String
+    Description: Role name for the Cloud9 Instance
+    Default: Cloud9InstanceRole
+
+  PostgresMasterUsername:
+    Type: String
+    Description: A user name for RDS database instance.
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    Default: postgresuser
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+
+  PostgresMasterUserPassword:
+    Type: String
+    Description: >-
+      A user password for RDS database instance default password Awsadmin123. (8
+      characters minimum, 41 characters maximum.)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Default: adminpwrd
+    ConstraintDescription: must contain only alphanumeric characters.
+
+  PostgresAllocatedStorage:
+    Default: '20'
+    Description: The size of the database (GiB)
+    Type: Number
+    MinValue: '20'
+    MaxValue: '65536'
+    ConstraintDescription: must be between 20 and 65536 GiB.
+  
+  PostgresDBName:
+    Type: String
+    Default: 'postgres'
+
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+  PublicSubnetACIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+  PublicSubnetBCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+  PrivateSubnetACIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.3.0/24
+  PrivateSubnetBCIDR:
+    Type: String
+    Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+    Default: 10.0.4.0/24
+
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+
+  PublicBucketPostgresLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c4w3a1/lambda_layer_dependencies_p38.zip
+
+  PublicBucketPostgresDDLObjectKey:
+    Type: String
+    Description: Public bucket key for sql file.
+    Default: labs/cfn_dependencies/c4w3a1/classicmodels.sql
+  
+  PublicBucketPostgresLambdaKey:
+    Type: String
+    Description: Public bucket key for postgres load zip file.
+    Default: labs/cfn_dependencies/c4w3a1/postgres_load.py.zip
+
+  PostgresLambdaRuntime:
+    Type: String
+    Description: Postgres Lambda function Runtime
+    Default: python3.8
+
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+  
+  EmrRelease:
+    Type: "String"
+    Default: "emr-7.1.0"
+  
+  ClusterInstanceType:
+    Type: "String"
+    Default: "m5.xlarge"  
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Database Configuration
+        Parameters:
+          - DatabaseUserName
+          - DatabaseUserPassword
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetACIDR
+          - PublicSubnetBCIDR
+          - PrivateSubnetACIDR
+          - PrivateSubnetBCIDR
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}'
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-igw'
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-subnet-a'
+  PublicSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-subnet-b'
+  PrivateSubnetA:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-subnet-a'
+  PrivateSubnetB:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '1'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetBCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-subnet-b'
+  
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-public-routetable'
+      VpcId: !Ref VPC
+  PublicSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+  PrivateSubnetARouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+  NatGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGatewayA
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-private-routetable'
+      VpcId: !Ref VPC
+  NATGatewayA:
+    DependsOn:
+      - NATGatewayEIPA
+      - PublicSubnetA      
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPA.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-natgw-a'
+  NATGatewayB:
+    DependsOn:
+      - NATGatewayEIPB
+      - PublicSubnetB
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIPB.AllocationId
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-natgw-b'
+  NATGatewayEIPA:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NATGatewayEIPB:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-sg'
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup 
+  DBIngressRule:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      FromPort: "5432"
+      ToPort: "5432"
+      GroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: tcp
+      CidrIp: "0.0.0.0/0"
+  
+  LambdaExecutionSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-lambda-sg'
+  
+  LambdaSGSelfRefIngress:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref LambdaExecutionSecurityGroup 
+
+  LambdaSGIngressRule:
+    DependsOn: LambdaExecutionSecurityGroup
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:      
+      GroupId: !Ref LambdaExecutionSecurityGroup
+      IpProtocol: -1
+      CidrIp: "0.0.0.0/0"
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup    
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC  
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectPrefix}-ec2-sg'
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22  
+  EC2SecurityGroupIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443    
+   
+  PostgresLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleArchitectures:
+        - arm64
+      CompatibleRuntimes:
+        - !Ref PostgresLambdaRuntime
+      Content:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLayerKey
+      Description: Lambda layer with dependencies to insert data into postgres DBs
+      LayerName: !Sub ${ProjectPrefix}-lambda-layer-postgres
+
+  PostgresSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Subnet available for the DB Instance
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+    DependsOn:
+      - PrivateSubnetA
+      - PrivateSubnetB
+  
+  PostgresDB:
+    DependsOn:
+      - DefaultVPCSecurityGroup
+      - PostgresSubnetGroup
+      - PrivateSubnetA      
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: !Sub '${ProjectPrefix}-rds'
+      DBName: dev
+      DBInstanceClass: db.t3.small
+      AllocatedStorage: !Ref PostgresAllocatedStorage
+      AvailabilityZone: !GetAtt
+        - PrivateSubnetA
+        - AvailabilityZone
+      DBSubnetGroupName: !Ref PostgresSubnetGroup
+      Engine: postgres
+      EngineVersion: 15.5
+      MasterUsername: !Ref PostgresMasterUsername
+      MasterUserPassword: !Ref PostgresMasterUserPassword
+      MultiAZ: false
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 0
+      VPCSecurityGroups:
+        - !Ref DefaultVPCSecurityGroup
+  
+  PostgresLoadFunction:
+    DependsOn:
+      - PostgresLambdaLayer
+      - PostgresDB      
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Environment:
+        Variables:
+          DBHOST: !GetAtt
+            - PostgresDB
+            - Endpoint.Address
+          DBPORT: !GetAtt
+            - PostgresDB
+            - Endpoint.Port
+          DBNAME: !Ref PostgresDBName
+          DBUSER: !Ref PostgresMasterUsername
+          DBPASSWORD: !Ref PostgresMasterUserPassword
+          BUCKET_NAME: !Ref PublicBucketName
+          OBJECT_KEY: !Ref PublicBucketPostgresDDLObjectKey
+                    
+      Code:
+        S3Bucket: !Ref PublicBucketName
+        S3Key: !Ref PublicBucketPostgresLambdaKey
+      FunctionName: !Sub '${ProjectPrefix}-postgres-lambda-function'
+      Handler: postgres_load.lambda_handler
+      Layers:
+        - !Ref PostgresLambdaLayer
+      Runtime: !Ref PostgresLambdaRuntime
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DefaultVPCSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      Policies:
+        - PolicyName: LambdaS3PutPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:Put*"
+                Resource: !Sub "arn:aws:s3:::${EMRBucket}/*"
+       
+
+  CFPostgresLambdaExecution:
+    DependsOn:
+      - PostgresLoadFunction
+    Type: 'Custom::CFPostgresLambdaExecution'
+    Properties:
+      ServiceToken: !GetAtt PostgresLoadFunction.Arn
+      DeletionPolicy: Delete
+  
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: "*"
+          Principal: "*"
+          Resource: "*"
+      RouteTableIds:
+      - Ref: PublicRouteTable
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.s3
+      VpcId:
+        Ref: VPC
+
+  EMRDevExpSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-emr-default-sg'
+      GroupDescription: Security Group for EMRDevExp-Default-SG
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: "-1"
+        CidrIp: !Ref VPCCIDR
+      Tags:
+      - Key: Name
+        Value: !Sub '${ProjectPrefix}-emr-default-sg'
+  
+  VPCDefaultSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        !Ref EMRDevExpSecGroup
+      IpProtocol: "-1"
+      CidrIp: !Ref VPCCIDR
+  
+  EMRBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-emr-bucket'
+
+  StudioSAMLRoleAuth0:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/PowerUserAccess
+      - arn:aws:iam::aws:policy/AWSCodeCommitPowerUser
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Federated:
+              Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":saml-provider/StudioAuth0SAMLProvider"
+          Action: sts:AssumeRoleWithSAML
+          Condition:
+            StringEquals:
+              SAML:aud: https://signin.aws.amazon.com/saml
+      Policies:
+      - PolicyName: !Sub '${ProjectPrefix}-StudioSAMLRoleAuth0-AssumeRolePolicy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Resource:
+            - Fn::GetAtt:
+              - EMRStudioServiceRole
+              - Arn
+            - Fn::GetAtt:
+              - EMRClusterServiceRole
+              - Arn
+            - Fn::GetAtt:
+              - EMREC2RestrictedRole
+              - Arn
+            - Fn::GetAtt:
+              - EMRStudioServiceRole
+              - Arn
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":role/EMR_DefaultRole"
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":role/EMR_EC2_DefaultRole"
+            Action: iam:PassRole
+      RoleName: !Sub '${ProjectPrefix}-Studio-SAML-Role-Auth0'
+
+  SCLaunchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-EMR-SCLaunchRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - elasticmapreduce.amazonaws.com
+            - servicecatalog.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub '${ProjectPrefix}-SC-Launch-Role-Policy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - catalog-user:*
+            - cloudformation:CreateStack
+            - cloudformation:DeleteStack
+            - cloudformation:DescribeStackEvents
+            - cloudformation:DescribeStacks
+            - cloudformation:GetTemplateSummary
+            - cloudformation:SetStackPolicy
+            - cloudformation:ValidateTemplate
+            - cloudformation:UpdateStack
+            - s3:GetObject
+            - elasticmapreduce:*
+            Resource: "*"
+      - PolicyName: !Sub '${ProjectPrefix}-SC-Launch-Role-Limited-IAM-Policy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource:
+            - Fn::GetAtt:
+              - EMREC2RestrictedRole
+              - Arn
+            - Fn::GetAtt:
+              - EMRClusterServiceRole
+              - Arn
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":role/EMR_AutoScaling_DefaultRole"
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":role/EMR_DefaultRole"
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ":role/EMR_EC2_DefaultRole"
+  
+  EMREC2RestrictedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-EMRDevExp-EMR_EC2_Restricted_Role'
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub '${ProjectPrefix}-EMRDevExp-EMR_EC2_Restricted_Role_Policy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: s3:*
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: EMRBucket
+                - "/"
+          - Effect: Allow
+            Action: s3:*
+            Resource:
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: EMRBucket
+                - "/*"
+          - Effect: Allow
+            Action:
+            - s3:ListBucket
+            Resource:
+            - "arn:aws:s3:::${ProjectPrefix}*"
+            - "arn:aws:s3:::${ProjectPrefix}*:*"
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: EMRBucket
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource:            
+            - "arn:aws:s3:::${ProjectPrefix}*"
+            - "arn:aws:s3:::${ProjectPrefix}*:*"
+            - Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: EMRBucket
+                - "/*"
+          - Effect: Allow
+            Action:
+            - cloudwatch:*
+            - dynamodb:*
+            - ec2:Describe*
+            - elasticmapreduce:Describe*
+            - elasticmapreduce:ListBootstrapActions
+            - elasticmapreduce:ListClusters
+            - elasticmapreduce:ListInstanceGroups
+            - elasticmapreduce:ListInstances
+            - elasticmapreduce:ListSteps
+            - kinesis:*
+            - rds:Describe*
+            - sdb:*
+            - sns:*
+            - sqs:*
+            - glue:*
+            Resource: "*"  
+
+  EMREC2RestrictedRoleInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: EMREC2RestrictedRole
+      InstanceProfileName: !Sub '${ProjectPrefix}-EMRDevExp-EMR_EC2_Restricted_Role'
+  
+  EMRClusterServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-EMRClusterServiceRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - elasticmapreduce.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+      Path: "/"
+      Policies:
+        - PolicyName: EMRDevExp-EMR_EC2_Restricted_Role_Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: s3:*
+              Resource:
+              - "arn:aws:s3:::${ProjectPrefix}*"
+              - "arn:aws:s3:::${ProjectPrefix}*:*"            
+  
+  EMRStudioServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-EMRDevExp-EMRStudioServiceRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - elasticmapreduce.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub '${ProjectPrefix}-EMRDevExp-Studio-Service-Policy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: AllowEMRReadOnlyActions
+            Effect: Allow
+            Action:
+            - elasticmapreduce:ListInstances
+            - elasticmapreduce:DescribeCluster
+            - elasticmapreduce:ListSteps
+            Resource: "*"
+          - Sid: AllowEC2ENIActionsWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:CreateNetworkInterfacePermission
+            - ec2:DeleteNetworkInterface
+            Resource:
+            - arn:aws:ec2:*:*:network-interface/*  
+          - Sid: AllowEC2ENIAttributeAction
+            Effect: Allow
+            Action:
+            - ec2:ModifyNetworkInterfaceAttribute
+            Resource:
+            - arn:aws:ec2:*:*:instance/*
+            - arn:aws:ec2:*:*:network-interface/*
+            - arn:aws:ec2:*:*:security-group/*
+          - Sid: AllowEC2SecurityGroupActionsWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:AuthorizeSecurityGroupEgress
+            - ec2:AuthorizeSecurityGroupIngress
+            - ec2:RevokeSecurityGroupEgress
+            - ec2:RevokeSecurityGroupIngress
+            - ec2:DeleteNetworkInterfacePermission
+            Resource: "*"            
+          - Sid: AllowDefaultEC2SecurityGroupsCreationWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:CreateSecurityGroup
+            Resource:
+            - arn:aws:ec2:*:*:security-group/*            
+          - Sid: AllowDefaultEC2SecurityGroupsCreationInVPCWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:CreateSecurityGroup
+            Resource:
+            - arn:aws:ec2:*:*:vpc/*            
+          - Sid: AllowAddingEMRTagsDuringDefaultSecurityGroupCreation
+            Effect: Allow
+            Action:
+            - ec2:CreateTags
+            Resource: arn:aws:ec2:*:*:security-group/*
+          - Sid: AllowEC2ENICreationWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:CreateNetworkInterface
+            Resource:
+            - arn:aws:ec2:*:*:network-interface/*            
+          - Sid: AllowEC2ENICreationInSubnetAndSecurityGroupWithEMRTags
+            Effect: Allow
+            Action:
+            - ec2:CreateNetworkInterface
+            Resource:
+            - arn:aws:ec2:*:*:subnet/*
+            - arn:aws:ec2:*:*:security-group/*            
+          - Sid: AllowAddingTagsDuringEC2ENICreation
+            Effect: Allow
+            Action:
+            - ec2:CreateTags
+            Resource: arn:aws:ec2:*:*:network-interface/*
+            Condition:
+              StringEquals:
+                ec2:CreateAction: CreateNetworkInterface
+          - Sid: AllowEC2ReadOnlyActions
+            Effect: Allow
+            Action:
+            - ec2:DescribeSecurityGroups
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DescribeTags
+            - ec2:DescribeInstances
+            - ec2:DescribeSubnets
+            - ec2:DescribeVpcs
+            Resource: "*"
+          - Sid: AllowSecretsManagerReadOnlyActionsWithEMRTags
+            Effect: Allow
+            Action:
+            - secretsmanager:GetSecretValue
+            Resource: arn:aws:secretsmanager:*:*:secret:*            
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:GetEncryptionConfiguration
+            - s3:ListBucket
+            - s3:DeleteObject
+            Resource: arn:aws:s3:::*
+    
+  EMRSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-EMRDevExp-EMR-SG'
+      GroupDescription: Security Group for EMRDevExp-EMR-SecGroup
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: "-1"
+        CidrIp: !Ref VPCCIDR
+      Tags:
+      - Key: Name
+        Value: !Sub '${ProjectPrefix}-EMRDevExp-EMR-SG'
+
+  EMRServiceAccessSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-EMRDevExp-EMR-ServiceAccess-SG'
+      GroupDescription: Security Group for EMRDevExp-EMR-SecGroup
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 9443
+        ToPort: 9443
+        SourceSecurityGroupId:
+          Fn::GetAtt:
+          - EMRSecurityGroup
+          - GroupId
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 8443
+        ToPort: 8443
+        DestinationSecurityGroupId:
+          Fn::GetAtt:
+          - EMRSecurityGroup
+          - GroupId
+      Tags:
+      - Key: Name
+        Value: !Sub '${ProjectPrefix}-EMRDevExp-EMR-ServiceAccess-SG'
+  
+  WorkspaceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-EMRDevExp-Workspace-SG'
+      GroupDescription: Security group for EMR Studio Workspace
+      VpcId:
+        Ref: VPC
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 18888
+        ToPort: 18888
+        DestinationSecurityGroupId:
+          Fn::GetAtt:
+          - ClusterEndpointSecurityGroup
+          - GroupId
+      Tags:
+      - Key: Name
+        Value: !Sub '${ProjectPrefix}-EMRDevExp-Workspace-SG'
+      - Key: for-use-with-amazon-emr-managed-policies
+        Value: 'true'
+
+  ClusterEndpointSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${ProjectPrefix}-EMRDevExp-Cluster-Endpoint-SG'
+      GroupDescription: Security group for EMR Studio Cluster-Endpoint
+      VpcId:
+        Ref: VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        SourceSecurityGroupId:
+          Fn::GetAtt:
+          - EMRSecurityGroup
+          - GroupId
+      - IpProtocol: tcp
+        FromPort: 0
+        ToPort: 65535
+        SourceSecurityGroupId:
+          Fn::GetAtt:
+          - EMRServiceAccessSecurityGroup
+          - GroupId
+      Tags:
+      - Key: Name
+        Value: !Sub '${ProjectPrefix}-EMRDevExp-Cluster-Endpoint-SG'
+      - Key: for-use-with-amazon-emr-managed-policies
+        Value: 'true'
+
+  ClusterEndpointSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Ref: ClusterEndpointSecurityGroup
+      IpProtocol: tcp
+      FromPort: 18888
+      ToPort: 18888
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - WorkspaceSecurityGroup
+        - GroupId
+
+  EMRDefaultRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2008-10-17'
+        Statement:
+        - Sid: ''
+          Effect: Allow
+          Principal:
+            Service: elasticmapreduce.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+      RoleName: !Sub '${ProjectPrefix}-EMR-DefaultRole'
+  
+  EMREC2DefaultRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role
+      RoleName: !Sub '${ProjectPrefix}-EMR-EC2-DefaultRole'
+
+  EMRNotebooksDefaultRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: elasticmapreduce.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceEditorsRole
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      RoleName: !Sub '${ProjectPrefix}-EMR-Notebooks-DefaultRole'
+
+  EMREC2DefaultRoleInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub '${ProjectPrefix}-EMR-EC2-DefaultRole'
+      Path: "/"
+      Roles:
+      - Ref: EMREC2DefaultRole
+
+  EmrCluster:
+    Type: AWS::EMR::Cluster
+    DependsOn:
+      - EMREC2RestrictedRoleInstanceProfile
+    Properties:
+      Applications:
+      - Name: Spark
+      - Name: Livy
+      - Name: JupyterEnterpriseGateway
+      - Name: Hive
+      - Name: Hadoop
+      EbsRootVolumeSize: '15'
+      Name: !Sub '${ProjectPrefix}-cluster'
+      JobFlowRole: !Ref EMREC2RestrictedRole
+      ServiceRole: !Ref EMRClusterServiceRole
+      ReleaseLabel: !Ref EmrRelease
+      VisibleToAllUsers: true
+      LogUri: 
+        Fn::Sub: 's3://${EMRBucket}/elasticmapreduce/'
+      Instances:
+        TerminationProtected: false
+        Ec2SubnetId: !Ref PublicSubnetA
+        MasterInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref ClusterInstanceType
+        CoreInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref ClusterInstanceType
+          Market: ON_DEMAND
+          Name: Core
+
+  EMRStudio:
+    Type: "AWS::EMR::Studio"
+    Properties:
+      Name: !Sub "${ProjectPrefix}-studio-emr"
+      AuthMode: IAM
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+      ServiceRole: !GetAtt EMRStudioServiceRole.Arn 
+      WorkspaceSecurityGroupId: !Ref WorkspaceSecurityGroup
+      EngineSecurityGroupId: !Ref ClusterEndpointSecurityGroup
+      DefaultS3Location: !Sub "s3://${EMRBucket}/emr-studio/"      
+
+  SubmissionS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectPrefix}-${AWS::AccountId}-${AWS::Region}-submission
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:  
+  PostgresJDBCConnectionString:
+    Description: JDBC connection string for Postgres database
+    Value: !Join
+      - ''
+      - - 'jdbc:mysql://'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt
+          - PostgresDB
+          - Endpoint.Port
+  PostgresEndpoint:
+    Description: RDS endpoint for Postgres DB instance
+    Value: !GetAtt PostgresDB.Endpoint.Address
+  PostgresUser:
+    Description: user name for Postgres DB instance
+    Value: !Ref PostgresMasterUsername    
+  AWSRegion:
+    Description: This is the current AWS Region for this tutorial
+    Value: !Sub '${AWS::Region}'
+  AWSAccount:
+    Description: This is the current AWS Account for this tutorial
+    Value: !Sub '${AWS::AccountId}'
+  ClusterId:
+    Value:
+      Ref: EmrCluster
+    Description: The ID of the EMR Cluster
+

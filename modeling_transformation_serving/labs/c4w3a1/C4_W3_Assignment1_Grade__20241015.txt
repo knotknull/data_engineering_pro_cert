@@ -1,0 +1,16 @@
+Total score 	100/100
+	
+dim_customers table check 	10/10
+	
+dim_products table check 	10/10
+	
+dim_offices table check 	10/10
+	
+dim_employees table check 	10/10
+	
+dim_date table check 	20/20
+	
+fact_orders table check 	30/30
+	
+printSchema() output 	10/10
+	

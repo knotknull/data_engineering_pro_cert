@@ -1,0 +1,6 @@
+AWSAccount 		851725516312
+AWSRegion 		us-east-1
+ClusterId 		j-9DHX26XY6WCW
+PostgresEndpoint 	de-c4w3a1-rds.cjayego64nbc.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString jdbc:mysql://de-c4w3a1-rds.cjayego64nbc.us-east-1.rds.amazonaws.com:5432
+PostgresUser 		postgresuser

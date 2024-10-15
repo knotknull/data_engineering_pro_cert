@@ -2514,15 +2514,16 @@ Type: Spark
 Glue Version: 4.0
 Lang: Python 3
 Worker type:  G 1X (4vcpu and 16GB RAM)
-Requested number of workers
+Requested number of workers:  2
+Number of retries: 0 
+Job timeout (minutes): 3
+[Save]
+[RUN]
+
+On canvas tab, choose "Runs" 
 
 
-
-
-
-
-
-
+# Technical Considerations
 
 
 
