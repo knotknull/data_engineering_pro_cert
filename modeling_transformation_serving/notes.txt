@@ -1791,5 +1791,49 @@ Spark Application:    start with instantiating a Spark session object:
 Spark DataFrames
 
 
++--------------------------------------------------+
+| High-level Structured API                        |  <-- Use simpler / more expressive operations:
+|                                                  |      - filtering, selecting, counting, aggregating, grouping
+|      Spark DataFrames                            |
+|                                                  |
+|                                                  |
+|                                                  |
+|                                                  |
+|                                                  |  ----->>  Two types of operations
++--------------------------------------------------+              Transformation : filtering, selecting, joining, grouping
+                        |                                                create new data frames without modifying original data
+      Immutable data structures (fault tolerant)                 
+                        |                                         Actions:  counting, showing, saving
++--------------------------------------------------+                     triggers the execution of the transformation*
+| Low-level Structured API                         |              
+|                                                  |
+|      Resilient Distributed DataFrames (RDD)      |
+|      (actual paritioned collection of records)   |            (orig Immutable)     Lazy Evluation*
+|                                                  |               [Data Frame]     -----------------> [Data Frame]  ---------->   [Data Frame]             
+|                                                  | 
+|                                                  | 
+|                                                  |    *NOTE: 
+|                                                  |          - Transformations are recorded as a lieneage, only executed when                 
++--------------------------------------------------+              an action is invoked
+
+                                                              - Lazy evaluation allows Spark to optimize exeuction plan by rearranging
+                                                                  transformation operations for efficiency  
+
+                                                              - Lineage and immutability ensure fault tolerance
+                                                                    - allows you to reporduce original state in case of failure
+                                                    
+                                                    
+
+
+
+Working with Spark DataFrames using Python
+
+
+
+
+
+
+
+
 
 .
