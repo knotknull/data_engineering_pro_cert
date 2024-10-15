@@ -2438,6 +2438,96 @@ In prior course, Terraform was used to perform:
     utilizing Glue_jobs.py
 
 
+# Glue Visual ETL Demo
+
+  script: 
+      - took normalized data from RDS
+      - transformed it to star scheam
+      - delivered to S3 bucket
+
+console > Glue > Visual ETL > [Visual ETL]  
+
+(blank canvas)
+
+"+" button (add nodes)
+
+tabbed menu:  sources, transforms, targets, popular
+
+- choose Data Source - MySQL 
+  name: customers_source
+
+connection name: choose dropdown of rds connection
+
+choose JDBC connection details 
+enter table name: customers
+choose IAM role for glue job to run (Cloud9-de-c1w2-glue_role)
+
+shows data preview 
+
+
+
+
+"+" node > Transforms > Transform - SQL Query
+
+Enter SQL Query: with dim_customers as ....
+
+Name: dim_customers
+
+SQL Aliases: input:       customers_source 
+             SQL aliases: customers
+
+Create Datasource - MySQL for each table being converted to fact or dim
+
+
+when creating dim_products you can create previous sql sources that were created as input sources
+
+
+for fact_orders table 
+  - select all of the dim tables (Node Parents) that were created previously
+
+
+
+choose targets S3
+  - setup separate target node for each fact / dim
+
+
+i.e. dim_customers_target
+        - Node Parents 
+            dim_customers
+
+   format          : Parquet
+   Compression type: Snappy
+  [ Browse S3 and choose bucket ]
+
+
+[Save]  glue_job_demo
+
+
+On canvas tab, choose "Script" 
+  - this displays the python script for the visual ETL  
+
+
+On canvas tab, choose "Job Details" 
+Name: 
+IAM Role: 
+Type: Spark 
+Glue Version: 4.0
+Lang: Python 3
+Worker type:  G 1X (4vcpu and 16GB RAM)
+Requested number of workers
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
