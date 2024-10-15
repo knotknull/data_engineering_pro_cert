@@ -2245,9 +2245,150 @@ GROUP by category
 # Amazon Elastic MapReduce (EMR)
 
 
-MAP LAST HERE
+EMR can run Spark Jobs
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/dLMWO/amazon-emr
+EMR 
+  - Massively Parallel Processin (MPP)
+  - elastic cluster
+  - Job is run in parallel
+  - results stored in several places
+  - supported frameworks: 
+      - hadoop
+      - hive
+      - presto
+      - spark
+      - flink
+      - hbase
+
+  - Managed Environment
+    - simplifies setup / scaling
+    - natively integrates with AWS
+    - focus on data workflows
+    - decouple compute and storage
+    - analyze large amount of data
+
+  - Can integrate with AWS services:
+    - DynamoDB, RDS, Redshift
+
+
+ex. 
+        S3 -> EMR -> Hadoop
+
+Overview:
+  - when start cluster, EMR streams data from S3 to each instance 
+    in cluster and begins processing it. 
+
+  - can use multiple EMR clusters to process same S3 data in different ways.
+
+
+EMR Studio:
+  - browswer based IDE for Jupyter Notebooks that run on EMR clusters
+
+
+NOTE: need EMR Studio to manage EMR Serverless apps
+AWS console >  EMR  > EMR Serverless > Get Started > Create and launch EMR Studio
+
+name: example
+type: Spark
+release ver:  <default>
+application setup options:
+    choose Use default for interactive workloads
+[create] -> [start application]
+
+
+EMR studio > Dashboard > Create workspace
+  Brings Up Error: Need to enable studio for interactive workspaces
+    > [Edit Studio]
+
+update 
+Studio service role:  choose existing IAM role (emr)
+    role allows interaction with other AWS resources
+
+Workspace storage:   [Browse S3]
+  - choose S3 bucket for backup location for workspaces
+
+[Save Changes]
+[View Workspaces]   (top right)
+
+EMR > Workspaces > [Create Workspace]
+
+workspace name: example
+[Create Workspace]
+
+select created workspace [Launch Workspace]
+  - this brings up the notebook
+
+
+Need to connect notebook to compute 
+ - compute tab on left (under folder icon)
+ - EMR Serverless applicaton (dropdown)
+    - select dropdown and choose application created above 
+      - exmple 
+ - Interactive runtime role  (dropdown)  ## Role that will be assumed to call other AWS services
+    - select dropdown and choose interactive runtime role
+      - emr-serverless-role 
+
+[Attach]
+
+
+Files in notebook 
+  - select empty notebook
+  - select Kernel: PySpark
+
+Run a PySpark script to do data analysis on a file uploaded to S3
+ - paste script 
+ - shift + enter to run
+
+NOTE:  This is the code that was displayed in the overview 
+
+################################################################################################33
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg
+
+spark = SparkSession.builder.appName("AverageFareAmount").getOrCreate()
+
+#Define S3 bucket path to the csv file
+s3_bucket_path = s3a://sample-taxi-data-2024/fake_taxi_data.csv"
+
+#Read the dataset from S3 into a Spark Dataframe
+df = spark.read.csv(s3_bucket_path, header=True, inferSchema=True)
+
+#define the time period for filtering
+start_date = "2020-06-01"
+end_date   = "2020-06-30"
+
+# filter the DataFrame for the specified time period
+filtered_df = df.filter((col(pickup_datetime") >= start_date) & (col("pickup_datetime") <= end_date))
+
+#calculate the average fare amount
+average_fare = filtered_df.select(avg(col("fare_amount")).alias("average_fare_amount))
+
+average_fare.show()
+spark.stop() 
+
+################################################################################################33
+
+notebook was run as a job on serverless EMR cluster that it was attached to
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 .
