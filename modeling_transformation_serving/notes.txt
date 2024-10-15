@@ -2526,6 +2526,49 @@ On canvas tab, choose "Runs"
 # Technical Considerations
 
 
+Transformation Complexity:            
+  Simple trsnformation                    
+       Python and SQL approaches have comparable performance:            
+          - translated to the same execution plan 
+          - executed by the same engine
+
+  Complex trsnformation
+      Cannot be implemented in SQL/not in a straightforward way 
+          - transpose operation (pivot)
+              - DataFrame: df.T
+              - SQL: Not supported
+
+          - normalizing and cleaning data
+              - Python may requires more code than SQL
+
+Code Reusability / Testability:
+  DataFrames: more testable, maintainable, modular/ reusable code.
+  SQL : no good notion of reusability for more complex query component 
+
+
+Team skills / background:
+  SQL : writing SQL queries might be simpler and easier than working with DataFrames
+
+
+
+When to use Spark DataFrames 
+
+Spark: Distributed Framework: load the entire data into a cluster of nodes
+Use Spark: if data doesn't fit entirely into memory or you want to leverage distributed computations
+
+Pandas:  Non-distributed Framework: load the entire data into memory
+Use Pands: if data cat fit into memory
+
+
+Best Practices: 
+  - Extract only the data you need from the source
+  - Apply transformation inside the source database to reduce the size of the ingested data
+
+
+
+
+# Stream Processing
+
 
 
 
