@@ -1626,23 +1626,60 @@ Large File -->> [1] [2] [3]  large file broken into blocks of few hundred megaby
 
 Hadoop MapReduce
 
-last here @ 2:49
+MapReduce:  send computation code to the nodes that contain the data
+
+                 (hashing the key)
+      [  Map  ]  ----------------->>  [  Shuffle  ]     ----------------->>  [ Reduce ]  
+Map task reads data               Shuffle redistributes the                 Aggregates data 
+bloocks and produce a           Map results across cluster                   on each node
+set of key-value pairs          so values with same key are 
+                                at the same nodes
+
++-----------------------+        +-----------------------+                +------------------------+            
+| Data Node             |        | Data Node             |                | Data Node              |                      
+|  [ 1 ]  [ 2 ]  [ 3 ]  |        |                       |                |                        |-------+ 
+|    |      |      |    |        |  k'-v   k'-v    k'-v  |                |  k' -->> [ Agg Value ] |       |
+|    |      |      |    |        +-----------------------+                +------------------------+       |    
+|    v      v      v    |                                                                                  +---- collect 
+|   k'-v   k-v    k'-v  |        +-----------------------+                +------------------------+       |     results
+|   k-v    k'-v   k-v   |        | Data Node             |                | Data Node              |       |                          
++-----------------------+        |                       |                |                        |-------+                
+                                 |   k-v    k-v    k-v   |                |  k  -->> [ Agg Value ] |                    
+                                 +-----------------------+                +------------------------+            
 
 
-MAP LAST HERE 
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/OeBHP/batch-transformation-patterns-and-use-cases
+Hadoop MapReduce Shortcomings
 
-
-
-
+  [disk] --read--> [mapreduce] --write--> [disk] --read--> [mapreduce] --write--> [disk]
+                   [   task  ]                             [   task  ]
 
 
+- utilizes many short lived MapReduce tasks that read data from disk 
+  and write intermediate computations to disk
+
+- no results saved to memory, all data transferred between tasks stored 
+  to disk and pushed over network
+
+              Pros                                      Cons
+- simplifies state and workflow mgmt                - drives high-disk bandwidth utilization              
+- minimizes memory consumption                      - increases processing time
 
 
 
+Spark:   [RAM] --read--> [mapreduce] --write--> [RAM] --read--> [mapreduce] --write--> [RAM]
+                  [   task  ]                            [   task  ]
+
+- In-memory processing speeds up data processing tasks
+- Disk is treated as a second-class data storage layer
+I
 
 
+# Distributed Processing Framework: Spark 
 
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/sOmlp/distributed-processing-framework-spark
 
 .
