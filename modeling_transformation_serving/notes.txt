@@ -2794,6 +2794,74 @@ Data Scientist use Notebooks:
 +-------------------------------------------------------------------------+
 
 
+# Views and Materialized Views
+
+
+View:  
+  - Stored in the database to provide easier access to common queries
+      - Can abstract about data complexities
+  - Represents a virtual table, not a physical one
+  - When selecting from a view:
+      - The database creates a new query
+      - The query optimizer optimizes and runs the query
+  - Database object 
+      - stored and persists on disk
+  - Enforces security by giving data access to only the data needed
+
+NOTE: frequently running a complex view can be expensive 
+
+CREATE VIEW customer_info AS
+SELECT
+  first_name, 
+  last_name, 
+  email, 
+  Phone, 
+  city, 
+  postal_code, 
+  country
+FROM
+  customer
+  JOIN address ON address.id = customer.address_id
+  JOIN city    ON city.id    = address.city_id
+  JOIN country ON country.id = address.country_id
+
+
+Common Table Expressions (CTE): 
+  - similar to views   
+  - represents temporary results that you can reference
+  - CTEs only existin within the scope of the main query where they are referenced
+
+
+WITH name of the CTE AS (
+  Query),
+Subsequent query
+
+
+
+Materialized View:  
+  - Does some or all of the view computations in advance
+  - Caches the query results and allows you to refesh the data
+  - Some latency between refreshes is tolerated
+
+
+
+CREATE MATERIALIZED VIEW rental_by_category AS 
+SELECT category.name as category, 
+       sum(payment.amount) as total_sales 
+FROM payment        
+JOIN .... rental, inventory, film, file_category, category ...
+GROUP BY category.name
+
+- when user references materialized view they are referencing cached data
+
+
+
+Practice Lab: Data Visualization with DBT and Superset
+
+
+MAP LAST HERE
+
+https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/zV7Ls/practice-lab-data-visualization-with-dbt-and-superset
 
 
 
