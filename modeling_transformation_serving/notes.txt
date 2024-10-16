@@ -2706,7 +2706,95 @@ Serving Data:
 
 
 
+# Serving Data for Analytics and Machine Learning
 
 
-    
+ As Files: 
+  - text
+  - csv
+  - images
+
+
+ From Databases or Data Warehouses : 
+benefits: 
+  - order / structre via schema
+  - fine grained perms controls
+  - high performance for queries
+
+
+ From Streaming Systems:
+  - real time
+  - operational analytics databases
+  - low latency analytical queries across historical / current data
+  - combining features of OLAP dB with stream processing system
+
+
+
+Data Management
+  - stakeholders must trust the data
+    - can interpret the data correctly
+
+Data Definition: Meaning of data as it is understood throughout the organization 
+                    i.e. "what is a customer"
+
+Data Logic:     Consists of formulas for deriving metriccs from data 
+                    i.e. "gross sales or customer lifetime value"
+
+  ex.  Customer Churn Metric:   what is a customer ->  write SQL query -> define metric so it can be reused
+
+
+
+Semantic Layer
+  - Built on top of Data Model 
+  - Translate the underlying data elements and structures into more intuitive business terms
+  - Ensure consistent definitions for business terms
+  - Helps end users more easily navigate the data
+
+      - Can be created in BI tool
+      - Can be created using software like dbt
+            - metrics become using YAML files and SQL queries
+
+Stake holders can use BI platform to visualize and analyze data:
+  - Amazon Quicksight
+  - Apache Superset 
+  - Looker 
+
+Data Scientist use Notebooks:
+  - explore data
+  - engineer features
+  - train a model
+        - Amazon SageMaker
+        - Google Cloud Vertex AI
+        - Azure Machine Learning 
+
+
+
++--Stakeholder Tooling ---------------------------------------------------+
+|                                                                         |
+| BI Platforms         Notebooks                Data Science Workloads    |
+|  Quicksight         - analsysis                Amazon SageMaker         |
+|  Superset           - feature engineering      Google Cloud Vertex AI   |
+|  Looker             - model training           Azure Machine Learning   |
++-------------------------------------------------------------------------+
+                            ^        |
+                            |        v
++--Semantic Layer---------------------------------------------------------+
+|                                                                         |
+|  - terms                        BI Tool                                 |
+|  - definitions                    or                                    |
+|                              Software:  dbt                             |
+|                            (metrics become YAML and SQL )               |
++-------------------------------------------------------------------------+
+                            ^        |
+                            |        v
++-------------------------------------------------------------------------+
+|                                                                         |
+| [Data Sources]  --> DataLake / Warehouse -->> Data Model                                                                         |
+|                                                                         |
++-------------------------------------------------------------------------+
+
+
+
+
+
 .
