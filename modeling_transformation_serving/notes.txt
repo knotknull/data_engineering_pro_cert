@@ -2886,9 +2886,16 @@ duration
 year
 
 
-MAP LAST HERE
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/WufHL/graded-programming-assignment-4-capstone-project-part-1-etl-and-data-modeling
+# Lab pt1
+
+
+Example: Insert a DataFrame into an Iceberg table in Amazon S3 using the AWS Glue Data Catalog
+
+https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-format-iceberg.html#aws-glue-programming-etl-format-iceberg-insert
+
+
+
 
 
 

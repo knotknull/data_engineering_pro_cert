@@ -1,0 +1,19 @@
+[Executed at: Wed Oct 16 16:05:26 PDT 2024]
+
+Glue Job de-c4w4a1-api-users-extract-job exists.
+Glue Job de-c4w4a1-api-sessions-extract-job exists.
+Glue Job de-c4w4a1-rds-extract-job exists.
+Test 1 passed: All three extract jobs are correctly deployed.
+========================================================================================================================
+Glue Job de-c4w4a1-api-users-extract-job has at least one successful run.
+Glue Job de-c4w4a1-api-sessions-extract-job has at least one successful run.
+Glue Job de-c4w4a1-rds-extract-job has at least one successful run.
+Test 2 passed: All extract jobs have at least one successful run.
+========================================================================================================================
+Glue Job de-c4w4a1-json-transform-job exists.
+Glue Job de-c4w4a1-songs-transform-job exists.
+Test 3 passed: Both transformation jobs are correctly deployed.
+========================================================================================================================
+Glue Job de-c4w4a1-json-transform-job has at least one successful run.
+Glue Job de-c4w4a1-songs-transform-job has at least one successful run.
+Test 4 passed: Both transformation jobs have at least one successful run.

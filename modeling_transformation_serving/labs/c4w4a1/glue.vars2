@@ -1,0 +1,8 @@
+glue_api_users_extract_job = "de-c4w4a1-api-users-extract-job"
+glue_catalog_db = <sensitive>
+glue_json_transformation_job = "de-c4w4a1-json-transform-job"
+glue_rds_extract_job = "de-c4w4a1-rds-extract-job"
+glue_role_arn = "arn:aws:iam::851725340811:role/Cloud9-de-c4w4a1-glue-role"
+glue_sessions_users_extract_job = "de-c4w4a1-api-sessions-extract-job"
+glue_songs_transformation_job = "de-c4w4a1-songs-transform-job"
+project = "de-c4w4a1"

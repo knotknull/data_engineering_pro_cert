@@ -1,0 +1,4 @@
+## gluey 2
+aws glue get-job-run --job-name de-c4w4a1-api-users-extract-job    --run-id jr_d9a409d27f93cd763930b42299841345afe36bd0153b29cb635a7024795d0587 --output text --query "JobRun.JobRunState"
+aws glue get-job-run --job-name de-c4w4a1-api-sessions-extract-job --run-id jr_4266340db7ad2cd6b6c882207c47b4b128f42001033e8b42ca307e3c21a6fb46 --output text --query "JobRun.JobRunState"
+aws glue get-job-run --job-name de-c4w4a1-rds-extract-job          --run-id jr_608a27740337c5b5a220089704d73079d2a31416690c65e4bab91d88cbe815dc --output text --query "JobRun.JobRunState"

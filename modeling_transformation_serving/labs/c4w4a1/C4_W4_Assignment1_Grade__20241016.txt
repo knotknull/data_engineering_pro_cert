@@ -1,0 +1,20 @@
+Total score 	100/100
+	
+Deployment of Extract Jobs Modules 	15/15
+	
+Successful Glue Job Runs for Extract Jobs 	15/15
+	
+Deployment of Transformation Jobs Modules 	10/10
+	
+Successful Glue Job Runs for Transformation Jobs 	10/10
+	
+dev database schemas output 	15/15
+	
+dev.deftunes_transform tables output 	20/20
+	
+deftunes_transform.songs table output 	5/5
+	
+deftunes_transform.sessions table output 	5/5
+	
+deftunes_transform.users table output 	5/5
+	

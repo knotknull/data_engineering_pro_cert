@@ -1,0 +1,6 @@
+APIEndpoint 		3.88.244.26:8080
+PostgresEndpoint 	de-c4w4a1-rds.cb22u8m2kgg0.us-east-1.rds.amazonaws.com
+RedshiftClusterName 	de-c4w4a1-redshift-cluster
+VSCodeEndpoint 		http://3.88.244.26:8443
+PostgresJDBCConnectionString 	jdbc:mysql://de-c4w4a1-rds.cb22u8m2kgg0.us-east-1.rds.amazonaws.com:5432
+RedshiftClusterEndpoint 	de-c4w4a1-redshift-cluster.cxloseyvugzl.us-east-1.redshift.amazonaws.com

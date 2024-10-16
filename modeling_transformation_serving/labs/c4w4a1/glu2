@@ -1,0 +1,4 @@
+
+## gluey 2
+aws glue get-job-run --job-name de-c4w4a1-json-transform-job   --run-id jr_007b54e5dec81ffb9df1ff909eee8f34806dc6339544da69cfa9d94c8ea7e531 --output text --query "JobRun.JobRunState"
+aws glue get-job-run --job-name de-c4w4a1-songs-transform-job  --run-id jr_e14d79a2aa03eb8733664b867d4609ee32d4a55b2fd026dec67afff9a49dd5f5 --output text --query "JobRun.JobRunState"
