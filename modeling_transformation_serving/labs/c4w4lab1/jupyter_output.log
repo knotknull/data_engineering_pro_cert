@@ -1,0 +1,133 @@
+nohup: ignoring input
+[I 2024-10-16 17:12:45.138 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-10-16 17:12:45.144 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2024-10-16 17:12:45.149 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-10-16 17:12:45.151 ServerApp] Writing Jupyter server cookie secret to /config/.local/share/jupyter/runtime/jupyter_cookie_secret
+[I 2024-10-16 17:12:45.464 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-10-16 17:12:45.482 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-10-16 17:12:45.486 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-10-16 17:12:45.487 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-10-16 17:12:45.490 LabApp] JupyterLab extension loaded from /config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyterlab
+[I 2024-10-16 17:12:45.490 LabApp] JupyterLab application directory is /config/workspace/jupyterlab-venv/share/jupyter/lab
+[I 2024-10-16 17:12:45.490 LabApp] Extension Manager is 'pypi'.
+[I 2024-10-16 17:12:45.495 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-10-16 17:12:45.496 ServerApp] Serving notebooks from local directory: /config/workspace
+[I 2024-10-16 17:12:45.496 ServerApp] Jupyter Server 2.14.2 is running at:
+[I 2024-10-16 17:12:45.496 ServerApp] http://07523481d7ab:8888/lab?token=a8c9daa3c948522631e9c94c23c3b6a90d3f798c5ca324d6
+[I 2024-10-16 17:12:45.496 ServerApp]     http://127.0.0.1:8888/lab?token=a8c9daa3c948522631e9c94c23c3b6a90d3f798c5ca324d6
+[I 2024-10-16 17:12:45.496 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2024-10-16 17:12:45.502 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///config/.local/share/jupyter/runtime/jpserver-12248-open.html
+    Or copy and paste one of these URLs:
+        http://07523481d7ab:8888/lab?token=a8c9daa3c948522631e9c94c23c3b6a90d3f798c5ca324d6
+        http://127.0.0.1:8888/lab?token=a8c9daa3c948522631e9c94c23c3b6a90d3f798c5ca324d6
+[I 2024-10-16 17:12:45.534 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-10-16 17:13:27.567 LabApp] Could not determine jupyterlab build status without nodejs
+[I 2024-10-16 17:14:06.827 ServerApp] New terminal with automatic name: 1
+[I 2024-10-16 17:14:51.636 ServerApp] Writing notebook-signing key to /config/.local/share/jupyter/notebook_secret
+[W 2024-10-16 17:14:51.639 ServerApp] Notebook C4_W4_Lab_1_Visualization.ipynb is not trusted
+[I 2024-10-16 17:14:52.440 ServerApp] Kernel started: 154eda4a-83a4-4657-9f7d-a8e9c8e5537b
+[I 2024-10-16 17:14:53.528 ServerApp] Connecting to kernel 154eda4a-83a4-4657-9f7d-a8e9c8e5537b.
+[I 2024-10-16 17:14:53.586 ServerApp] Connecting to kernel 154eda4a-83a4-4657-9f7d-a8e9c8e5537b.
+[I 2024-10-16 17:14:53.650 ServerApp] Connecting to kernel 154eda4a-83a4-4657-9f7d-a8e9c8e5537b.
+[I 2024-10-16 17:16:52.881 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:26:55.130 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:28:55.584 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[W 2024-10-16 17:30:23.588 ServerApp] WebSocket ping timeout after 119979 ms.
+[I 2024-10-16 17:30:28.590 ServerApp] Starting buffering for 154eda4a-83a4-4657-9f7d-a8e9c8e5537b:dc55fdd8-855c-4fab-8559-21b39630a92c
+[I 2024-10-16 17:30:28.853 ServerApp] Connecting to kernel 154eda4a-83a4-4657-9f7d-a8e9c8e5537b.
+[I 2024-10-16 17:30:28.853 ServerApp] Restoring connection for 154eda4a-83a4-4657-9f7d-a8e9c8e5537b:dc55fdd8-855c-4fab-8559-21b39630a92c
+[I 2024-10-16 17:30:55.718 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:32:55.889 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:34:56.251 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:36:56.532 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:37:57.906 ServerApp] Creating new directory in /classicmodels_modeling/models
+[I 2024-10-16 17:38:34.467 ServerApp] Creating new file in /classicmodels_modeling/models/analytical_views
+[I 2024-10-16 17:40:34.665 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/annual_sells_per_office_view.sql
+[I 2024-10-16 17:40:36.247 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/annual_sells_per_office_view.sql
+[I 2024-10-16 17:42:20.856 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/schema.yml
+[I 2024-10-16 17:44:19.872 ServerApp] Saving file at /classicmodels_modeling/dbt_project.yml
+[E 2024-10-16 17:44:34.709 ServerApp] Uncaught exception POST /api/contents/classicmodels_modeling/models/analytical_views/untitled.txt/checkpoints?1729100314640 (73.160.113.10)
+    HTTPServerRequest(protocol='http', host='52.0.72.130:8888', method='POST', uri='/api/contents/classicmodels_modeling/models/analytical_views/untitled.txt/checkpoints?1729100314640', version='HTTP/1.1', remote_ip='73.160.113.10')
+    Traceback (most recent call last):
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/tornado/web.py", line 1790, in _execute
+        result = await result
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/auth/decorator.py", line 73, in inner
+        return await out
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/handlers.py", line 357, in post
+        checkpoint = await ensure_async(cm.create_checkpoint(path))
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 198, in ensure_async
+        result = await obj
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/manager.py", line 1085, in create_checkpoint
+        return await self.checkpoints.create_checkpoint(self, path)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/filecheckpoints.py", line 140, in create_checkpoint
+        await self._copy(src_path, dest_path)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/fileio.py", line 444, in _copy
+        await async_copy2_safe(src, dest, log=self.log)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/fileio.py", line 55, in async_copy2_safe
+        await run_sync(shutil.copyfile, src, dst)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/to_thread.py", line 56, in run_sync
+        return await get_async_backend().run_sync_in_worker_thread(
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 2441, in run_sync_in_worker_thread
+        return await future
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 943, in run
+        result = context.run(func, *args)
+      File "/usr/lib/python3.10/shutil.py", line 254, in copyfile
+        with open(src, 'rb') as fsrc:
+    FileNotFoundError: [Errno 2] No such file or directory: '/config/workspace/classicmodels_modeling/models/analytical_views/untitled.txt'
+[W 2024-10-16 17:44:34.711 ServerApp] wrote error: 'Unhandled error'
+    Traceback (most recent call last):
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/tornado/web.py", line 1790, in _execute
+        result = await result
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/auth/decorator.py", line 73, in inner
+        return await out
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/handlers.py", line 357, in post
+        checkpoint = await ensure_async(cm.create_checkpoint(path))
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 198, in ensure_async
+        result = await obj
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/manager.py", line 1085, in create_checkpoint
+        return await self.checkpoints.create_checkpoint(self, path)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/filecheckpoints.py", line 140, in create_checkpoint
+        await self._copy(src_path, dest_path)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/fileio.py", line 444, in _copy
+        await async_copy2_safe(src, dest, log=self.log)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/jupyter_server/services/contents/fileio.py", line 55, in async_copy2_safe
+        await run_sync(shutil.copyfile, src, dst)
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/to_thread.py", line 56, in run_sync
+        return await get_async_backend().run_sync_in_worker_thread(
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 2441, in run_sync_in_worker_thread
+        return await future
+      File "/config/workspace/jupyterlab-venv/lib/python3.10/site-packages/anyio/_backends/_asyncio.py", line 943, in run
+        result = context.run(func, *args)
+      File "/usr/lib/python3.10/shutil.py", line 254, in copyfile
+        with open(src, 'rb') as fsrc:
+    FileNotFoundError: [Errno 2] No such file or directory: '/config/workspace/classicmodels_modeling/models/analytical_views/untitled.txt'
+[E 2024-10-16 17:44:34.722 ServerApp] {
+      "Host": "52.0.72.130:8888",
+      "Accept": "*/*",
+      "Referer": "http://52.0.72.130:8888/lab/tree/classicmodels_modeling/models/analytical_views/untitled.txt",
+      "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0"
+    }
+[E 2024-10-16 17:44:34.722 ServerApp] 500 POST /api/contents/classicmodels_modeling/models/analytical_views/untitled.txt/checkpoints?1729100314640 (a6390851056b4bf69632d98fd6ebec7d@73.160.113.10) 16.54ms referer=http://52.0.72.130:8888/lab/tree/classicmodels_modeling/models/analytical_views/untitled.txt
+[I 2024-10-16 17:44:51.860 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/annual_sells_per_office_view.sql
+[I 2024-10-16 17:46:57.183 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 17:48:28.031 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_view.sql
+[I 2024-10-16 17:49:07.740 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/schema.yml
+[I 2024-10-16 17:49:31.633 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/schema.yml
+[I 2024-10-16 17:51:06.798 ServerApp] Saving file at /classicmodels_modeling/dbt_project.yml
+[I 2024-10-16 17:51:12.836 ServerApp] Saving file at /classicmodels_modeling/dbt_project.yml
+[I 2024-10-16 17:57:25.003 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_view.sql
+[I 2024-10-16 18:00:28.581 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_view.sql
+[I 2024-10-16 18:00:55.979 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/schema.yml
+[I 2024-10-16 18:01:43.763 ServerApp] Saving file at /classicmodels_modeling/dbt_project.yml
+[I 2024-10-16 18:06:58.988 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 18:08:40.153 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_mv.sql
+[I 2024-10-16 18:08:57.159 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_mv.sql
+[I 2024-10-16 18:09:01.808 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/avg_sells_per_product_line_view.sql
+[I 2024-10-16 18:09:56.343 ServerApp] Saving file at /classicmodels_modeling/models/analytical_views/schema.yml
+[I 2024-10-16 18:12:59.639 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 18:14:59.956 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 18:19:00.551 ServerApp] Saving file at /C4_W4_Lab_1_Visualization.ipynb
+[I 2024-10-16 18:25:28.198 ServerApp] 302 GET / (@147.185.132.234) 0.97ms

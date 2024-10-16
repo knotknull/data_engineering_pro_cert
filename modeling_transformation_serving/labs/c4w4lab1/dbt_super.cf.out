@@ -1,0 +1,7 @@
+AWSAccount 		381492138618
+AWSRegion 		us-east-1
+PostgresEndpoint 	de-c4w4lab1-rds.c7sck0y24l87.us-east-1.rds.amazonaws.com
+PostgresUser 		postgresuser
+SupersetEndpoint 	http://52.0.72.130:8088
+VSCodeEndpoint 		http://52.0.72.130:8443
+PostgresJDBCConnectionString jdbc:mysql://de-c4w4lab1-rds.c7sck0y24l87.us-east-1.rds.amazonaws.com:5432
