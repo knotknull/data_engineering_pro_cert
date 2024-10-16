@@ -1,0 +1,8 @@
+AWSAccount 		905418146303
+AWSRegion 		us-east-1
+DebeziumUI 		ec2-54-152-189-187.compute-1.amazonaws.com:8080
+FlinkUI 		ec2-54-152-189-187.compute-1.amazonaws.com:8086
+PostgresEndpoint 	de-c4w3lab1-rds.cv68c4io2d3m.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString 	jdbc:mysql://de-c4w3lab1-rds.cv68c4io2d3m.us-east-1.rds.amazonaws.com:5432
+PostgresUser 		postgresuser
+ZeppelinUI 		ec2-54-152-189-187.compute-1.amazonaws.com:8085
