@@ -2859,9 +2859,36 @@ GROUP BY category.name
 Practice Lab: Data Visualization with DBT and Superset
 
 
+# Course Capstone Project
+
+# Summary of the Program Concepts
+
+
+
+Data Model 
+
+[dim_users]                                                   [dim_date]
+user_key (PK)                                                 date_key (PK)
+user_id                                                       month
+user_lastname                 [fact_order_items]              year
+user_name                     fact_key (PK)                   day_of_week
+user_since                    session_id                      
+country_code                  song_id
+                              song_key (FK)
+                              user_key (FK)
+[dim_songs]                   artist_key (FK)                 [dim_artists]
+song_key (PK)                 session_start_time (FK)         artist_key (PK)
+song_id                       price                           artist_id
+song_title                    liked                           artist_name
+track_id                      liked_since                     artist_familiarity
+release                                                       artist_hotness
+duration
+year
+
+
 MAP LAST HERE
 
-https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/zV7Ls/practice-lab-data-visualization-with-dbt-and-superset
+https://www.coursera.org/learn/data-modeling-transformation-serving/gradedLti/WufHL/graded-programming-assignment-4-capstone-project-part-1-etl-and-data-modeling
 
 
 
