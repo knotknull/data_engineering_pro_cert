@@ -2634,11 +2634,79 @@ Apack Flink:
 
 LAB: Capture Data Change with Flink and Debezium
 
-MAP LAST HERE 
-
-https://www.coursera.org/learn/data-modeling-transformation-serving/lecture/EKi4c/streaming-processing
 
 
 
+Resources:
 
+https://learning.oreilly.com/library/view/spark-the-definitive/9781491912201/
+
+https://pages.databricks.com/rs/094-YMS-629/images/LearningSpark2.0.pdf
+
+https://aws.amazon.com/blogs/big-data/a-side-by-side-comparison-of-apache-spark-and-apache-flink-for-common-streaming-use-cases/
+
+https://medium.com/wbaa/using-scala-udfs-in-pyspark-b70033dd69b9
+
+https://datanoon.com/blog/pyspark_udf/
+
+https://bertwagner.com/posts/should-i-transform-my-data-in-my-sql-query/
+
+https://www.confessionsofadataguy.com/dataframes-vs-sparksql-which-one-should-you-choose/
+
+https://spark.apache.org/docs/3.5.1/api/python/reference/index.html
+
+https://spark.apache.org/docs/latest/api/python/getting_started/install.html
+
+https://spark.apache.org/downloads.html
+
+https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf
+
+https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf
+
+
+
+
+## Data Modeling, Transformation and Serving
+## Course 4
+## Week 4
+## Serving Data
+
+
+# Serving Data for Analytics and Machine Learning
+
+Serving Data:  Analytics Use Cases 
+
+  - Business Ingelligence: 
+      Data Warehouse / Data Lake  -->> Dahsboards and Reports
+
+  - Operational Analytics: 
+      - Monitor data to inform immediate action 
+      - Serve data within the required latency
+
+  - Embedded Analytics: 
+      - Data fed to client facing data product (mobile app, etc) or dashboard
+
+
+Serving Data:  Analytics Use Cases 
+  - Data engineer working with data scientiest / ML engineer 
+      - acquire / transform / deliver data for model training
+
+
+Serving Data:  Semantic Layer
+  - after data is modeled: 
+        - Document definitions (what is an active user)
+        - Derive business metrics (revenue) 
+        - Create a "common language" for data
+
+
+Serving Data:  
+    - as table
+    - as view
+    - as materialized view
+
+
+
+
+
+    
 .
