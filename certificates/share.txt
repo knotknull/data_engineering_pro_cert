@@ -1,0 +1,12 @@
+
+# Intro
+https://coursera.org/share/40c31a47cc99f3a5069693dae341a787
+
+# Source Systems, Data Integration and Pipelines
+https://coursera.org/share/e1a420a25bcf39d029abb4a37b1b6643
+
+# Data Storage and Queries
+https://coursera.org/share/427f73d950e12b0ce5b675ec06c7ced8
+
+# Data Modeling, Transformation and Serving
+

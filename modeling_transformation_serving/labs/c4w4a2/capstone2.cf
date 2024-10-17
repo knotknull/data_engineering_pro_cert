@@ -1,0 +1,652 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:  
+  ProjectPrefix:
+    Type: String
+    Description: Project prefix for naming resources
+    Default: de-c2w2lab1
+  Cloud9RoleName:
+    Type: String
+    Description: Role name for the Cloud9 Instance
+    Default: Cloud9InstanceRole
+  VPCCIDR:
+    Type: String
+    Description: CIDR of VPC. IPv4 address range in CIDR notation.
+    Default: 10.0.0.0/16
+  PublicSubnetCIDR:
+    Type: String
+    Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+    Default: 10.0.1.0/24
+  # PublicSubnetBCIDR:
+  #   Type: String
+  #   Description: CIDR of a public subnet. IPv4 address range in CIDR notation.
+  #   Default: 10.0.2.0/24
+  PrivateSubnetCIDR:
+    Type: String
+    Description: CIDR of a private subnet A. IPv4 address range in CIDR notation.
+    Default: 10.0.2.0/24
+  # PrivateSubnetBCIDR:
+  #   Type: String
+  #   Description: CIDR of a private subnet B. IPv4 address range in CIDR notation.
+  #   Default: 10.0.4.0/24
+  PublicBucketName:
+    Type: String
+    Description: Public bucket name for assets.
+    Default: dlai-data-engineering
+  PublicBucketLayerKey:
+    Type: String
+    Description: Public bucket key for dependencies file.
+    Default: labs/cfn_dependencies/c2w2lab1/lambda_layer_dependencies_p312.zip
+  Runtime:
+    Type: String
+    Description: Lambda function Runtime
+    Default: python3.12
+  Timeout:
+    Type: Number
+    Description: Lambda function Timeout
+    Default: 300
+  AWSRegion:
+    Type: String
+    Description: Default AWS Region
+    Default: us-east-1
+  LatestAmiId:
+    Description: The latest Amazon Linux 2 AMI from the Parameter Store
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  InstanceType:
+    Description: The EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+  ProducerDockerRepo:
+    Description: ECR repo with the producer docker image
+    Type: String
+    Default: public.ecr.aws/e4g9p6i2/dlai-de-c2w2lab1-producer:latest  
+  KeyName:
+    Description: Name of an existing EC2 KeyPair
+    Type: String
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Database Configuration
+        Parameters:
+          - DatabaseUserName
+          - DatabaseUserPassword
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnetCIDR          
+          - PrivateSubnetCIDR          
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}"
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-igw"
+  InternetGatewayAttachment:
+    DependsOn:
+      - InternetGateway
+      - VPC
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnet:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PublicSubnetCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-public-subnet"  
+  PrivateSubnet:
+    DependsOn: VPC
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs ''
+      CidrBlock: !Ref PrivateSubnetCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-private-subnet"
+  
+  InternetGatewayRoute:
+    DependsOn:
+      - InternetGatewayAttachment
+      - PublicRouteTable
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable
+  PublicRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-public-routetable"
+      VpcId: !Ref VPC
+  PublicSubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  
+  PrivateSubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+  
+  NatGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+  
+  PrivateRouteTable:
+    DependsOn: VPC
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-private-routetable"
+      VpcId: !Ref VPC
+  NATGateway:
+    DependsOn:
+      - NATGatewayEIP
+      - PublicSubnet      
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-natgw"
+  
+  NATGatewayEIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  
+  DefaultVPCSecurityGroup:
+    DependsOn: VPC
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Default Security Group for the VPC.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-sg"
+
+  DefaultVPCSecurityGroupSelfRefIngress:
+    DependsOn: DefaultVPCSecurityGroup
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      SourceSecurityGroupId: !Ref DefaultVPCSecurityGroup
+      IpProtocol: '-1'
+      GroupId: !Ref DefaultVPCSecurityGroup 
+  
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup    
+    Properties:
+      GroupDescription: EC2 Security Group
+      VpcId: !Ref VPC  
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-ec2-sg"
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  EC2SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+  EC2SecurityGroupIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443    
+
+  
+  # Init instance and producer
+  KinesisSourceStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "${ProjectPrefix}-kinesis-data-stream"
+      RetentionPeriodHours: 24            
+      StreamModeDetails: 
+        StreamMode: ON_DEMAND
+      Tags: 
+        - Key: de-project
+          Value: !Sub "${ProjectPrefix}"
+
+  EC2KeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: !Sub "${ProjectPrefix}-ec2-keypair"
+
+  EC2IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-ec2-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonAthenaFullAccess
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+        - arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess
+        - arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds
+
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref EC2IAMRole
+
+  InitInstance:
+    DependsOn:
+      - EC2InstanceProfile      
+    Type: AWS::EC2::Instance
+    Properties:      
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref EC2KeyPair #!Ref KeyName      
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnet
+          GroupSet:
+            - !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectPrefix}-init-instance"
+      UserData: { 
+                  "Fn::Base64": {"Fn::Join": ["", 
+                      ["#!/bin/bash\n", 
+                      "set -ex\n",
+                      "export PRODUCER_DOCKER_REPO=", {"Ref": "ProducerDockerRepo"}, "\n",                       
+                      "echo $PRODUCER_DOCKER_REPO\n",                      
+                      "sudo yum update -y\n",
+                      "sudo amazon-linux-extras install -y docker\n",
+                      "sudo service docker start\n",                         
+                      "sudo docker pull $PRODUCER_DOCKER_REPO\n",
+                      "echo 'Pulled Inference image from' $PRODUCER_DOCKER_REPO\n",
+                      "sudo docker run -d -e AWS_DEFAULT_REGION=us-east-1 -p 443:443 $PRODUCER_DOCKER_REPO\n",
+                      "echo Producer ready!\n",                      
+                      ]
+                    ] 
+                  }
+                }
+  InitInstanceEIP:
+    Type: "AWS::EC2::EIP"
+    Properties:
+      InstanceId: !Ref InitInstance
+
+    
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectPrefix}-firehose-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${ProjectPrefix}-firehose-policy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "glue:GetTable"
+                  - "glue:GetTableVersion"
+                  - "glue:GetTableVersions"
+                Resource:
+                  - "arn:aws:glue:*:*:catalog"
+                  - "arn:aws:glue:*:*:database/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+                  - "arn:aws:glue:*:*:table/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+              - Effect: Allow
+                Action:
+                  - "kafka:GetBootstrapBrokers"
+                  - "kafka:DescribeCluster"
+                  - "kafka:DescribeClusterV2"
+                  - "kafka-cluster:Connect"
+                Resource: "arn:aws:kafka:*:*:cluster/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+              - Effect: Allow
+                Action:
+                  - "kafka-cluster:DescribeTopic"
+                  - "kafka-cluster:DescribeTopicDynamicConfiguration"
+                  - "kafka-cluster:ReadData"
+                Resource: "arn:aws:kafka:*:*:topic/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+              - Effect: Allow
+                Action: "kafka-cluster:DescribeGroup"
+                Resource: "arn:aws:kafka:*:*:group/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/*"
+              - Effect: Allow
+                Action:
+                  - "s3:AbortMultipartUpload"
+                  - "s3:GetBucketLocation"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "s3:ListBucketMultipartUploads"
+                  - "s3:PutObject"
+                Resource:
+                  - !Sub "arn:aws:s3:::${ProjectPrefix}*"
+                  - !Sub "arn:aws:s3:::${ProjectPrefix}*/*"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:GetFunctionConfiguration"
+                Resource: "arn:aws:lambda:*:*:function:%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+              - Effect: Allow
+                Action:
+                  - "kms:GenerateDataKey"
+                  - "kms:Decrypt"
+                Resource: "arn:aws:kms:*:*:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+                Condition:
+                  StringEquals:
+                    kms:ViaService: "s3.us-east-1.amazonaws.com"
+                  StringLike:
+                    kms:EncryptionContext:aws:s3:arn:
+                      - "arn:aws:s3:::%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/*"
+                      - "arn:aws:s3:::%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+              - Effect: Allow
+                Action: "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:aws:logs:*:*:log-group:/aws/kinesisfirehose/${ProjectPrefix}*:log-stream:*"
+                  - "arn:aws:logs:*:*:log-group:%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%:log-stream:*"
+              - Effect: Allow
+                Action:
+                  - "kinesis:DescribeStream"
+                  - "kinesis:GetShardIterator"
+                  - "kinesis:GetRecords"
+                  - "kinesis:ListShards"
+                Resource: !Sub "arn:aws:kinesis:*:*:stream/${ProjectPrefix}*"
+              - Effect: Allow
+                Action: "kms:Decrypt"
+                Resource: "arn:aws:kms:*:*:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+                Condition:
+                  StringEquals:
+                    kms:ViaService: "kinesis.us-east-1.amazonaws.com"
+                  StringLike:
+                    kms:EncryptionContext:aws:kinesis:arn: !Sub "arn:aws:kinesis:*:*:stream/${ProjectPrefix}*"
+
+  FirehoseUSALogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${ProjectPrefix}-firehose-usa-log-group"
+
+  FirehoseUSALogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref FirehoseUSALogGroup
+      LogStreamName: !Sub "${ProjectPrefix}-usa-firehose-log-stream"
+
+  FirehoseInternationalLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${ProjectPrefix}-firehose-international-log-group"
+
+  FirehoseInternationalLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref FirehoseInternationalLogGroup
+      LogStreamName: !Sub "${ProjectPrefix}-international-firehose-log-stream"
+
+  # LambdaRoleCloud9Setup:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub "${ProjectPrefix}-lambda-role-cloud9-setup"
+  #     AssumeRolePolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Action: sts:AssumeRole
+  #           Principal:
+  #             Service:
+  #               - lambda.amazonaws.com
+  #     Policies:
+  #       - PolicyName: Cloud9InstanceRolePolicy
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             - Sid: CreateLogGroup
+  #               Effect: Allow
+  #               Action: logs:CreateLogGroup
+  #               Resource: "arn:aws:logs:*:*:*"
+  #             - Sid: LogStreamMgmt
+  #               Effect: Allow
+  #               Action: 
+  #                 - logs:CreateLogStream
+  #                 - logs:PutLogEvents
+  #               Resource: !Sub "arn:aws:logs:*:*:log-group:/aws/lambda/${ProjectPrefix}*:*"
+  #             - Sid: GetRolePolicyAccess
+  #               Effect: Allow
+  #               Action: 
+  #                 - iam:GetRolePolicy                  
+  #               Resource: "arn:aws:iam::*:role/voclabs"
+  #             - Sid: IAMRoleMgmt
+  #               Effect: Allow
+  #               Action: 
+  #                 - iam:CreateRole
+  #                 - iam:TagRole
+  #                 - iam:PutRolePolicy
+  #               Resource: "arn:aws:iam::*:role/Cloud9*"
+        
+  # LambdaLayer:
+  #   Type: AWS::Lambda::LayerVersion
+  #   Properties:
+  #     CompatibleArchitectures:
+  #       - arm64        
+  #     CompatibleRuntimes:
+  #       - python3.12
+  #     Content:
+  #       S3Bucket: !Ref PublicBucketName
+  #       S3Key: !Ref PublicBucketLayerKey
+  #     Description: Lambda layer with dependencies for lambda-backed custom resource 
+  #     LayerName: !Sub "${ProjectPrefix}-lambda-layer"
+
+  # LambdaFunctionCloud9Role:
+  #   DependsOn:
+  #     - LambdaLayer
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     Environment:
+  #       Variables:
+  #         PROJECT_VALUE: !Ref ProjectPrefix
+  #         CLONE_ROLE_NAME: !Ref Cloud9RoleName          
+  #     Code:
+  #       ZipFile: |          
+  #         import json
+  #         import logging
+  #         import os
+
+  #         import boto3
+  #         import cfnresponse
+
+  #         CLONE_ROLE_NAME = os.getenv("CLONE_ROLE_NAME", "")
+  #         PROJECT_VALUE = os.getenv("PROJECT_VALUE", "")
+
+  #         TRUST_RELATIONSHIP_DOCUMENT = {
+  #             "Version": "2012-10-17",
+  #             "Statement": [
+  #                 {
+  #                     "Effect": "Allow",
+  #                     "Principal": {"Service": "ec2.amazonaws.com"},
+  #                     "Action": "sts:AssumeRole",
+  #                 }
+  #             ],
+  #         }
+
+  #         CREATE = "Create"
+  #         DELETE = "Delete"
+
+  #         response_data = {}
+
+  #         logger = logging.getLogger()
+  #         logger.setLevel(logging.INFO)
+
+
+  #         def lambda_handler(event, context):
+  #             logger.info(f"Event: {event}")
+
+  #             try:
+  #                 if event["RequestType"] == CREATE:
+  #                     client = boto3.client("iam")
+
+  #                     logger.info("Getting role policy")
+
+  #                     response = client.get_role_policy(
+  #                         RoleName="voclabs", PolicyName="Pvoclabs"
+  #                     )
+
+  #                     logger.info(f"Response: {response}")
+
+  #                     response["ResponseMetadata"]["HTTPStatusCode"]
+
+  #                     logger.info("Clonning voclabs role")
+
+  #                     create_role_response = client.create_role(
+  #                         RoleName=CLONE_ROLE_NAME,
+  #                         AssumeRolePolicyDocument=json.dumps(
+  #                             TRUST_RELATIONSHIP_DOCUMENT
+  #                         ),
+  #                         Description="Clone of voclabs role for Cloud9 setup",
+  #                         MaxSessionDuration=7200,
+  #                         Tags=[{"Key": "de-project", "Value": PROJECT_VALUE}],
+  #                     )
+
+  #                     logger.info(f"Create role response: {create_role_response}")
+
+  #                     logger.info(f"Attaching policy to role")
+
+  #                     put_role_response = client.put_role_policy(
+  #                         RoleName=CLONE_ROLE_NAME,
+  #                         PolicyName="Pvoclabs_clone",
+  #                         PolicyDocument=json.dumps(response["PolicyDocument"]),
+  #                     )
+
+  #                     logger.info(f"Put policy role response: {put_role_response}")
+
+  #                     if (
+  #                         response["ResponseMetadata"]["HTTPStatusCode"] == 200
+  #                         and create_role_response["ResponseMetadata"]["HTTPStatusCode"]
+  #                         and put_role_response["ResponseMetadata"]["HTTPStatusCode"]
+  #                     ):
+  #                         logger.info("Role creation sucessfully executed")
+  #                     else:
+  #                         logger.info(f"Issues creating the role")
+  #                         logger.info(
+  #                             f"Getting policy Status code: {response['ResponseMetadata']['HTTPStatusCode']}"
+  #                         )
+  #                         logger.info(
+  #                             f"Creating role Status code: {create_role_response['ResponseMetadata']['HTTPStatusCode']}"
+  #                         )
+  #                         logger.info(
+  #                             f"Attaching policy Status code: {put_role_response['ResponseMetadata']['HTTPStatusCode']}"
+  #                         )
+
+  #                 elif event["RequestType"] == DELETE:
+  #                     curl_data = {
+  #                         "Status": "SUCCESS",
+  #                         "PhysicalResourceId": event["PhysicalResourceId"],
+  #                         "StackId": event["StackId"],
+  #                         "RequestId": event["RequestId"],
+  #                         "LogicalResourceId": event["LogicalResourceId"],
+  #                     }
+
+  #                     curl_command = [
+  #                         "curl",
+  #                         "-H",
+  #                         "Content-Type: application/json",
+  #                         "-X",
+  #                         "PUT",
+  #                         "-d",
+  #                         json.dumps(curl_data),
+  #                         event["ResponseURL"],
+  #                     ]
+  #                     logger.info(f"curl_command: {curl_command}")
+
+  #                 cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+
+  #             except Exception as exc:
+  #                 logger.error(f"Error: {str(exc)}")
+  #                 cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+
+  #     FunctionName: !Sub "${ProjectPrefix}-lambda-function-cloud9-setup"
+  #     Handler: index.lambda_handler
+  #     Layers:
+  #       - !Ref LambdaLayer
+  #     Runtime: !Ref Runtime
+  #     Role: !GetAtt LambdaRoleCloud9Setup.Arn
+  #     Timeout: !Ref Timeout
+
+  # CRCloud9RoleWithLambda:
+  #   DependsOn:
+  #     - LambdaFunctionCloud9Role
+  #   Type: Custom::CRCloud9RoleWithLambda
+  #   Properties:
+  #     ServiceToken: !GetAtt LambdaFunctionCloud9Role.Arn      
+  #   DeletionPolicy: Delete
+
+  # Cloud9EC2InstanceProfile:
+  #   DependsOn:
+  #     - CRCloud9RoleWithLambda
+  #   Type: 'AWS::IAM::InstanceProfile'
+  #   Properties:
+  #     InstanceProfileName: Cloud9EC2InstanceProfile
+  #     Roles:
+  #       - !Ref Cloud9RoleName            
+
+Outputs:    
+  AWSRegion:
+    Description: This is the current AWS Region for this tutorial
+    Value: !Sub '${AWS::Region}'
+  AWSAccount:
+    Description: This is the current AWS Account for this tutorial
+    Value: !Sub '${AWS::AccountId}'
+

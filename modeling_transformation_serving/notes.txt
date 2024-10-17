@@ -2894,9 +2894,13 @@ Example: Insert a DataFrame into an Iceberg table in Amazon S3 using the AWS Glu
 
 https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-format-iceberg.html#aws-glue-programming-etl-format-iceberg-insert
 
+http://millionsongdataset.com/
 
 
+Resources:
 
+https://go.redpanda.com/fundamentals-of-data-engineering
 
+https://joereis.substack.com/p/data-engineering-in-2024-what-im
 
 .
