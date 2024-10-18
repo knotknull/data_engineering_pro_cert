@@ -1,0 +1,8 @@
+C4_W4_Assignment_2.ipynb
+dags
+dbt_modeling
+images
+jupyterlab-venv
+ls.txt
+scripts
+terraform

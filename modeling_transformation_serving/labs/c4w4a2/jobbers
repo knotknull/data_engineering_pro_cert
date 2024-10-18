@@ -1,0 +1,66 @@
+## data_lake_bucket = "de-c4w4a2-975049975251-us-east-1-data-lake"
+## glue_api_users_extract_job = "de-c4w4a2-api-users-extract-job"
+## glue_rds_extract_job = "de-c4w4a2-rds-extract-job"
+## glue_role_arn = "arn:aws:iam::975049975251:role/Cloud9-de-c4w4a2-glue-role"
+## glue_sessions_users_extract_job = "de-c4w4a2-api-sessions-extract-job"
+## scripts_bucket = "de-c4w4a2-975049975251-us-east-1-scripts"
+## 
+## 
+## data_lake_bucket = "de-c4w4a2-975049975251-us-east-1-data-lake"
+## glue_api_users_extract_job = "de-c4w4a2-api-users-extract-job"
+## glue_catalog_db = <sensitive>
+## glue_json_transformation_job = "de-c4w4a2-json-transform-job"
+## glue_rds_extract_job = "de-c4w4a2-rds-extract-job"
+## glue_role_arn = "arn:aws:iam::975049975251:role/Cloud9-de-c4w4a2-glue-role"
+## glue_sessions_users_extract_job = "de-c4w4a2-api-sessions-extract-job"
+## glue_songs_transformation_job = "de-c4w4a2-songs-transform-job"
+## scripts_bucket = "de-c4w4a2-975049975251-us-east-1-scripts"
+## 
+## data_lake_bucket = "de-c4w4a2-975049975251-us-east-1-data-lake"
+## glue_api_users_extract_job = "de-c4w4a2-api-users-extract-job"
+## glue_catalog_db = <sensitive>
+## glue_json_transformation_job = "de-c4w4a2-json-transform-job"
+## glue_rds_extract_job = "de-c4w4a2-rds-extract-job"
+## glue_role_arn = "arn:aws:iam::975049975251:role/Cloud9-de-c4w4a2-glue-role"
+## glue_sessions_users_extract_job = "de-c4w4a2-api-sessions-extract-job"
+## glue_songs_transformation_job = "de-c4w4a2-songs-transform-job"
+## scripts_bucket = "de-c4w4a2-975049975251-us-east-1-scripts"
+## serving_schema = "deftunes_serving"
+## transform_schema = "deftunes_transform"
+
+
+## STEP 1
+## Perform an initial run of the glue jobs contained in the Terraform outputs. First, you need to run three jobs, the names of which 
+## are in the following output variables: 
+## 
+## glue_api_users_extract_job = "de-c4w4a2-api-users-extract-job"
+## glue_sessions_users_extract_job = "de-c4w4a2-api-sessions-extract-job"
+## glue_rds_extract_job = "de-c4w4a2-rds-extract-job"
+
+
+## You should get JobRunID in the output. Use this job run ID to track each job status by using this command:
+
+## aws glue start-job-run --job-name "de-c4w4a2-api-users-extract-job" | jq -r '.JobRunId'
+## sleep 1
+## aws glue start-job-run --job-name "de-c4w4a2-api-sessions-extract-job" | jq -r '.JobRunId'
+## sleep 1
+## aws glue start-job-run --job-name "de-c4w4a2-rds-extract-job" | jq -r '.JobRunId'
+
+
+
+## aws glue get-job-run --job-name "de-c4w4a2-api-users-extract-job"  --run-id jr_6206176c1cdd694b814b5daced1549136519a1f394ee2eb99c2b5990bc59a3db --output text --query "JobRun.JobRunState"
+## aws glue get-job-run --job-name "de-c4w4a2-api-sessions-extract-job"  --run-id jr_5e1720bfddf944cd3d85f6069286d7e064a815154c682c747c8328875375b35d --output text --query "JobRun.JobRunState"
+## aws glue get-job-run --job-name "de-c4w4a2-rds-extract-job" --run-id jr_4947ee59ac5c839394368ebc9053b1477bf49f78425e5a693021bdb0fedd653e --output text --query "JobRun.JobRunState"
+
+## STEP 2
+## Now run two jobs, the names of which are in the following outputs: 
+## glue_json_transformation_job = "de-c4w4a2-json-transform-job"
+## glue_songs_transformation_job = "de-c4w4a2-songs-transform-job"
+
+## aws glue start-job-run --job-name de-c4w4a2-json-transform-job | jq -r '.JobRunId'
+## sleep 1
+## aws glue start-job-run --job-name de-c4w4a2-songs-transform-job  | jq -r '.JobRunId'
+
+
+aws glue get-job-run --job-name de-c4w4a2-json-transform-job --run-id jr_885a8d428c1dd8e255f421543ab7c2ecde88b4c0b2a0fb5dbfba24814dcf350f  --output text --query "JobRun.JobRunState"
+aws glue get-job-run --job-name de-c4w4a2-songs-transform-job --run-id jr_6c9c9296a105755dd9a4fd87e0be072c89ee75495ba7c586bbe9ace479963a1f --output text --query "JobRun.JobRunState"

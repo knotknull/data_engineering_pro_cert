@@ -1,0 +1,4 @@
+
+## aws s3 cp $HOME/workspace/dbt_modeling/models/bi_views s3://de-c4w4a2-975049975251-us-east-1-dbt/dbt_project/dbt_modeling/models/bi_views --recursive
+
+aws s3 cp $HOME/workspace/dbt_modeling/dbt_project.yml s3://de-c4w4a2-975049975251-us-east-1-dbt/dbt_project/dbt_modeling/dbt_project.yml

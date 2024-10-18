@@ -1,0 +1,3 @@
+## aws s3 cp $HOME/workspace/dags/deftunes_songs_pipeline.py s3://de-c4w4a2-975049975251-us-east-1-dags/dags/deftunes_songs_pipeline.py
+
+aws s3 cp $HOME/workspace/dags/deftunes_api_pipeline.py s3://de-c4w4a2-975049975251-us-east-1-dags/dags/deftunes_api_pipeline.py

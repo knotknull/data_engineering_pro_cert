@@ -1,0 +1,20 @@
+
+[Executed at: Thu Oct 17 20:57:46 PDT 2024]
+
+========================================================================================================================
+Glue Job de-c4w4a2-api-users-extract-job exists.
+Glue Job de-c4w4a2-api-users-extract-job has at least one successful run.
+Glue Job de-c4w4a2-api-sessions-extract-job exists.
+Glue Job de-c4w4a2-api-sessions-extract-job has at least one successful run.
+Glue Job de-c4w4a2-rds-extract-job exists.
+Glue Job de-c4w4a2-rds-extract-job has at least one successful run.
+Glue Job de-c4w4a2-json-transform-job exists.
+Glue Job de-c4w4a2-json-transform-job has at least one successful run.
+Glue Job de-c4w4a2-songs-transform-job exists.
+Glue Job de-c4w4a2-songs-transform-job has at least one successful run.
+Test 1 passed: All jobs are found and have at least one successful run
+========================================================================================================================
+File dbt_project/dbt_modeling/models/bi_views/schema.yml exists in the S3 bucket.
+File dbt_project/dbt_modeling/models/bi_views/sales_per_artist_vw.sql exists in the S3 bucket.
+File dbt_project/dbt_modeling/models/bi_views/sales_per_country_vw.sql exists in the S3 bucket.
+Test 2 passed: All required files exist in the DBT S3 bucket.

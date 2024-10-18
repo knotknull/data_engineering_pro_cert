@@ -1,0 +1,9 @@
+
+Total score 	100/100
+	
+Deployment and Successful Runs of Glue Jobs 	30/30
+	
+Existence of Objects in DBT S3 Bucket 	30/30
+	
+Existence and Syntax Check of DAG Python Files 	40/40
+	

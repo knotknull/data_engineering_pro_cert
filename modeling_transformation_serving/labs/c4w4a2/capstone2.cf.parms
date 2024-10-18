@@ -1,16 +1,21 @@
+AirflowPort
+	
+8080
+	
+-
+APIPort
+	
+8000
+	
+-
 AWSRegion
 	
 us-east-1
 	
 -
-Cloud9RoleName
-	
-Cloud9InstanceRole
-	
--
 InstanceType
 	
-t2.micro
+t3.xlarge
 	
 -
 KeyName
@@ -22,25 +27,70 @@ LatestAmiId
 	
 /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
 	
-ami-089f365c7b6a04f00
-PrivateSubnetCIDR
+ami-01e3c4a339a264cc9
+PostgresAllocatedStorage
 	
-10.0.2.0/24
+20
+	
+-
+PostgresDBName
+	
+postgres
+	
+-
+PostgresLambdaRuntime
+	
+python3.8
+	
+-
+PostgresMasterUsername
+	
+postgresuser
+	
+-
+PostgresMasterUserPassword
+	
+****
+	
+-
+PrivateSubnetACIDR
+	
+10.0.3.0/24
+	
+-
+PrivateSubnetBCIDR
+	
+10.0.4.0/24
 	
 -
 ProducerDockerRepo
 	
-public.ecr.aws/e4g9p6i2/dlai-de-c2w2lab1-producer:latest
+public.ecr.aws/deeplearning-ai/dlai-de-c4w4a2-api:latest
 	
 -
 ProjectPrefix
 	
-de-c2w2lab1
+de-c4w4a2
+	
+-
+PublicBucketAPIServiceKey
+	
+labs/cfn_dependencies/c4w4a2/docker_api_service.service
+	
+-
+PublicBucketLabContentKey
+	
+labs/c4w4a2-343017
+	
+-
+PublicBucketLambdaKey
+	
+labs/cfn_dependencies/c4w4a2/policy_clone.zip
 	
 -
 PublicBucketLayerKey
 	
-labs/cfn_dependencies/c2w2lab1/lambda_layer_dependencies_p312.zip
+labs/cfn_dependencies/c4w4a2/lambda_layer_dependencies_p312.zip
 	
 -
 PublicBucketName
@@ -48,9 +98,84 @@ PublicBucketName
 dlai-data-engineering
 	
 -
+PublicBucketPolicyPath
+	
+labs/cfn_dependencies/c4w4a2/lab.policy
+	
+-
+PublicBucketPostgresDDLObjectKey
+	
+labs/cfn_dependencies/c4w4a2/songs_ddl.sql
+	
+-
+PublicBucketPostgresLambdaKey
+	
+labs/cfn_dependencies/c4w4a2/postgres_load.py.zip
+	
+-
+PublicBucketPostgresLayerKey
+	
+labs/cfn_dependencies/c4w4a2/lambda_layer_dependencies_p38.zip
+	
+-
+PublicBucketSupersetServiceKey
+	
+labs/cfn_dependencies/c4w4a2/docker_superset_service.service
+	
+-
+PublicBucketVSCodeServiceKey
+	
+labs/cfn_dependencies/c4w4a2/docker_vscode_service.service
+	
+-
+PublickBucketAirflowDags
+	
+labs/cfn_dependencies/c4w4a2/dags
+	
+-
+PublickBucketAirflowFolder
+	
+labs/cfn_dependencies/c4w4a2/docker/airflow
+	
+-
+PublickBucketDBTDockerfile
+	
+labs/cfn_dependencies/c4w4a2/docker/dbt/Dockerfile
+	
+-
+PublickBucketDBTProjectFolder
+	
+labs/cfn_dependencies/c4w4a2/docker/dbt/dbt_project
+	
+-
 PublicSubnetCIDR
 	
 10.0.1.0/24
+	
+-
+PublicVsCodeDockerRepo
+	
+public.ecr.aws/deeplearning-ai/dlai-de-code-server:latest
+	
+-
+RedshiftDatabaseName
+	
+dev
+	
+-
+RedshiftMasterUsername
+	
+defaultuser
+	
+-
+RedshiftMasterUserPassword
+	
+****
+	
+-
+RedshiftPortNumber
+	
+5439
 	
 -
 Runtime
@@ -58,13 +183,33 @@ Runtime
 python3.12
 	
 -
+SupersetPort
+	
+8088
+	
+-
 Timeout
 	
-300
+900
 	
 -
 VPCCIDR
 	
 10.0.0.0/16
+	
+-
+VSCodeInstanceType
+	
+t3.medium
+	
+-
+VsCodePort
+	
+8443
+	
+-
+VSCodeRoleName
+	
+VSCodeInstanceRole
 	
 -

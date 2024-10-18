@@ -1,2 +1,10 @@
-AWSAccount 	533267104743
-AWSRegion 	us-east-1
+AirflowDNS 		ec2-3-231-194-193.compute-1.amazonaws.com:8080
+APIEndpoint 		23.23.113.203:8000
+DagsBucket 		de-c4w4a2-975049975251-us-east-1-dags
+DBTBucket 		de-c4w4a2-975049975251-us-east-1-dbt
+PostgresEndpoint 	de-c4w4a2-rds.cl2k0mc2u7zn.us-east-1.rds.amazonaws.com
+PostgresJDBCConnectionString jdbc:mysql://de-c4w4a2-rds.cl2k0mc2u7zn.us-east-1.rds.amazonaws.com:5432
+RedshiftClusterEndpoint de-c4w4a2-redshift-cluster.cw0emy91iwdm.us-east-1.redshift.amazonaws.com
+RedshiftClusterName 	de-c4w4a2-redshift-cluster
+SupersetEndpoint 	http://3.231.194.193:8088
+VSCodeEndpoint 		http://23.23.113.203:8443
